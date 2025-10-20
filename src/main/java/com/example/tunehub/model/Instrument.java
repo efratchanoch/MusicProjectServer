@@ -1,0 +1,74 @@
+package com.example.tunehub.model;
+
+import jakarta.persistence.*;
+
+import java.util.List;
+
+@Entity
+public class Instrument {
+    @Id
+    @GeneratedValue
+    private long id;
+
+    private String name;
+
+    @ManyToMany
+    private List<Users> users;
+
+    @ManyToMany
+    private List<Teacher> teachers;
+
+    @ManyToMany
+    private List<SheetMusic> sheetsMusic;
+
+    public Instrument() {
+    }
+
+    public Instrument(long id, String name, List<Users> users, List<Teacher> teachers, List<SheetMusic> sheetsMusic) {
+        this.id = id;
+        this.name = name;
+        this.users = users;
+        this.teachers = teachers;
+        this.sheetsMusic = sheetsMusic;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<Users> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<Users> users) {
+        this.users = users;
+    }
+
+    public List<Teacher> getTeachers() {
+        return teachers;
+    }
+
+    public void setTeachers(List<Teacher> teachers) {
+        this.teachers = teachers;
+    }
+
+    public List<SheetMusic> getSheetsMusic() {
+        return sheetsMusic;
+    }
+
+    public void setSheetsMusic(List<SheetMusic> sheetsMusic) {
+        this.sheetsMusic = sheetsMusic;
+    }
+}
