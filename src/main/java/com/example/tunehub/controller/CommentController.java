@@ -6,16 +6,22 @@ import com.example.tunehub.model.Users;
 import com.example.tunehub.service.CommentRepository;
 import com.example.tunehub.service.PostRepository;
 import com.example.tunehub.service.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+//
+//@RestController
+//@RequestMapping("/api/comment")
+//@CrossOrigin
 public class CommentController {
-    private final CommentRepository commentRepository;
-    private final PostRepository postRepository;
+    private  CommentRepository commentRepository;
+    private  PostRepository postRepository;
 
+    //@Autowired
     public CommentController(CommentRepository commentRepository, PostRepository postRepository) {
         this.commentRepository = commentRepository;
         this.postRepository = postRepository;
@@ -27,7 +33,7 @@ public class CommentController {
     @GetMapping("/commentsByPostId/{post_id}")
     public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable Long post_id) {
         try {
-            List<Comment> c = commentRepository.findCommentByPostId(post_id);
+            List<Comment> c = commentRepository.findByPostId(post_id);
             if (c == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -81,7 +87,7 @@ public class CommentController {
             @PathVariable Long post_id,
             @RequestBody Comment c) {
         try {
-            Post p = postRepository.findPostId(post_id);
+            Post p = postRepository.findUsersById(post_id);
             if (p == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

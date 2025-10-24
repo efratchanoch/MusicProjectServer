@@ -8,17 +8,17 @@ import java.util.List;
 public class Instrument {
     @Id
     @GeneratedValue
-    private long id;
+    private Long id;
 
     private String name;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "instrumentsUsers")
     private List<Users> users;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "instruments")
     private List<Teacher> teachers;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "instruments")
     private List<SheetMusic> sheetsMusic;
 
     public Instrument() {
