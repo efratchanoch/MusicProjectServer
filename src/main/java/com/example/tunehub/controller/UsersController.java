@@ -19,7 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/comment")
+@RequestMapping("/api/users")
 @CrossOrigin
 public class UsersController {
 
@@ -34,21 +34,21 @@ public class UsersController {
     }
 
     //Get
-//    @GetMapping("/userById/{id}")
-//    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
-//        try {
-//            Users u = usersRepository.findUsersById(id);
-//            if (u == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(u, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+    @GetMapping("/userById/{id}")
+    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
+        try {
+            Users u = usersRepository.findUsersById(id);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(u, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-    @GetMapping("/getUser/{id}")
-    public ResponseEntity<UsersProfileImageDTO> getUserById(@PathVariable Long id) throws IOException {
+    @GetMapping("/usersProfileImageDTO/{id}")
+    public ResponseEntity<UsersProfileImageDTO> getUsersProfileImageDTO(@PathVariable Long id) throws IOException {
         Users u = usersRepository.findUsersById(id);
         if (u != null) {
             return new ResponseEntity<>(usersMapper.usersToDTO(u), HttpStatus.OK);

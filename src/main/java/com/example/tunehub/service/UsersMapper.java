@@ -17,7 +17,7 @@ public interface UsersMapper {
         UsersProfileImageDTO usersProfileImageDTO = new UsersProfileImageDTO();
         usersProfileImageDTO.setId(u.getId());
         usersProfileImageDTO.setImagePath(u.getImageProfilePath());
-        usersProfileImageDTO.setImage(u.getImageProfile());
+
 
         Path fileName = Paths.get(u.getImageProfilePath()); //לוקח את הנתיב של התמונה
         byte[] byteImage = Files.readAllBytes(fileName); //מעביר למערך של ביטים
