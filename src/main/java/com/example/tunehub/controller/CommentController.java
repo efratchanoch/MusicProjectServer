@@ -3,6 +3,7 @@ package com.example.tunehub.controller;
 import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.service.CommentMapper;
 import com.example.tunehub.service.CommentRepository;
 import com.example.tunehub.service.PostRepository;
 import com.example.tunehub.service.UsersRepository;
@@ -13,19 +14,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/comment")
-//@CrossOrigin
+
+@RestController
+@RequestMapping("/api/comment")
+@CrossOrigin
 public class CommentController {
     private  CommentRepository commentRepository;
+    private CommentMapper commentMapper;
     private  PostRepository postRepository;
 
-    //@Autowired
-    public CommentController(CommentRepository commentRepository, PostRepository postRepository) {
+    @Autowired
+    public CommentController(CommentRepository commentRepository, CommentMapper commentMapper, PostRepository postRepository) {
         this.commentRepository = commentRepository;
+        this.commentMapper = commentMapper;
         this.postRepository = postRepository;
     }
+
 
     //Get
     // getCommentsByPostId
