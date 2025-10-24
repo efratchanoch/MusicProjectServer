@@ -52,11 +52,6 @@ public class Users {
     // צריכים לבדוק סוג תמונה ושמע
         private String imageProfilePath;
 
-        private String imageProfile;
-
-
-    //    // 4גג
-    //    private String locationUrl;
 
     @OneToMany(mappedBy = "user")
     private List<SheetMusic> sheetMusic;
@@ -102,7 +97,7 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, String imageProfile, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments) {
+    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -119,7 +114,6 @@ public class Users {
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
-        this.imageProfile = imageProfile;
         this.sheetMusic = sheetMusic;
         this.posts = posts;
         this.comments = comments;
@@ -161,13 +155,6 @@ public class Users {
         this.imageProfilePath = imageProfilePath;
     }
 
-    public String getImageProfile() {
-        return imageProfile;
-    }
-
-    public void setImageProfile(String imageProfile) {
-        this.imageProfile = imageProfile;
-    }
 
     public void setPassword(String password) {
         this.password = password;
