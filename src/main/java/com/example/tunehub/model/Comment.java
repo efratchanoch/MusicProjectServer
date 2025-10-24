@@ -32,6 +32,15 @@ public class Comment {
     public Comment() {
     }
 
+    public Comment(Long id, int likes, Users user, Post post, String content, LocalDate dateUploaded) {
+        this.id = id;
+        this.likes = likes;
+        this.user = user;
+        this.post = post;
+        this.content = content;
+        this.dateUploaded = dateUploaded;
+    }
+
     public Long getId() {
         return id;
     }
@@ -80,12 +89,5 @@ public class Comment {
         this.dateUploaded = dateUploaded;
     }
 
-    public Comment(Long id, int likes, Users user, Post post, String content, LocalDate dateUploaded) {
-        this.id = id;
-        this.likes = likes;
-        this.user = user;
-        this.post = post;
-        this.content = content;
-        this.dateUploaded = dateUploaded;
-    }
+
 }

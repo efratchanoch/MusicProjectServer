@@ -24,29 +24,23 @@ public class Teacher extends Users {
 
     private LocalDate dateUploaded;
 
+    @ManyToMany
+    private List<Instrument> instruments;
 
     public Teacher() {
     }
 
-    public Teacher(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, Teacher teacher, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments,  double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded) {
-
+    public Teacher(double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
         this.pricePerLesson = pricePerLesson;
         this.experience = experience;
         this.lessonDuration = lessonDuration;
         this.rating = rating;
         this.students = students;
         this.dateUploaded = dateUploaded;
+        this.instruments = instruments;
     }
 
 
-
-    public List<Users> getStudents() {
-        return students;
-    }
-
-    public void setStudents(List<Users> students) {
-        this.students = students;
-    }
 
     public double getPricePerLesson() {
         return pricePerLesson;
@@ -64,7 +58,6 @@ public class Teacher extends Users {
         this.experience = experience;
     }
 
-
     public double getLessonDuration() {
         return lessonDuration;
     }
@@ -81,7 +74,13 @@ public class Teacher extends Users {
         this.rating = rating;
     }
 
+    public List<Users> getStudents() {
+        return students;
+    }
 
+    public void setStudents(List<Users> students) {
+        this.students = students;
+    }
 
     public LocalDate getDateUploaded() {
         return dateUploaded;
@@ -90,4 +89,6 @@ public class Teacher extends Users {
     public void setDateUploaded(LocalDate dateUploaded) {
         this.dateUploaded = dateUploaded;
     }
+
+
 }

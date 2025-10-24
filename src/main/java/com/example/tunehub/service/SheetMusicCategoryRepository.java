@@ -1,4 +1,8 @@
 package com.example.tunehub.service;
 
-public interface SheetMusicCategoryRepository {
+import com.example.tunehub.model.SheetMusicCategory;
+import com.example.tunehub.model.Users;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface SheetMusicCategoryRepository  extends JpaRepository<SheetMusicCategory, Long> {
 }

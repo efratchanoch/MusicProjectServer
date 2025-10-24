@@ -28,15 +28,31 @@ public class Users {
 
     private boolean active;
 
-//    private String teacherIdentity;
+    private String city;
+
+    private String country;
+
+    @ManyToMany(mappedBy = "following")
+    private List<Users> followers;  // מי עוקב אחרי המשתמש הזה
+
+    @ManyToMany
+    private List<Users> following;  // מי שהמשתמש הזה עוקב אחריהם
+
+
+
+    @ManyToMany
+    private List<Instrument> instrumentsUsers;
+
+
 
     @ManyToOne
     private Teacher teacher;
 
 
     // צריכים לבדוק סוג תמונה ושמע
-    //    private String imageUrl;
-    //
+        private String imageProfilePath;
+
+        private String imageProfile;
 
 
     //    // 4גג
@@ -51,11 +67,42 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
 
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public List<Users> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(List<Users> followers) {
+        this.followers = followers;
+    }
+
+    public List<Users> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(List<Users> followOn) {
+        this.following = followOn;
+    }
 
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, Teacher teacher, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments) {
+    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, String imageProfile, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -65,12 +112,18 @@ public class Users {
         this.createdAt = createdAt;
         this.editedIn = editedIn;
         this.active = active;
+        this.city = city;
+        this.country = country;
+        this.followers = followers;
+        this.following = following;
+        this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
+        this.imageProfilePath = imageProfilePath;
+        this.imageProfile = imageProfile;
         this.sheetMusic = sheetMusic;
         this.posts = posts;
         this.comments = comments;
     }
-
 
     public Long getId() {
         return id;
@@ -90,6 +143,30 @@ public class Users {
 
     public String getPassword() {
         return password;
+    }
+
+    public List<Instrument> getInstrumentsUsers() {
+        return instrumentsUsers;
+    }
+
+    public void setInstrumentsUsers(List<Instrument> instrumentsUsers) {
+        this.instrumentsUsers = instrumentsUsers;
+    }
+
+    public String getImageProfilePath() {
+        return imageProfilePath;
+    }
+
+    public void setImageProfilePath(String imageProfilePath) {
+        this.imageProfilePath = imageProfilePath;
+    }
+
+    public String getImageProfile() {
+        return imageProfile;
+    }
+
+    public void setImageProfile(String imageProfile) {
+        this.imageProfile = imageProfile;
     }
 
     public void setPassword(String password) {
@@ -174,5 +251,9 @@ public class Users {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public void setImagePath(String filePath) {
+
     }
 }

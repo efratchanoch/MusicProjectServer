@@ -2,13 +2,13 @@ package com.example.tunehub.service;
 
 import com.example.tunehub.model.UserType;
 import com.example.tunehub.model.Users;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface UsersRepository {
-    Users findUsersByUserName(String name);
+public interface UsersRepository  extends JpaRepository<Users, Long> {
 
-    List<Users> findUsers();
+    Users findUsersByName(String name);
 
     Users save(Users user);//
 
@@ -20,9 +20,11 @@ public interface UsersRepository {
 
     // List<Users> findByLikes(List<Users> users);
 
-    List<Users> findTop10ByLikesOrderByLikesDesc();
+    // List<Users> findTop10ByLikesOrderByLikesDesc();
 
     boolean existsById(Long id);
 
     void deleteById(Long id);
+
+
 }

@@ -1,56 +1,80 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.dto.UsersProfileImageDTO;
 import com.example.tunehub.model.UserType;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.service.UsersMapper;
 import com.example.tunehub.service.UsersRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
+@RestController
+@RequestMapping("/api/comment")
+@CrossOrigin
 public class UsersController {
 
-    private final UsersRepository usersRepository;
+    private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\images\\";
+    private UsersRepository usersRepository;
+    private UsersMapper usersMapper;
 
-    public UsersController(UsersRepository usersRepository) {
+    @Autowired
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper) {
         this.usersRepository = usersRepository;
+        this.usersMapper = usersMapper;
     }
 
     //Get
-    @GetMapping("/userById/{id}")
-    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
-        try {
-            Users u = usersRepository.findUsersById(id);
-            if (u == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(u, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//    @GetMapping("/userById/{id}")
+//    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
+//        try {
+//            Users u = usersRepository.findUsersById(id);
+//            if (u == null) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(u, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+
+    @GetMapping("/getUser/{id}")
+    public ResponseEntity<UsersProfileImageDTO> getUserById(@PathVariable Long id) throws IOException {
+        Users u = usersRepository.findUsersById(id);
+        if (u != null) {
+            return new ResponseEntity<>(usersMapper.usersToDTO(u), HttpStatus.OK);
         }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/hotUsers")
-    public ResponseEntity<List<Users>> getHotUsers()   {
-        try{
-            List<Users> u = usersRepository.findTop10ByLikesOrderByLikesDesc();
-            //להוסיף לשקלול נוסיה של עוד בהמשך
-            if (u.isEmpty()) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(u,HttpStatus.OK);
-        }
-        catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 
+    //    @GetMapping("/hotUsers")
+//    public ResponseEntity<List<Users>> getHotUsers()   {
+//        try{
+//            List<Users> u = usersRepository.findTop10ByLikesOrderByLikesDesc();
+//            //להוסיף לשקלול נוסיה של עוד בהמשך
+//            if (u.isEmpty()) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(u,HttpStatus.OK);
+//        }
+//        catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
     @GetMapping("/users")
     public ResponseEntity<List<Users>> getUsers() {
         try {
-            List<Users> u = usersRepository.findUsers();
+            List<Users> u = usersRepository.findAll();
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -75,16 +99,15 @@ public class UsersController {
 
 
     @GetMapping("/usersByTeacherId/{teacher_id}")
-    public ResponseEntity<List<Users>> getUsersByTeacher(@PathVariable Long teacher_id){
-        try{
-            List<Users> u=usersRepository.findByTeacherId(teacher_id);
-            if(u==null){
-                return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+    public ResponseEntity<List<Users>> getUsersByTeacher(@PathVariable Long teacher_id) {
+        try {
+            List<Users> u = usersRepository.findByTeacherId(teacher_id);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(u,HttpStatus.OK);
-        }
-        catch(Exception e){
-            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(u, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -93,7 +116,7 @@ public class UsersController {
     @GetMapping("/userByName/{name}")
     public ResponseEntity<Users> getUserByName(@PathVariable String name) {
         try {
-            Users u = usersRepository.findUsersByUserName(name);
+            Users u = usersRepository.findUsersByName(name);
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -112,7 +135,7 @@ public class UsersController {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
 
-            Users existingWithSameName = usersRepository.findUsersByUserName(user.getName());
+            Users existingWithSameName = usersRepository.findUsersByName(user.getName());
             if (existingWithSameName != null && !existingWithSameName.getId().equals(id)) {
                 return new ResponseEntity<>(null, HttpStatus.CONFLICT);
             }
@@ -137,7 +160,7 @@ public class UsersController {
     @PostMapping("/signUp")
     public ResponseEntity<Users> signUpUser(@RequestBody Users user) {
         try {
-            Users existingUser = usersRepository.findUsersByUserName(user.getName());
+            Users existingUser = usersRepository.findUsersByName(user.getName());
             if (existingUser != null) {
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
             }
@@ -151,42 +174,54 @@ public class UsersController {
         }
     }
 
-
     @PostMapping("/logIn")
-    public ResponseEntity<Users> logIn(@RequestBody Users u){
-        try{
-            Users u1 = usersRepository.findUsersByUserName(u.getName());
-            if(u1==null){
+    public ResponseEntity<Users> logIn(@RequestBody Users u) {
+        try {
+            Users u1 = usersRepository.findUsersByName(u.getName());
+            if (u1 == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
 
-            if(!u1.getPassword().equals((u.getPassword()))){  //בדיקה לפי סיסמא
-                return new ResponseEntity<>(null,HttpStatus.UNAUTHORIZED);
+            if (!u1.getPassword().equals((u.getPassword()))) {  //בדיקה לפי סיסמא
+                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
             }
 
-           // שכחתי סיסמא
-            return new ResponseEntity<>(u1,HttpStatus.OK);
-        }
-        catch(Exception e){
-            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    //Delete
-    @DeleteMapping("/DeleteAllUser/{id}")
-    public ResponseEntity DeleteAllUserById(@PathVariable Long id){
-        try{
-            if(usersRepository.existsById(id)){
-                usersRepository.deleteById(id);
-                return new ResponseEntity(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }catch(Exception e){
+            // שכחתי סיסמא
+            return new ResponseEntity<>(u1, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+
+    @PostMapping("/uploadImageProfile")
+    public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
+        try {
+            String filePath = UPLOAD_DIRECTORY + file.getOriginalFilename();//שנראה מה זה לבדוק...
+            Path fileName = Paths.get(filePath);
+            Files.write(fileName, file.getBytes());
+            p.setImagePath(filePath);
+            Users users = usersRepository.save(p);
+            return new ResponseEntity<>(users, HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //Delete
+    @DeleteMapping("/DeleteAllUser/{id}")
+    public ResponseEntity DeleteAllUserById(@PathVariable Long id) {
+        try {
+            if (usersRepository.existsById(id)) {
+                usersRepository.deleteById(id);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
 }

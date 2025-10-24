@@ -1,12 +1,10 @@
 package com.example.tunehub.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class SheetMusic {
@@ -23,7 +21,6 @@ public class SheetMusic {
 
     private int hearts = 0;
 
-
     private LocalDate dateUploaded;
 
     private DifficultyLevel level;
@@ -31,22 +28,25 @@ public class SheetMusic {
     @ManyToOne
     private Users user;
 
+    @ManyToMany
+    private List<Instrument> instruments;
+
     @ManyToOne
     private SheetMusicCategory category;
 
     public SheetMusic() {
     }
 
-    public SheetMusic(Long id, String name, Scale scale, int likes, int hearts, String instruments, LocalDate dateUploaded, DifficultyLevel level, Users user, SheetMusicCategory category) {
+    public SheetMusic(Long id, String name, Scale scale, int likes, int hearts, LocalDate dateUploaded, DifficultyLevel level, Users user, List<Instrument> instruments, SheetMusicCategory category) {
         this.id = id;
         this.name = name;
         this.scale = scale;
         this.likes = likes;
         this.hearts = hearts;
-//        Instruments = instruments;
         this.dateUploaded = dateUploaded;
         this.level = level;
         this.user = user;
+        this.instruments = instruments;
         this.category = category;
     }
 
@@ -90,8 +90,6 @@ public class SheetMusic {
         this.hearts = hearts;
     }
 
-
-
     public LocalDate getDateUploaded() {
         return dateUploaded;
     }
@@ -114,6 +112,14 @@ public class SheetMusic {
 
     public void setUser(Users user) {
         this.user = user;
+    }
+
+    public List<Instrument> getInstruments() {
+        return instruments;
+    }
+
+    public void setInstruments(List<Instrument> instruments) {
+        this.instruments = instruments;
     }
 
     public SheetMusicCategory getCategory() {
