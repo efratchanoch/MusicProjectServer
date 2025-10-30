@@ -39,10 +39,8 @@ public class Users {
     private List<Users> following;  // מי שהמשתמש הזה עוקב אחריהם
 
 
-
     @ManyToMany
     private List<Instrument> instrumentsUsers;
-
 
 
     @ManyToOne
@@ -50,7 +48,7 @@ public class Users {
 
 
     // צריכים לבדוק סוג תמונה ושמע
-        private String imageProfilePath;
+    private String imageProfilePath;
 
 
     @OneToMany(mappedBy = "user")
@@ -61,6 +59,8 @@ public class Users {
 
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
+
+
 
     public String getCity() {
         return city;

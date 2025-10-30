@@ -31,7 +31,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
+    private List<String> imagesPath;
 
+    private List<String> audiosPath;
     //
     // @Lob
     //    private byte[] image;
