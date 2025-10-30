@@ -1,5 +1,6 @@
 package com.example.tunehub.service;
 
+import com.example.tunehub.dto.PostDTO;
 import com.example.tunehub.dto.PostMediaDTO;
 import com.example.tunehub.model.Post;
 import org.mapstruct.Mapper;
@@ -11,7 +12,13 @@ import java.util.List;
 public interface PostMapper {
 
     List<PostMediaDTO> PostToDTO(List<Post> posts);
-    Post PostMediaDTOToPost(PostMediaDTO p);
+    Post PostMediaDTOtoPost(PostMediaDTO p);
+
+    Post PostDTOtoPost(PostDTO p);
+//    PostDTO PosttoPostDTO(Post p);
+    List<PostDTO> PostsToPostsDTO(List<Post> p);
+
+
     default PostMediaDTO PostToDTO(Post p) throws IOException {
         PostMediaDTO postMediaDTO=new PostMediaDTO();
         postMediaDTO.setId(p.getId());

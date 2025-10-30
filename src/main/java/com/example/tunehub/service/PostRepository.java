@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface PostRepository  extends JpaRepository<Post, Long> {
-    Post findUsersById(Long post_id);
+    Post findUsersById(Long id);
 
     Post findPostById(Long id);
 
     List<Post> findAllByUserId(Long id);
 
     List<Post> findByDateUploaded(LocalDate dateUploaded);
+
+    List<Post> findAllByUsersFavorite(Long id);
 }

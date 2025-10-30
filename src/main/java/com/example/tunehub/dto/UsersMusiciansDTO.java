@@ -17,6 +17,14 @@ public class UsersMusiciansDTO {
 //    private String rating;
 
 
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
+    }
+
     public UsersProfileDTO getProfile() {
         return profile;
     }

@@ -1,5 +1,6 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.model.Post;
 import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.Teacher;
 import com.example.tunehub.service.SheetMusicMapper;
@@ -43,6 +44,33 @@ public class SheetMusicController {
     public ResponseEntity<List<SheetMusic>> getSheetsMusic() {
         try {
             List<SheetMusic> s = sheetMusicRepository.findAll();
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/sheetsMusicByUserId/{id}")
+    public ResponseEntity<List<SheetMusic>> getSheetsMusicByUserId(@PathVariable Long id) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUser_Id(id);
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/favoriteSheetsMusicByUserId/{id}")
+    public ResponseEntity<List<SheetMusic>> getFavoriteSheetsMusicByUserId(@PathVariable Long id) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite(id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }

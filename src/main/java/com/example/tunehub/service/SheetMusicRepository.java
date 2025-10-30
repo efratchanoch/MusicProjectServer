@@ -4,6 +4,12 @@ import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface SheetMusicRepository  extends JpaRepository<SheetMusic, Long> {
     SheetMusic findSheetMusicById(Long id);
+
+    List<SheetMusic> findAllSheetMusicByUser_Id(Long id);
+
+    List<SheetMusic> findAllSheetMusicByUsersFavorite(Long id);
 }

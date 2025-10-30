@@ -65,6 +65,18 @@ public class PostController {
         }
     }
 
+    @GetMapping("/favoritePostsByUserId/{id}")
+    public ResponseEntity<List<Post>> getFavoritePostsByUserId(@PathVariable Long id) {
+        try {
+            List<Post> p = postRepository.findAllByUsersFavorite(id);
+            if (p == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(p, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @GetMapping("/newPosts")
     public ResponseEntity<List<Post>> getNewPosts() {
@@ -79,17 +91,6 @@ public class PostController {
         }
     }
 
-//    @GetMapping("/favoritePostsByUserId/{id}")
-//    public ResponseEntity<List<Post>> getFavoritePostsByUserId(@PathVariable Long id) {
-//        try {
-//            List<Post> p = postRepository.findAllByfavo(id);
-//            if (p == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(p, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+
 
 }
