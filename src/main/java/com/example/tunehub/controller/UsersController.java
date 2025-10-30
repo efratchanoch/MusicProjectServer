@@ -1,8 +1,9 @@
 package com.example.tunehub.controller;
 
-import com.example.tunehub.dto.UsersProfileImageDTO;
+import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.UserType;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.UsersMapper;
 import com.example.tunehub.service.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -48,7 +46,7 @@ public class UsersController {
     }
 
     @GetMapping("/usersProfileImageDTO/{id}")
-    public ResponseEntity<UsersProfileImageDTO> getUsersProfileImageDTO(@PathVariable Long id) throws IOException {
+    public ResponseEntity<UsersUploadProfileImageDTO> getUsersProfileImageDTO(@PathVariable Long id) throws IOException {
         Users u = usersRepository.findUsersById(id);
         if (u != null) {
             return new ResponseEntity<>(usersMapper.usersToDTO(u), HttpStatus.OK);
@@ -197,13 +195,10 @@ public class UsersController {
     @PostMapping("/uploadImageProfile")
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
         try {
-            String filePath = UPLOAD_DIRECTORY + file.getOriginalFilename();//שנראה מה זה לבדוק...
-            Path fileName = Paths.get(filePath);
-            Files.write(fileName, file.getBytes());
-            p.setImagePath(filePath);
+            FileUtils.uploadImage(file);
+            p.setImagePath(file.getOriginalFilename());
             Users users = usersRepository.save(p);
             return new ResponseEntity<>(users, HttpStatus.CREATED);
-
         } catch (IOException e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

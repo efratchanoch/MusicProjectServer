@@ -21,6 +21,11 @@ public class Post {
 
     private int likes = 0;
 
+
+
+    private String audio;
+
+    private String video;
     private LocalDate dateUploaded;
 
     @OneToMany(mappedBy = "post")
@@ -47,6 +52,30 @@ public class Post {
     public Post() {
     }
 
+
+    public String getAudio() {
+        return audio;
+    }
+
+    public void setAudio(String audio) {
+        this.audio = audio;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getVideo() {
+        return video;
+    }
+
+    public void setVideo(String video) {
+        this.video = video;
+    }
     public Long getPost_id() {
         return id;
     }
