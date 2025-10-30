@@ -32,6 +32,7 @@ public class Users {
 
     private String country;
 
+    //private int raiting;
     @ManyToMany(mappedBy = "following")
     private List<Users> followers;  // מי עוקב אחרי המשתמש הזה
 

@@ -191,7 +191,7 @@ public class UsersController {
         }
     }
 
-
+   //לבדוק אם לשנות את זה לקבל פרטים נוספים מהאוביקט
     @PostMapping("/uploadImageProfile")
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
         try {
@@ -203,6 +203,8 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     //Delete
     @DeleteMapping("/DeleteAllUser/{id}")
@@ -217,6 +219,7 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 }

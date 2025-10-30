@@ -13,6 +13,28 @@ public class CommentDTO {
     private UsersProfileDTO profile;
 
 
+    private int likes;
+
+    private int hearts;
+
+    //private UsersUploadProfileImageDTO profile;
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public int getHearts() {
+        return hearts;
+    }
+
+    public void setHearts(int hearts) {
+        this.hearts = hearts;
+    }
+
     public Long getId() {
         return id;
     }

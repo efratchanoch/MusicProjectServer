@@ -11,5 +11,5 @@ public interface SheetMusicRepository  extends JpaRepository<SheetMusic, Long> {
 
     List<SheetMusic> findAllSheetMusicByUser_Id(Long id);
 
-    List<SheetMusic> findAllSheetMusicByUsersFavorite(Long id);
+    List<SheetMusic> findAllSheetMusicByUsersFavorite_Id(Long id);
 }

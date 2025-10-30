@@ -3,6 +3,7 @@ package com.example.tunehub.dto;
 import org.springframework.web.multipart.MultipartFile;
 
 public class PostMediaDTO {
+
     private Long id;
     private String type;  // AUDIO, VIDEO, IMAGE
     private String url;

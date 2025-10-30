@@ -16,7 +16,7 @@ public interface PostMapper {
 
     Post PostDTOtoPost(PostDTO p);
 //    PostDTO PosttoPostDTO(Post p);
-    List<PostDTO> PostsToPostsDTO(List<Post> p);
+//    List<PostDTO> PostsToPostsDTO(List<Post> p);
 
 
     default PostMediaDTO PostToDTO(Post p) throws IOException {

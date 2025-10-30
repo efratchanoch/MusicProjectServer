@@ -70,7 +70,7 @@ public class SheetMusicController {
     @GetMapping("/favoriteSheetsMusicByUserId/{id}")
     public ResponseEntity<List<SheetMusic>> getFavoriteSheetsMusicByUserId(@PathVariable Long id) {
         try {
-            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite(id);
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite_Id(id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
