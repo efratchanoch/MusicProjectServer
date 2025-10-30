@@ -9,7 +9,7 @@ public class PostDTO {
  private Long id;
  private String content;
  private LocalDate createdAt;
- private UsersUploadProfileImageDTO user; // רק מה שצריך להצגה
+ private UsersProfileDTO profile; // רק מה שצריך להצגה
  private List<CommentDTO> comments;
  private List<PostMediaDTO> media;
 
@@ -37,12 +37,12 @@ public class PostDTO {
   this.createdAt = createdAt;
  }
 
- public UsersUploadProfileImageDTO getUser() {
-  return user;
+ public UsersProfileDTO getUser() {
+  return profile;
  }
 
- public void setUser(UsersUploadProfileImageDTO user) {
-  this.user = user;
+ public void setUser(UsersProfileDTO user) {
+  this.profile = profile;
  }
 
  public List<CommentDTO> getComments() {

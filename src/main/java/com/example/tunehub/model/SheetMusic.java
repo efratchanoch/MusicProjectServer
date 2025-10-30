@@ -34,10 +34,14 @@ public class SheetMusic {
     @ManyToOne
     private SheetMusicCategory category;
 
+    @ManyToMany
+    private List<Users> usersFavorite;
+
+
     public SheetMusic() {
     }
 
-    public SheetMusic(Long id, String name, Scale scale, int likes, int hearts, LocalDate dateUploaded, DifficultyLevel level, Users user, List<Instrument> instruments, SheetMusicCategory category) {
+    public SheetMusic(Long id, String name, Scale scale, int likes, int hearts, LocalDate dateUploaded, DifficultyLevel level, Users user, List<Instrument> instruments, SheetMusicCategory category, List<Users> usersFavorite) {
         this.id = id;
         this.name = name;
         this.scale = scale;
@@ -48,6 +52,15 @@ public class SheetMusic {
         this.user = user;
         this.instruments = instruments;
         this.category = category;
+        this.usersFavorite = usersFavorite;
+    }
+
+    public List<Users> getUsersFavorite() {
+        return usersFavorite;
+    }
+
+    public void setUsersFavorite(List<Users> usersFavorite) {
+        this.usersFavorite = usersFavorite;
     }
 
     public Long getId() {

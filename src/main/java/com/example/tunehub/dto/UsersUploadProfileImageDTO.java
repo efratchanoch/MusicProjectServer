@@ -1,11 +1,9 @@
 package com.example.tunehub.dto;
 
 public class UsersUploadProfileImageDTO {
-
     private Long id;
     private String imagePath;
     private String image;
-
 
     public Long getId() {
         return id;

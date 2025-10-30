@@ -10,6 +10,9 @@ public class CommentDTO {
 
     private LocalDate dateUploaded;
 
+    private UsersProfileDTO profile;
+
+
     public Long getId() {
         return id;
     }
@@ -32,5 +35,13 @@ public class CommentDTO {
 
     public void setDateUploaded(LocalDate dateUploaded) {
         this.dateUploaded = dateUploaded;
+    }
+
+    public UsersProfileDTO getProfile() {
+        return profile;
+    }
+
+    public void setProfile(UsersProfileDTO profile) {
+        this.profile = profile;
     }
 }

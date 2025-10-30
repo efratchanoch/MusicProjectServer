@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class PostMediaDTO {
     private Long id;
     private String type;  // AUDIO, VIDEO, IMAGE
-    private String url; // המיקום של הקובץ
+    private String url;
 
     public Long getId() {
         return id;

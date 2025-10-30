@@ -69,7 +69,7 @@ public class PostController {
     @GetMapping("/newPosts")
     public ResponseEntity<List<Post>> getNewPosts() {
         try {
-            List<Post> p = postRepository.findAllByDateUploaded_Day(LocalDate.now());
+            List<Post> p = postRepository.findByDateUploaded(LocalDate.now());
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -79,17 +79,17 @@ public class PostController {
         }
     }
 
-    @GetMapping("/favoritePostsByUserId/{id}")
-    public ResponseEntity<List<Post>> getFavoritePostsByUserId(@PathVariable Long id) {
-        try {
-            List<Post> p = postRepository.findAllByfavo(id);
-            if (p == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(p, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @GetMapping("/favoritePostsByUserId/{id}")
+//    public ResponseEntity<List<Post>> getFavoritePostsByUserId(@PathVariable Long id) {
+//        try {
+//            List<Post> p = postRepository.findAllByfavo(id);
+//            if (p == null) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(p, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 }

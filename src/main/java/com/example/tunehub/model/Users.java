@@ -38,18 +38,13 @@ public class Users {
     @ManyToMany
     private List<Users> following;  // מי שהמשתמש הזה עוקב אחריהם
 
-
     @ManyToMany
     private List<Instrument> instrumentsUsers;
-
 
     @ManyToOne
     private Teacher teacher;
 
-
-    // צריכים לבדוק סוג תמונה ושמע
     private String imageProfilePath;
-
 
     @OneToMany(mappedBy = "user")
     private List<SheetMusic> sheetMusic;
@@ -60,10 +55,59 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
 
+    @ManyToMany(mappedBy = "usersFavorite")
+    private List<SheetMusic> favoriteSheetsMusic;
+
+    @ManyToMany(mappedBy = "usersFavorite")
+    private List<Post> favoritePosts;
+
+
+    public Users() {
+    }
+
+    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.email = email;
+        this.description = description;
+        this.userType = userType;
+        this.createdAt = createdAt;
+        this.editedIn = editedIn;
+        this.active = active;
+        this.city = city;
+        this.country = country;
+        this.followers = followers;
+        this.following = following;
+        this.instrumentsUsers = instrumentsUsers;
+        this.teacher = teacher;
+        this.imageProfilePath = imageProfilePath;
+        this.sheetMusic = sheetMusic;
+        this.posts = posts;
+        this.comments = comments;
+        this.favoriteSheetsMusic = favoriteSheetsMusic;
+        this.favoritePosts = favoritePosts;
+    }
 
 
     public String getCity() {
         return city;
+    }
+
+    public List<SheetMusic> getFavoriteSheetsMusic() {
+        return favoriteSheetsMusic;
+    }
+
+    public void setFavoriteSheetsMusic(List<SheetMusic> favoriteSheetsMusic) {
+        this.favoriteSheetsMusic = favoriteSheetsMusic;
+    }
+
+    public List<Post> getFavoritePosts() {
+        return favoritePosts;
+    }
+
+    public void setFavoritePosts(List<Post> favoritePosts) {
+        this.favoritePosts = favoritePosts;
     }
 
     public void setCity(String city) {
@@ -92,31 +136,6 @@ public class Users {
 
     public void setFollowing(List<Users> followOn) {
         this.following = followOn;
-    }
-
-    public Users() {
-    }
-
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments) {
-        this.id = id;
-        this.name = name;
-        this.password = password;
-        this.email = email;
-        this.description = description;
-        this.userType = userType;
-        this.createdAt = createdAt;
-        this.editedIn = editedIn;
-        this.active = active;
-        this.city = city;
-        this.country = country;
-        this.followers = followers;
-        this.following = following;
-        this.instrumentsUsers = instrumentsUsers;
-        this.teacher = teacher;
-        this.imageProfilePath = imageProfilePath;
-        this.sheetMusic = sheetMusic;
-        this.posts = posts;
-        this.comments = comments;
     }
 
     public Long getId() {

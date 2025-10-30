@@ -21,11 +21,10 @@ public class Post {
 
     private int likes = 0;
 
-
-
     private String audio;
 
     private String video;
+
     private LocalDate dateUploaded;
 
     @OneToMany(mappedBy = "post")
@@ -34,26 +33,51 @@ public class Post {
     private List<String> imagesPath;
 
     private List<String> audiosPath;
-    //
-    // @Lob
-    //    private byte[] image;
-    //    private byte[] audio;
 
+    @ManyToMany
+    private List<Users> usersFavorite;
 
-    public Post(Long id, Users user, String content, int hearts, int likes, LocalDate dateUploaded, List<Comment> comments) {
+    public Post() {
+    }
+
+    public Post(Long id, Users user, String content, int hearts, int likes, String audio, String video, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<String> audiosPath, List<Users> usersFavorite) {
         this.id = id;
         this.user = user;
         this.content = content;
         this.hearts = hearts;
         this.likes = likes;
+        this.audio = audio;
+        this.video = video;
         this.dateUploaded = dateUploaded;
         this.comments = comments;
-
+        this.imagesPath = imagesPath;
+        this.audiosPath = audiosPath;
+        this.usersFavorite = usersFavorite;
     }
 
-    public Post() {
+    public List<String> getImagesPath() {
+        return imagesPath;
     }
 
+    public void setImagesPath(List<String> imagesPath) {
+        this.imagesPath = imagesPath;
+    }
+
+    public List<String> getAudiosPath() {
+        return audiosPath;
+    }
+
+    public void setAudiosPath(List<String> audiosPath) {
+        this.audiosPath = audiosPath;
+    }
+
+    public List<Users> getUsersFavorite() {
+        return usersFavorite;
+    }
+
+    public void setUsersFavorite(List<Users> usersFavorite) {
+        this.usersFavorite = usersFavorite;
+    }
 
     public String getAudio() {
         return audio;
