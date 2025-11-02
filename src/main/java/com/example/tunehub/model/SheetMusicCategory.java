@@ -16,15 +16,15 @@ public class SheetMusicCategory {
     private String name;
 
     @OneToMany(mappedBy = "category")
-    private List<SheetMusic> sheetMusic;
+    private List<SheetMusic> sheetsMusic;
 
     public SheetMusicCategory() {
     }
 
-    public SheetMusicCategory(long id, String name, List<SheetMusic> sheetMusic) {
+    public SheetMusicCategory(long id, String name, List<SheetMusic> sheetsMusic) {
         this.id = id;
         this.name = name;
-        this.sheetMusic = sheetMusic;
+        this.sheetsMusic = sheetsMusic;
     }
 
     public long getId() {
@@ -43,11 +43,11 @@ public class SheetMusicCategory {
         this.name = name;
     }
 
-    public List<SheetMusic> getSheetMusic() {
-        return sheetMusic;
+    public List<SheetMusic> getSheetsMusic() {
+        return sheetsMusic;
     }
 
-    public void setSheetMusic(List<SheetMusic> sheetMusic) {
-        this.sheetMusic = sheetMusic;
+    public void setSheetsMusic(List<SheetMusic> sheetsMusic) {
+        this.sheetsMusic = sheetsMusic;
     }
 }

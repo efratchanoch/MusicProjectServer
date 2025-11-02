@@ -4,6 +4,7 @@ import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.UserType;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.service.FileUtils;
+import com.example.tunehub.service.RoleRepository;
 import com.example.tunehub.service.UsersMapper;
 import com.example.tunehub.service.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,14 @@ public class UsersController {
 
     private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\images\\";
     private UsersRepository usersRepository;
+    private RoleRepository roleRepository;
     private UsersMapper usersMapper;
 
     @Autowired
-    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper) {
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper,RoleRepository roleRepository) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
+        this.roleRepository=roleRepository;
     }
 
     //Get
@@ -107,6 +110,25 @@ public class UsersController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/get")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String get(){
+        return "hello";
+    }
+    @PostMapping("/signup")
+    public ResponseEntity<Users> signUp(@RequestBody Users user){
+        //נבדוק ששם המשתמש לא קיים
+        Users u=usersRepository.findByUserName((user.getUserName());
+        if(u!=null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String pass=user.getPassword();//הסיסמא שהמשתמש הכניס - לא מוצפנת
+        user.setPassword(new BCryptPasswordEncoder().encode(pass));
+
+        user.getRoles().add(RoleRepository.findById((long)1).get());
+        usersRepository.save(user);
+        return new ResponseEntity<>(user,HttpStatus.CREATED);
     }
 
 

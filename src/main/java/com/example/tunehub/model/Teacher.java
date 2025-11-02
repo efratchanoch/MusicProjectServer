@@ -30,7 +30,8 @@ public class Teacher extends Users {
     public Teacher() {
     }
 
-    public Teacher(double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
+    public Teacher(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
+        super(id, name, password, email, description, userType, createdAt, editedIn, active, city, country, followers, following, instrumentsUsers, teacher, imageProfilePath, sheetsMusic, posts, comments, favoriteSheetsMusic, favoritePosts);
         this.pricePerLesson = pricePerLesson;
         this.experience = experience;
         this.lessonDuration = lessonDuration;
@@ -39,8 +40,6 @@ public class Teacher extends Users {
         this.dateUploaded = dateUploaded;
         this.instruments = instruments;
     }
-
-
 
     public double getPricePerLesson() {
         return pricePerLesson;
@@ -90,5 +89,11 @@ public class Teacher extends Users {
         this.dateUploaded = dateUploaded;
     }
 
+    public List<Instrument> getInstruments() {
+        return instruments;
+    }
 
+    public void setInstruments(List<Instrument> instruments) {
+        this.instruments = instruments;
+    }
 }

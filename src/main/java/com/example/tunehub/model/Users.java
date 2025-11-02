@@ -3,7 +3,9 @@ package com.example.tunehub.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -48,7 +50,7 @@ public class Users {
     private String imageProfilePath;
 
     @OneToMany(mappedBy = "user")
-    private List<SheetMusic> sheetMusic;
+    private List<SheetMusic> sheetsMusic;
 
     @OneToMany(mappedBy = "user")
     private List<Post> posts;
@@ -63,10 +65,22 @@ public class Users {
     private List<Post> favoritePosts;
 
 
+
+    @ManyToMany
+    private Set<Role> roles=new HashSet<>();
+
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts) {
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -83,7 +97,7 @@ public class Users {
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
-        this.sheetMusic = sheetMusic;
+        this.sheetsMusic = sheetsMusic;
         this.posts = posts;
         this.comments = comments;
         this.favoriteSheetsMusic = favoriteSheetsMusic;
@@ -236,12 +250,12 @@ public class Users {
         this.teacher = teacher;
     }
 
-    public List<SheetMusic> getSheetMusic() {
-        return sheetMusic;
+    public List<SheetMusic> getSheetsMusic() {
+        return sheetsMusic;
     }
 
-    public void setSheetMusic(List<SheetMusic> sheetMusic) {
-        this.sheetMusic = sheetMusic;
+    public void setSheetsMusic(List<SheetMusic> sheetsMusic) {
+        this.sheetsMusic = sheetsMusic;
     }
 
     public List<Post> getPosts() {
@@ -262,5 +276,8 @@ public class Users {
 
     public void setImagePath(String filePath) {
 
+    }
+
+    public void getUserName() {
     }
 }
