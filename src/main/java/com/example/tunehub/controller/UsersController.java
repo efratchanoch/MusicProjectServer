@@ -60,7 +60,7 @@ public class UsersController {
     }
 
 
-    //    @GetMapping("/hotUsers")
+    //   @GetMapping("/hotUsers")
 //    public ResponseEntity<List<Users>> getHotUsers()   {
 //        try{
 //            List<Users> u = usersRepository.findTop10ByLikesOrderByLikesDesc();
@@ -159,23 +159,23 @@ public class UsersController {
         }
     }
 
-    //Post
-    @PostMapping("/signUp")
-    public ResponseEntity<Users> signUpUser(@RequestBody Users user) {
-        try {
-            Users existingUser = usersRepository.findUsersByName(user.getName());
-            if (existingUser != null) {
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
-
-            user.setCreatedAt(LocalDate.now());
-            user.setEditedIn(null);//האם מיותר ?
-            Users savedUser = usersRepository.save(user);
-            return new ResponseEntity<>(savedUser, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    //Post
+//    @PostMapping("/signUp")
+//    public ResponseEntity<Users> signUpUser(@RequestBody Users user) {
+//        try {
+//            Users existingUser = usersRepository.findUsersByName(user.getName());
+//            if (existingUser != null) {
+//                return new ResponseEntity<>(HttpStatus.CONFLICT);
+//            }
+//
+//            user.setCreatedAt(LocalDate.now());
+//            user.setEditedIn(null);//האם מיותר ?
+//            Users savedUser = usersRepository.save(user);
+//            return new ResponseEntity<>(savedUser, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     @PostMapping("/logIn")
     public ResponseEntity<Users> logIn(@RequestBody Users u) {

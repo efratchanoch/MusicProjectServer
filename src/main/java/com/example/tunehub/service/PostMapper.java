@@ -12,17 +12,18 @@ import java.util.List;
 public interface PostMapper {
 
     List<PostMediaDTO> PostToDTO(List<Post> posts);
+
     Post PostMediaDTOtoPost(PostMediaDTO p);
 
     Post PostDTOtoPost(PostDTO p);
-//    PostDTO PosttoPostDTO(Post p);
-//    List<PostDTO> PostsToPostsDTO(List<Post> p);
+
+    //    PostDTO PosttoPostDTO(Post p);
+    List<PostDTO> PostsToPostsDTO(List<Post> p);
 
 
     default PostMediaDTO PostToDTO(Post p) throws IOException {
-        PostMediaDTO postMediaDTO=new PostMediaDTO();
+        PostMediaDTO postMediaDTO = new PostMediaDTO();
         postMediaDTO.setId(p.getId());
-
         return postMediaDTO;
     }
 
