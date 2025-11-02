@@ -1,9 +1,8 @@
 package com.example.tunehub.model;
 
+
 public enum ERole {
-
     ROLE_USER,
-    ROLE_ADMIN,//עובד
-    ROLE_SUPERADMIN
-
+    ROLE_ADMIN,
+    ROLE_SUPER_ADMIN
 }

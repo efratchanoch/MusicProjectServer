@@ -34,7 +34,6 @@ public class Users {
 
     private String country;
 
-    //private int raiting;
     @ManyToMany(mappedBy = "following")
     private List<Users> followers;  // מי עוקב אחרי המשתמש הזה
 
@@ -50,7 +49,7 @@ public class Users {
     private String imageProfilePath;
 
     @OneToMany(mappedBy = "user")
-    private List<SheetMusic> sheetsMusic;
+    private List<SheetMusic> sheetMusic;
 
     @OneToMany(mappedBy = "user")
     private List<Post> posts;
@@ -64,23 +63,14 @@ public class Users {
     @ManyToMany(mappedBy = "usersFavorite")
     private List<Post> favoritePosts;
 
-
-
+    //Security
     @ManyToMany
-    private Set<Role> roles=new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
     public Users() {
     }
 
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts) {
+    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -97,13 +87,13 @@ public class Users {
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
-        this.sheetsMusic = sheetsMusic;
+        this.sheetMusic = sheetMusic;
         this.posts = posts;
         this.comments = comments;
         this.favoriteSheetsMusic = favoriteSheetsMusic;
         this.favoritePosts = favoritePosts;
+        this.roles = roles;
     }
-
 
     public String getCity() {
         return city;
@@ -189,7 +179,6 @@ public class Users {
         this.imageProfilePath = imageProfilePath;
     }
 
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -250,12 +239,12 @@ public class Users {
         this.teacher = teacher;
     }
 
-    public List<SheetMusic> getSheetsMusic() {
-        return sheetsMusic;
+    public List<SheetMusic> getSheetMusic() {
+        return sheetMusic;
     }
 
-    public void setSheetsMusic(List<SheetMusic> sheetsMusic) {
-        this.sheetsMusic = sheetsMusic;
+    public void setSheetMusic(List<SheetMusic> sheetMusic) {
+        this.sheetMusic = sheetMusic;
     }
 
     public List<Post> getPosts() {
@@ -274,10 +263,11 @@ public class Users {
         this.comments = comments;
     }
 
-    public void setImagePath(String filePath) {
-
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void getUserName() {
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }

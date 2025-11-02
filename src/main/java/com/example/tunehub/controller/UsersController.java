@@ -10,6 +10,7 @@ import com.example.tunehub.service.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,14 +25,14 @@ public class UsersController {
 
     private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\images\\";
     private UsersRepository usersRepository;
-    private RoleRepository roleRepository;
     private UsersMapper usersMapper;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper,RoleRepository roleRepository) {
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
-        this.roleRepository=roleRepository;
+        this.roleRepository = roleRepository;
     }
 
     //Get
@@ -110,25 +111,6 @@ public class UsersController {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @GetMapping("/get")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String get(){
-        return "hello";
-    }
-    @PostMapping("/signup")
-    public ResponseEntity<Users> signUp(@RequestBody Users user){
-        //נבדוק ששם המשתמש לא קיים
-        Users u=usersRepository.findByUserName((user.getUserName());
-        if(u!=null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String pass=user.getPassword();//הסיסמא שהמשתמש הכניס - לא מוצפנת
-        user.setPassword(new BCryptPasswordEncoder().encode(pass));
-
-        user.getRoles().add(RoleRepository.findById((long)1).get());
-        usersRepository.save(user);
-        return new ResponseEntity<>(user,HttpStatus.CREATED);
     }
 
 
@@ -213,7 +195,7 @@ public class UsersController {
         }
     }
 
-   //לבדוק אם לשנות את זה לקבל פרטים נוספים מהאוביקט
+
     @PostMapping("/uploadImageProfile")
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
         try {
@@ -225,8 +207,6 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
     //Delete
     @DeleteMapping("/DeleteAllUser/{id}")
@@ -242,6 +222,26 @@ public class UsersController {
         }
     }
 
+
+    @GetMapping("/get")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public String get() {
+        return "hello";
+    }
+
+    @PostMapping("/signUp")
+    public ResponseEntity<Users> signUp(@RequestBody Users user) {
+
+        Users u = usersRepository.findByName(user.getName());
+        if (u != null)
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        String pass = user.getPassword();//הסיסמא שהמשתמש הכניס - לא מוצפנת
+        user.setPassword(new BCryptPasswordEncoder().encode(pass));
+
+        user.getRoles().add(roleRepository.findById((long) 1).get());
+        userRepository.save(user);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
+    }
 
 
 }
