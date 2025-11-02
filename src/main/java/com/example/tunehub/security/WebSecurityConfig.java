@@ -11,12 +11,10 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
+//הגדרות אבטחה
+@Configuration
+@EnableWebSecurity
 public class WebSecurityConfig {
-
-    //הגדרות אבטחה
-    @Configuration
-    @EnableWebSecurity
-    public class WebSecurityConfig1 {
 
         //********תפקיד הפונקציה:
         //מגדירה את שרשרת מסנן האבטחה
@@ -46,6 +44,6 @@ public class WebSecurityConfig {
 
             return http.build();
         }
-    }
+
 
 }

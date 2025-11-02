@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -200,7 +201,7 @@ public class UsersController {
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
         try {
             FileUtils.uploadImage(file);
-            p.setImagePath(file.getOriginalFilename());
+            p.setImageProfilePath(file.getOriginalFilename());
             Users users = usersRepository.save(p);
             return new ResponseEntity<>(users, HttpStatus.CREATED);
         } catch (IOException e) {
@@ -239,7 +240,7 @@ public class UsersController {
         user.setPassword(new BCryptPasswordEncoder().encode(pass));
 
         user.getRoles().add(roleRepository.findById((long) 1).get());
-        userRepository.save(user);
+        usersRepository.save(user);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
