@@ -3,6 +3,7 @@ package com.example.tunehub.dto;
 public class UsersProfileDTO {
     private String id;
     private String name;
+    private String imageProfilePath;
 
     public String getId() {
         return id;
@@ -18,5 +19,13 @@ public class UsersProfileDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getImageProfilePath() {
+        return imageProfilePath;
+    }
+
+    public void setImageProfilePath(String imageProfilePath) {
+        this.imageProfilePath = imageProfilePath;
     }
 }

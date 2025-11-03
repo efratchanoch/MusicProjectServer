@@ -1,6 +1,6 @@
 package com.example.tunehub.dto;
 
-public class InstrumentsDTO {
+public class InstrumentDTO {
     private Long id;
     private String name;
 

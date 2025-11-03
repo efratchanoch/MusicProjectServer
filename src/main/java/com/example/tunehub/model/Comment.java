@@ -31,7 +31,6 @@ public class Comment {
 
     public Comment() {
     }
-
     public Comment(Long id, int likes, Users user, Post post, String content, LocalDate dateUploaded) {
         this.id = id;
         this.likes = likes;
