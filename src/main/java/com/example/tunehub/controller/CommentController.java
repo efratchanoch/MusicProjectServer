@@ -110,4 +110,19 @@ public class CommentController {
     }
 
 
+    //מחיקה בכל פעם אחד
+    @DeleteMapping("/comment")
+    public ResponseEntity DeleteComment(@RequestBody Comment comment){
+        try{
+            if (commentRepository.existsById(comment.getId())) {
+                commentRepository.delete(comment);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

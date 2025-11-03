@@ -14,7 +14,6 @@ import java.util.Base64;
 
 public class FileUtils {
     private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media\\";
-
     private static String IMAGES_FOLDER = "\\images\\";
     private static String AUDIO_FOLDER = "\\audio\\";
     private static String VIDEO_FOLDER = "\\video\\";
