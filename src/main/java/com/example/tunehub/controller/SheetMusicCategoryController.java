@@ -2,6 +2,7 @@ package com.example.tunehub.controller;
 
 import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.SheetMusicCategory;
+import com.example.tunehub.model.Teacher;
 import com.example.tunehub.service.SheetMusicCategoryMapper;
 import com.example.tunehub.service.SheetMusicCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,30 @@ public class SheetMusicCategoryController {
         }
     }
 
+    @GetMapping("/sheetMusicByName/{name}")
+    public ResponseEntity<List<SheetMusicCategory>> getSheetMusicByName(@PathVariable String name) {
+        try {
+            List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAllByName(name);
+            if (sc == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(sc, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
-
+    @GetMapping("/sheetMusicCategories")
+    public ResponseEntity<List<SheetMusicCategory>> getSheetMusicCategories() {
+        try {
+            List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAll();
+            if (sc == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(sc, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -1,8 +1,6 @@
 package com.example.tunehub.controller;
 
-import com.example.tunehub.model.Post;
-import com.example.tunehub.model.SheetMusic;
-import com.example.tunehub.model.Teacher;
+import com.example.tunehub.model.*;
 import com.example.tunehub.service.SheetMusicMapper;
 import com.example.tunehub.service.SheetMusicRepository;
 import jakarta.persistence.Id;
@@ -79,4 +77,58 @@ public class SheetMusicController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GetMapping("/sheetsMusicByName/{name}")
+    public ResponseEntity<List<SheetMusic>> getSheetsMusicByName(String name) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllByName(name) ;
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/sheetsMusicByCategory/{category_id}")
+    public ResponseEntity<List<SheetMusic>> getSheetsMusicByCategory(@PathVariable Long category_id) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByCategory_Id(category_id) ;
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/sheetsMusicByScale/{scale}")
+    public ResponseEntity<List<SheetMusic>> getSheetsMusicByScale(@PathVariable EScale scale) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByScale(scale) ;
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/sheetsMusicByLevel/{level}")
+    public ResponseEntity<List<SheetMusic>> getSheetsMusicByLevel(@PathVariable EDifficultyLevel level) {
+        try {
+            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByLevel(level) ;
+            if (s == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(s, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }

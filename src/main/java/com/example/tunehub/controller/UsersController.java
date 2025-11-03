@@ -1,7 +1,7 @@
 package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
-import com.example.tunehub.model.UserType;
+import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.RoleRepository;
@@ -50,8 +50,8 @@ public class UsersController {
         }
     }
 
-    @GetMapping("/usersProfileImageDTO/{id}")
-    public ResponseEntity<UsersUploadProfileImageDTO> getUsersProfileImageDTO(@PathVariable Long id) throws IOException {
+    @GetMapping("/usersProfileImageDTOById/{id}")
+    public ResponseEntity<UsersUploadProfileImageDTO> getUsersProfileImageDTOById(@PathVariable Long id) throws IOException {
         Users u = usersRepository.findUsersById(id);
         if (u != null) {
             return new ResponseEntity<>(usersMapper.usersToDTO(u), HttpStatus.OK);
@@ -60,20 +60,7 @@ public class UsersController {
     }
 
 
-    //   @GetMapping("/hotUsers")
-//    public ResponseEntity<List<Users>> getHotUsers()   {
-//        try{
-//            List<Users> u = usersRepository.findTop10ByLikesOrderByLikesDesc();
-//            //להוסיף לשקלול נוסיה של עוד בהמשך
-//            if (u.isEmpty()) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(u,HttpStatus.OK);
-//        }
-//        catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+
     @GetMapping("/users")
     public ResponseEntity<List<Users>> getUsers() {
         try {
@@ -88,9 +75,9 @@ public class UsersController {
     }
 
     @GetMapping("/usersByUserType/{user_type}")
-    public ResponseEntity<List<Users>> getUserByUserType(@PathVariable UserType user_type) {
+    public ResponseEntity<List<Users>> getUserByUserType(@PathVariable EUserType user_type) {
         try {
-            List<Users> u = usersRepository.findUsersByUserType(user_type);
+            List<Users> u = usersRepository.findUsersByEUserType(user_type);
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -114,8 +101,6 @@ public class UsersController {
         }
     }
 
-
-    //אין משתמשים באותו שם -- איך עושים חיפוש קטוע שמתחילים לרשום את השם וכבר קופצים פרופילים
     @GetMapping("/userByName/{name}")
     public ResponseEntity<Users> getUserByName(@PathVariable String name) {
         try {
@@ -128,6 +113,20 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //Put
     @PutMapping("/updateUser/{id}")
@@ -177,8 +176,8 @@ public class UsersController {
 //        }
 //    }
 
-    @PostMapping("/logIn")
-    public ResponseEntity<Users> logIn(@RequestBody Users u) {
+    @PostMapping("/signIn")
+    public ResponseEntity<Users> signIn(@RequestBody Users u) {
         try {
             Users u1 = usersRepository.findUsersByName(u.getName());
             if (u1 == null) {
@@ -189,7 +188,6 @@ public class UsersController {
                 return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
             }
 
-            // שכחתי סיסמא
             return new ResponseEntity<>(u1, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -208,6 +206,16 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
+
+
+
+
+
+
+
 
     //Delete
     @DeleteMapping("/DeleteAllUser/{id}")
@@ -246,4 +254,20 @@ public class UsersController {
 
 
 }
+
+
+//   @GetMapping("/hotUsers")
+//    public ResponseEntity<List<Users>> getHotUsers()   {
+//        try{
+//            List<Users> u = usersRepository.findTop10ByLikesOrderByLikesDesc();
+//            //להוסיף לשקלול נוסיה של עוד בהמשך
+//            if (u.isEmpty()) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(u,HttpStatus.OK);
+//        }
+//        catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 

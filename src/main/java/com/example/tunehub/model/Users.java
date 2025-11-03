@@ -22,7 +22,7 @@ public class Users {
 
     private String description;
 
-    private UserType userType;
+    private EUserType EUserType;
 
     private LocalDate createdAt;
 
@@ -70,13 +70,13 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.email = email;
         this.description = description;
-        this.userType = userType;
+        this.EUserType = EUserType;
         this.createdAt = createdAt;
         this.editedIn = editedIn;
         this.active = active;
@@ -199,12 +199,12 @@ public class Users {
         this.description = description;
     }
 
-    public UserType getUserType() {
-        return userType;
+    public EUserType getUserType() {
+        return EUserType;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
     }
 
     public LocalDate getCreatedAt() {

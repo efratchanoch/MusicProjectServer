@@ -1,6 +1,6 @@
 package com.example.tunehub.model;
 
-public enum Scale {
+public enum EScale {
     // תווים טבעיים
     C, D, E, F, G, A, B,
 

@@ -1,6 +1,6 @@
 package com.example.tunehub.service;
 
-import com.example.tunehub.model.UserType;
+import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,7 +14,7 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
     Users findUsersById(Long id);
 
-    List<Users> findUsersByUserType(UserType user_type);//
+    List<Users> findUsersByEUserType(EUserType user_type);//
 
     List<Users> findByTeacherId(Long teacherId);
 

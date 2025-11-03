@@ -14,7 +14,9 @@ public interface PostRepository  extends JpaRepository<Post, Long> {
 
     List<Post> findAllByUserId(Long id);
 
-    List<Post> findByDateUploaded(LocalDate now);
+    List<Post> findByDateUploaded(LocalDate dateUploaded);
 
     List<Post> findAllByUsersFavorite_Id(Long id);
+
+    List<Post> findAllPostByTitle(String title);
 }

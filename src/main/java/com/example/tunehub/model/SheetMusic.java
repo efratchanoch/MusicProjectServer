@@ -1,8 +1,6 @@
 package com.example.tunehub.model;
 
 import jakarta.persistence.*;
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -14,8 +12,8 @@ public class SheetMusic {
 
     private String name;
 
-    // private String fileUrl;
-    private Scale scale;
+    @Enumerated(EnumType.STRING)
+    private EScale scale;
 
     private int likes = 0;
 
@@ -23,7 +21,8 @@ public class SheetMusic {
 
     private LocalDate dateUploaded;
 
-    private DifficultyLevel level;
+    @Enumerated(EnumType.STRING)
+    private EDifficultyLevel level;
 
     @ManyToOne
     private Users user;
@@ -41,7 +40,7 @@ public class SheetMusic {
     public SheetMusic() {
     }
 
-    public SheetMusic(Long id, String name, Scale scale, int likes, int hearts, LocalDate dateUploaded, DifficultyLevel level, Users user, List<Instrument> instruments, SheetMusicCategory category, List<Users> usersFavorite) {
+    public SheetMusic(Long id, String name, EScale scale, int likes, int hearts, LocalDate dateUploaded, EDifficultyLevel level, Users user, List<Instrument> instruments, SheetMusicCategory category, List<Users> usersFavorite) {
         this.id = id;
         this.name = name;
         this.scale = scale;
@@ -79,11 +78,11 @@ public class SheetMusic {
         this.name = name;
     }
 
-    public Scale getScale() {
+    public EScale getScale() {
         return scale;
     }
 
-    public void setScale(Scale scale) {
+    public void setScale(EScale scale) {
         this.scale = scale;
     }
 
@@ -111,11 +110,11 @@ public class SheetMusic {
         this.dateUploaded = dateUploaded;
     }
 
-    public DifficultyLevel getLevel() {
+    public EDifficultyLevel getLevel() {
         return level;
     }
 
-    public void setLevel(DifficultyLevel level) {
+    public void setLevel(EDifficultyLevel level) {
         this.level = level;
     }
 

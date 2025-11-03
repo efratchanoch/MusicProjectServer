@@ -1,5 +1,6 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.PostMapper;
@@ -80,6 +81,7 @@ public class PostController {
         }
     }
 
+
     @GetMapping("/newPosts")
     public ResponseEntity<List<Post>> getNewPosts() {
         try {
@@ -93,6 +95,34 @@ public class PostController {
         }
     }
 
+
+    @GetMapping("/postsByTitle/{title}")
+    public ResponseEntity<List<Post>> getPostsByName(@PathVariable String title) {
+        try {
+            List<Post> ps = postRepository.findAllPostByTitle(title);
+            if (ps == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(ps, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/postsByDate/{date}")
+    public ResponseEntity<List<Post>> getPostsByDate(@PathVariable LocalDate Date) {
+        try {
+            List<Post> p = postRepository.findByDateUploaded(Date);
+            if (p == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(p, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //Post
 
 
     @PostMapping("/audio")

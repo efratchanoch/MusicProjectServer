@@ -1,5 +1,5 @@
 package com.example.tunehub.model;
 
-public enum DifficultyLevel {
+public enum EDifficultyLevel {
     EASY , MEDIUM , HARD
 }

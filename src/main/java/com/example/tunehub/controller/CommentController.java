@@ -32,23 +32,6 @@ public class CommentController {
 
 
     //Get
-    // getCommentsByPostId
-    // פונקציה שמחזירה רשימת תגובות לפי פוסט
-    @GetMapping("/commentsByPostId/{post_id}")
-    public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable Long post_id) {
-        try {
-            List<Comment> c = commentRepository.findByPostId(post_id);
-            if (c == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(c, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    //getCommentById
-    //מחזירה תגובה לפי ID
     @GetMapping("/commentById/{id}")
     public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
         try {
@@ -62,12 +45,32 @@ public class CommentController {
         }
     }
 
+    @GetMapping("/commentsByPostId/{post_id}")
+    public ResponseEntity<List<Comment>> getCommentsByPostId(@PathVariable Long post_id) {
+        try {
+            List<Comment> c = commentRepository.findByPostId(post_id);
+            if (c == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(c, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
+
+
+
+
     //Post
     //Put
-
     //Delete
+
+
     //removeLike
-    //הורדת לייק לתגובה
     @DeleteMapping("/removeLike/{comment_id}")
     public ResponseEntity<Void> removeLike(@PathVariable Long comment_id) {
         try {
@@ -85,7 +88,7 @@ public class CommentController {
         }
     }
 
-    // addCommentToPost
+    //addCommentToPost
     @PostMapping("/addCommentToPost/{post_id}")
     public ResponseEntity<Comment> addCommentToPost(
             @PathVariable Long post_id,

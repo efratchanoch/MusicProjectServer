@@ -1,6 +1,6 @@
 package com.example.tunehub.dto;
 
-import com.example.tunehub.model.UserType;
+import com.example.tunehub.model.EUserType;
 
 import java.time.LocalDate;
 
@@ -11,7 +11,7 @@ public class UsersMusiciansDTO {
     private boolean active;
     private String description;
     private InstrumentsDTO instruments;
-    private UserType userType;
+    private EUserType EUserType;
     private LocalDate createDate;
 
 //    private String rating;
@@ -73,11 +73,11 @@ public class UsersMusiciansDTO {
         this.instruments = instruments;
     }
 
-    public UserType getUserType() {
-        return userType;
+    public EUserType getUserType() {
+        return EUserType;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
     }
 }

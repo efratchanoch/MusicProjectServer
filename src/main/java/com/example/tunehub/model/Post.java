@@ -15,6 +15,8 @@ public class Post {
     @ManyToOne
     private Users user;
 
+    private String title;
+
     private String content;
 
     private int hearts = 0;
@@ -40,9 +42,10 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Users user, String content, int hearts, int likes, String audio, String video, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<String> audiosPath, List<Users> usersFavorite) {
+    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audio, String video, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<String> audiosPath, List<Users> usersFavorite) {
         this.id = id;
         this.user = user;
+        this.title = title;
         this.content = content;
         this.hearts = hearts;
         this.likes = likes;
@@ -53,6 +56,14 @@ public class Post {
         this.imagesPath = imagesPath;
         this.audiosPath = audiosPath;
         this.usersFavorite = usersFavorite;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public List<String> getImagesPath() {
@@ -102,6 +113,7 @@ public class Post {
     public void setVideo(String video) {
         this.video = video;
     }
+
     public Long getPost_id() {
         return id;
     }

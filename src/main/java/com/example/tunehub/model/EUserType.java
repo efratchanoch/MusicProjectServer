@@ -1,5 +1,5 @@
 package com.example.tunehub.model;
 
-public enum UserType {
+public enum EUserType {
     STUDENT , MANAGER , TEACHER, MUSIC_LOVER
 }
