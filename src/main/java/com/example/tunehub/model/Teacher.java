@@ -16,9 +16,7 @@ public class Teacher extends Users {
 
     private double lessonDuration;
 
-    private double rating;//תאריך
-    //כתובת
-    //Dynamic programming
+    private double rating;
 
     @OneToMany(mappedBy = "teacher")
     private List<Users> students;
