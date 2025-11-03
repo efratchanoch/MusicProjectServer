@@ -9,7 +9,7 @@ public class PostDTO {
  private Long id;
  private String content;
  private LocalDate createdAt;
- private UsersProfileDTO profile; // רק מה שצריך להצגה
+ private UsersProfileDTO profile;
  private List<CommentDTO> comments;
  private List<PostMediaDTO> media;
 

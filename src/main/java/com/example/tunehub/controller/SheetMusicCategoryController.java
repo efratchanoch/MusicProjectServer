@@ -8,6 +8,7 @@ import com.example.tunehub.service.SheetMusicCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,6 +64,20 @@ public class SheetMusicCategoryController {
             return new ResponseEntity<>(sc, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
+    @DeleteMapping("/sheetMusicCategoryById/{id}")
+    public ResponseEntity DeleteSheetMusicCategoryById(@PathVariable Long id){
+        try{
+            if(sheetMusicCategoryRepository.existsById(id)){
+                sheetMusicCategoryRepository.deleteById(id);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        catch(Exception e){
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

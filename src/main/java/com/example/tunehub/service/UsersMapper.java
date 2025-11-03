@@ -28,4 +28,10 @@ public interface UsersMapper {
         return usersUploadProfileImageDTO;
     }
 
+
+
+
+
+
+
 }
