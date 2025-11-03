@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 
@@ -30,8 +31,8 @@ public class Teacher extends Users {
     public Teacher() {
     }
 
-    public Teacher(Long id, String name, String password, String email, String description, UserType userType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
-        super(id, name, password, email, description, userType, createdAt, editedIn, active, city, country, followers, following, instrumentsUsers, teacher, imageProfilePath, sheetsMusic, posts, comments, favoriteSheetsMusic, favoritePosts);
+    public Teacher(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
+        super(id, name, password, email, description, EUserType, createdAt, editedIn, active, city, country, followers, following, instrumentsUsers, teacher, imageProfilePath, sheetMusic, posts, comments, favoriteSheetsMusic, favoritePosts, roles);
         this.pricePerLesson = pricePerLesson;
         this.experience = experience;
         this.lessonDuration = lessonDuration;
