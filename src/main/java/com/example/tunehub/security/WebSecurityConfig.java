@@ -36,10 +36,11 @@ public class WebSecurityConfig {
                                     auth.requestMatchers("/h2-console/**").permitAll()
 //                                            .requestMatchers("/api/**/**").permitAll()
 
-                  .requestMatchers("/api/user/**").permitAll()
+                  .requestMatchers("/api/users/**").permitAll()
                     .requestMatchers("/api/post/**").permitAll()
                                             .anyRequest().authenticated()
-                    ).httpBasic(Customizer.withDefaults());
+                    );
+                    //.httpBasic(Customizer.withDefaults());
 
             // fix H2 database console: Refused to display ' in a frame because it set 'X-Frame-Options' to 'deny'
             http.headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()));

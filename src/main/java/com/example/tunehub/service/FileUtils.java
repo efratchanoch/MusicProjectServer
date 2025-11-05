@@ -1,5 +1,6 @@
 package com.example.tunehub.service;
-
+import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -9,17 +10,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Base64;
 
 public class FileUtils {
-    private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media\\";
-    private static String IMAGES_FOLDER = "\\images\\";
-    private static String AUDIO_FOLDER = "\\audio\\";
-    private static String VIDEO_FOLDER = "\\video\\";
-    private static String DOCUMENTS_FOLDER = "\\documents\\";
+    private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media";
+    private static String IMAGES_FOLDER = "images";
+    private static String AUDIO_FOLDER = "audio";
+    private static String VIDEO_FOLDER = "video";
+    private static String DOCUMENTS_FOLDER = "documents";
 
     // Images
     public static void uploadImage(MultipartFile file) throws IOException {
@@ -28,10 +27,28 @@ public class FileUtils {
         Files.write(fileName, file.getBytes());
     }
 
-    public static String getImage(String path) throws IOException {
-        Path fileName = Paths.get(UPLOAD_DIRECTORY + IMAGES_FOLDER + path);
-        byte[] byteImage = Files.readAllBytes(fileName);
-        return Base64.getEncoder().encodeToString(byteImage);
+
+    public static String getImage(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+        Path fileName;
+        if (path.contains(":") || path.startsWith("/") || path.startsWith("\\")) {
+            fileName = Paths.get(path);
+        } else {
+            try {
+                Path baseDir = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER);
+                fileName = baseDir.resolve(path);
+            } catch (InvalidPathException e) {
+                return null;
+            }
+        }
+        try {
+            byte[] byteImage = Files.readAllBytes(fileName);
+            return Base64.getEncoder().encodeToString(byteImage);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
    //--------------------------Audio--------------------

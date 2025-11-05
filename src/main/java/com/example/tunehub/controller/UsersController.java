@@ -201,8 +201,11 @@ public class UsersController {
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+//            String image = FileUtils.getImage(u.getImageProfilePath());
+//            u.setImageProfilePath(image);
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -216,6 +219,7 @@ public class UsersController {
             }
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

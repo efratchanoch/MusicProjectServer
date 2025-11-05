@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",uses = { FileUtils.class })
 public interface UsersMapper {
     List<UsersUploadProfileImageDTO> UsersToDTO(List<Users> users);
 
@@ -32,6 +32,17 @@ public interface UsersMapper {
         usersUploadProfileImageDTO.setImagePath(u.getImageProfilePath());
         return usersUploadProfileImageDTO;
     }
+//
+//    default UsersProfileDTO usersToDTO(Users u) throws IOException {
+//        UsersProfileDTO usersProfileDTO = new UsersProfileDTO();
+//        usersProfileDTO.setId(u.getId());
+//        usersProfileDTO.setImageProfilePath(u.getImageProfilePath());
+//        return usersProfileDTO;
+//    }
+
+
+
+
 
 
 }
