@@ -1,6 +1,6 @@
 package com.example.tunehub.service;
 
-import com.example.tunehub.dto.InstrumentsDTO;
+import com.example.tunehub.dto.InstrumentDTO;
 import com.example.tunehub.dto.UsersProfileDTO;
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.Instrument;
@@ -12,10 +12,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface InstrumentMapper {
 
-    List<InstrumentsDTO> InstrumentToDTO(List<Instrument> instruments);
+    List<InstrumentDTO> InstrumentToDTO(List<Instrument> instruments);
 
-    Instrument InstrumentsDTOtoInstrument(InstrumentsDTO i);
+    Instrument InstrumentsDTOtoInstrument(InstrumentDTO i);
 
-    InstrumentsDTO InstrumentToInstrumentsDTO(Users u);
+    InstrumentDTO InstrumentToInstrumentsDTO(Users u);
 
 }

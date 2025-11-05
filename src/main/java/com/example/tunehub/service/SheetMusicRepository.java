@@ -2,10 +2,13 @@ package com.example.tunehub.service;
 import com.example.tunehub.model.EDifficultyLevel;
 import com.example.tunehub.model.EScale;
 import com.example.tunehub.model.SheetMusic;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface SheetMusicRepository  extends JpaRepository<SheetMusic, Long> {
+    List<SheetMusic> findAllByUserId(Long id);
+
     SheetMusic findSheetMusicById(Long id);
 
     List<SheetMusic> findAllSheetMusicByUser_Id(Long id);
@@ -19,4 +22,10 @@ public interface SheetMusicRepository  extends JpaRepository<SheetMusic, Long> {
     List<SheetMusic> findAllSheetMusicByScale(EScale scale);
 
     List<SheetMusic> findAllSheetMusicByLevel(EDifficultyLevel level);
+
+    void deleteAllByUserId(Long id);
+
+    List<SheetMusic> findAllByCategoryId(Long categoryId);
+
+    void deleteAllByCategoryId(Long id);
 }

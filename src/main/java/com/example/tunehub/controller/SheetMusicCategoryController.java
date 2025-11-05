@@ -66,6 +66,9 @@ public class SheetMusicCategoryController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    //Delete
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @DeleteMapping("/sheetMusicCategoryById/{id}")
     public ResponseEntity DeleteSheetMusicCategoryById(@PathVariable Long id){

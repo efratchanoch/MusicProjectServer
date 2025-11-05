@@ -60,6 +60,4 @@ public class PostDTO {
  public void setMedia(List<PostMediaDTO> media) {
   this.media = media;
  }
-
-
 }
