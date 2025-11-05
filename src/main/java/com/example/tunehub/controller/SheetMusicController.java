@@ -3,8 +3,6 @@ package com.example.tunehub.controller;
 import com.example.tunehub.model.*;
 import com.example.tunehub.service.SheetMusicMapper;
 import com.example.tunehub.service.SheetMusicRepository;
-import com.example.tunehub.service.UsersRepository;
-import jakarta.persistence.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

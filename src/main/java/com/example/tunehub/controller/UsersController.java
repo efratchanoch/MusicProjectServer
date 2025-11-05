@@ -1,5 +1,6 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.dto.UsersMusiciansDTO;
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
@@ -60,7 +61,6 @@ public class UsersController {
     }
 
 
-
     @GetMapping("/users")
     public ResponseEntity<List<Users>> getUsers() {
         try {
@@ -113,19 +113,6 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     //Put
@@ -202,19 +189,36 @@ public class UsersController {
             p.setImageProfilePath(file.getOriginalFilename());
             Users users = usersRepository.save(p);
             return new ResponseEntity<>(users, HttpStatus.CREATED);
-        } catch (IOException e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    @GetMapping("musicianById/{id}")
+    public ResponseEntity<UsersMusiciansDTO> getMusicianById(@PathVariable Long id) {
+        try {
+            Users u = usersRepository.findUsersById(id);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-
-
-
-
-
-
-
+    @GetMapping("musiciansById/{id}")
+    public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
+        try {
+            List<Users> u = usersRepository.findAll();
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 
     //Delete
@@ -270,15 +274,6 @@ public class UsersController {
 //            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 //        }
 //    }
-
-
-
-
-
-
-
-
-
 
 
 

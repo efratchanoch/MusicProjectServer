@@ -1,5 +1,6 @@
 package com.example.tunehub.service;
 
+import com.example.tunehub.dto.UsersMusiciansDTO;
 import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +29,7 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
 
     Users findByName(String name);
+
+
+    UsersMusiciansDTO findMusicianDtoById(Long id);
 }
