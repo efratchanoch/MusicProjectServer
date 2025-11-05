@@ -362,3 +362,15 @@ ALTER TABLE "PUBLIC"."SHEET_MUSIC_COPY_3_1" ADD CONSTRAINT "SHEET_MUSIC_COPY_3_1
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1363)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1352)
 	at com.example.tunehub.TuneHubApplication.main(TuneHubApplication.java:10)
+2025-11-05 16:42:28.825338+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "'STUDENT' (USERS: ""EUSER_TYPE"" TINYINT)"; SQL statement:
+INSERT INTO "PUBLIC"."USERS"("ACTIVE","CREATED_AT","EDITED_IN","EUSER_TYPE","ID","TEACHER_ID","CITY","COUNTRY","DESCRIPTION","EMAIL","IMAGE_PROFILE_PATH","NAME","PASSWORD")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) [22018-224]
+2025-11-05 16:42:28.833336+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "'STUDENT' (USERS: ""EUSER_TYPE"" TINYINT)"; SQL statement:
+INSERT INTO "PUBLIC"."USERS"("ACTIVE","CREATED_AT","EDITED_IN","EUSER_TYPE","ID","TEACHER_ID","CITY","COUNTRY","DESCRIPTION","EMAIL","IMAGE_PROFILE_PATH","NAME","PASSWORD")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) [22018-224]
+2025-11-05 16:42:53.189951+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "'' (USERS: ""ACTIVE"" BOOLEAN NOT NULL)"; SQL statement:
+INSERT INTO "PUBLIC"."USERS"("ACTIVE","CREATED_AT","EDITED_IN","EUSER_TYPE","ID","TEACHER_ID","CITY","COUNTRY","DESCRIPTION","EMAIL","IMAGE_PROFILE_PATH","NAME","PASSWORD")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) [22018-224]
+2025-11-05 16:42:53.191058+02:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLDataException: Data conversion error converting "'' (USERS: ""ACTIVE"" BOOLEAN NOT NULL)"; SQL statement:
+INSERT INTO "PUBLIC"."USERS"("ACTIVE","CREATED_AT","EDITED_IN","EUSER_TYPE","ID","TEACHER_ID","CITY","COUNTRY","DESCRIPTION","EMAIL","IMAGE_PROFILE_PATH","NAME","PASSWORD")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) [22018-224]

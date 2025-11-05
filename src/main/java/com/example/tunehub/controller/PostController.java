@@ -5,12 +5,17 @@ import com.example.tunehub.model.Post;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.PostMapper;
 import com.example.tunehub.service.PostRepository;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -125,16 +130,26 @@ public class PostController {
     //Post
 
 
-    @PostMapping("/audio")
-    public ResponseEntity<String> uploadAudio(@RequestParam("file") MultipartFile file) {
-        try {
-            FileUtils.uploadAudio(file);
-            return ResponseEntity.ok("Audio uploaded successfully!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error uploading audio");
-        }
+//    @PostMapping("/audio")
+//    public ResponseEntity<String> uploadAudio(@RequestParam("file") MultipartFile file) {
+//        try {
+//            FileUtils.uploadAudio(file);
+//            return ResponseEntity.ok("Audio uploaded successfully!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error uploading audio");
+//        }
+//    }
+
+    @GetMapping("/audio/{audioPath}")
+    public ResponseEntity<Resource> getReport(@PathVariable String audioPath) throws IOException {
+        InputStreamResource resource=FileUtils.getAudio(audioPath);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + audioPath + "\"")
+                .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .body((Resource) resource);
     }
 
     @PostMapping("/video")

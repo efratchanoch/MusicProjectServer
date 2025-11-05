@@ -2,7 +2,9 @@ package com.example.tunehub.service;
 
 import com.example.tunehub.dto.PostDTO;
 import com.example.tunehub.dto.PostMediaDTO;
+import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.Post;
+import com.example.tunehub.model.Users;
 import org.mapstruct.Mapper;
 
 import java.io.IOException;
@@ -26,5 +28,12 @@ public interface PostMapper {
         postMediaDTO.setId(p.getId());
         return postMediaDTO;
     }
+
+//    default PostDTO PostToDTO(Post p) throws IOException {
+//        PostDTO postDTO =new PostDTO();
+//        postDTO.setMedia(postMediaDTO.setImagePath);
+//        PostDTO.setImagePath(p.getImageProfilePath());
+//        return postDTO;
+//    }
 
 }

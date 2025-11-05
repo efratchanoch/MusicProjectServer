@@ -9,6 +9,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Arrays;
 import java.util.List;
 
 //הגדרות אבטחה
@@ -23,7 +24,8 @@ public class WebSecurityConfig {
             //משבית את הגנת CSRF על ידי הפעלת שיטת `csrf()` והשבתתה
             http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(request -> {
                         CorsConfiguration corsConfiguration = new CorsConfiguration();
-                        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+                        corsConfiguration.setAllowedOrigins(List.of("*"));
+                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowedMethods(List.of("*"));
                         corsConfiguration.setAllowedHeaders(List.of("*"));
                         return corsConfiguration;
@@ -32,9 +34,10 @@ public class WebSecurityConfig {
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                     .authorizeHttpRequests(auth ->
                                     auth.requestMatchers("/h2-console/**").permitAll()
-                                            .requestMatchers("/api/**/**").permitAll()
+//                                            .requestMatchers("/api/**/**").permitAll()
 
-//                  .requestMatchers("/api/user/signIn").permitAll()
+                  .requestMatchers("/api/user/**").permitAll()
+                    .requestMatchers("/api/post/**").permitAll()
                                             .anyRequest().authenticated()
                     ).httpBasic(Customizer.withDefaults());
 

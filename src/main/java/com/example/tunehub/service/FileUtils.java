@@ -3,10 +3,12 @@ package com.example.tunehub.service;
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +33,7 @@ public class FileUtils {
         byte[] byteImage = Files.readAllBytes(fileName);
         return Base64.getEncoder().encodeToString(byteImage);
     }
+
    //--------------------------Audio--------------------
     public static void uploadAudio(MultipartFile file) throws IOException, InterruptedException {
         String originalPath = UPLOAD_DIRECTORY + AUDIO_FOLDER + file.getOriginalFilename();
@@ -59,6 +62,11 @@ public class FileUtils {
 
     }
 
+    public static InputStreamResource getAudio(String path) throws IOException {
+        Path filename= Paths.get(UPLOAD_DIRECTORY+path);
+        InputStream stream = Files.newInputStream(filename);
+        return new InputStreamResource(stream);
+    }
 
     // ------------------ Video ------------------
     public static void uploadVideo(MultipartFile file) throws IOException {
