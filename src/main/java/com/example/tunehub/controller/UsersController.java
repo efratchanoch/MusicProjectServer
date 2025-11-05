@@ -207,7 +207,7 @@ public class UsersController {
         }
     }
 
-    @GetMapping("musiciansById/{id}")
+    @GetMapping("musicians")
     public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
         try {
             List<Users> u = usersRepository.findAll();
