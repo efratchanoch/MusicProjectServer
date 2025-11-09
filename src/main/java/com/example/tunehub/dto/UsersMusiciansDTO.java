@@ -36,6 +36,14 @@ public class UsersMusiciansDTO {
         return city;
     }
 
+    public EUserType getEUserType() {
+        return EUserType;
+    }
+
+    public void setEUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
+    }
+
     public void setCity(String city) {
         this.city = city;
     }
