@@ -18,4 +18,6 @@ public interface InstrumentMapper {
 
     InstrumentDTO InstrumentToInstrumentsDTO(Users u);
 
+    List<Instrument> instrumentDTOListToInstrumentList(List<InstrumentDTO> list);
+
 }

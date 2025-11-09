@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sheetMusicCategory")
-@CrossOrigin
 public class SheetMusicCategoryController {
     private SheetMusicCategoryRepository sheetMusicCategoryRepository;
     private SheetMusicCategoryMapper sheetMusicCategoryMapper;

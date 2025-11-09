@@ -4,14 +4,21 @@ import com.example.tunehub.dto.UsersMusiciansDTO;
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.security.CustomUserDetails;
+import com.example.tunehub.security.jwt.JwtUtils;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.RoleRepository;
 import com.example.tunehub.service.UsersMapper;
 import com.example.tunehub.service.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,20 +29,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin
 public class UsersController {
 
     private static final String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\images\\";
     private UsersRepository usersRepository;
     private UsersMapper usersMapper;
     private RoleRepository roleRepository;
+    private AuthenticationManager authenticationManager;
+    private JwtUtils jwtUtils;
+
 
     @Autowired
-    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository) {
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
         this.roleRepository = roleRepository;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
     }
+
 
     //Get
     @GetMapping("/userById/{id}")
@@ -164,23 +176,20 @@ public class UsersController {
 //    }
 
     @PostMapping("/signIn")
-    public ResponseEntity<Users> signIn(@RequestBody Users u) {
+    public ResponseEntity<?> signIn(@RequestBody Users u) {
         try {
-            Users u1 = usersRepository.findUsersByName(u.getName());
-            if (u1 == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-
-            if (!u1.getPassword().equals((u.getPassword()))) {  //בדיקה לפי סיסמא
-                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-            }
-
-            return new ResponseEntity<>(u1, HttpStatus.OK);
+            Authentication authentication=authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(u.getName(),u.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            CustomUserDetails userDetails=(CustomUserDetails)authentication.getPrincipal();
+            ResponseCookie jwtCookie=jwtUtils.generateJwtCookie(userDetails);
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,jwtCookie.toString())
+                    .body(userDetails.getUsername());
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
 
+    }
 
     @PostMapping("/uploadImageProfile")
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
@@ -198,11 +207,11 @@ public class UsersController {
     public ResponseEntity<UsersMusiciansDTO> getMusicianById(@PathVariable Long id) {
         try {
             Users u = usersRepository.findUsersById(id);
+
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-//            String image = FileUtils.getImage(u.getImageProfilePath());
-//            u.setImageProfilePath(image);
+
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
@@ -214,12 +223,13 @@ public class UsersController {
     public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
         try {
             List<Users> u = usersRepository.findAll();
+
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -240,11 +250,11 @@ public class UsersController {
     }
 
 
-    @GetMapping("/get")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String get() {
-        return "hello";
-    }
+//    @GetMapping("/get")
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    public String get() {
+//        return "hello";
+//    }
 
     @PostMapping("/signUp")
     public ResponseEntity<Users> signUp(@RequestBody Users user) {

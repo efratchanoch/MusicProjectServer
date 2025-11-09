@@ -14,7 +14,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/instrument")
-@CrossOrigin
 public class InstrumentController {
     private InstrumentRepository instrumentRepository;
     private InstrumentMapper instrumentMapper;

@@ -263,6 +263,14 @@ public class Users {
         this.comments = comments;
     }
 
+    public EUserType getEUserType() {
+        return EUserType;
+    }
+
+    public void setEUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
+    }
+
     public Set<Role> getRoles() {
         return roles;
     }
@@ -271,5 +279,16 @@ public class Users {
         this.roles = roles;
     }
 
+
+
+//
+//    @Override
+//    public String toString() {
+//        return "Users{" +
+//                "id=" + id +
+//                ", name='" + name + '\'' +
+//                ", email='" + email + '\'' +
+//                '}';
+//    }
 
 }

@@ -4,8 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class PostDTO {
-
-    //זה בעצם כל הערכים שיהיו לי בהצגה של פוסט ללא אוביקט וחשיפה לנתונים רגישים של משתמש כגון סיסמא וכו'
  private Long id;
  private String content;
  private LocalDate createdAt;

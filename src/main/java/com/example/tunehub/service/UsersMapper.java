@@ -9,22 +9,27 @@ import java.io.IOException;
 import java.util.List;
 
 
-@Mapper(componentModel = "spring",uses = { FileUtils.class })
+@Mapper(componentModel = "spring")
 public interface UsersMapper {
-    List<UsersUploadProfileImageDTO> UsersToDTO(List<Users> users);
-
-    Users UsersProfileImageDTOtoUsers(UsersUploadProfileImageDTO u);
-
+    @Mapping(
+            target = "imageProfilePath",
+            expression = "java(com.example.tunehub.service.FileUtils.imageToBase64(u.getImageProfilePath()))")
     UsersProfileDTO UsersToUsersProfileDTO(Users u);
 
     Users UsersSignUpDTOtoUsers(UsersSignUpDTO u);
 
     Users UsersLogInDTOtoUsers(UsersLogInDTO u);
 
-    @Mapping(source = "u", target = "profile")
+    @Mapping(target = "profile", source = "u")
     UsersMusiciansDTO UsersToUsersMusiciansDTO(Users u);
 
+    List<UsersUploadProfileImageDTO> UsersToDTO(List<Users> users);
+
+    Users UsersProfileImageDTOtoUsers(UsersUploadProfileImageDTO u);
+
     List<UsersMusiciansDTO> UsersToUsersMusiciansDTO(List<Users> u);
+
+    Users usersDTOtoUsers(UsersDTO u);
 
     default UsersUploadProfileImageDTO usersToDTO(Users u) throws IOException {
         UsersUploadProfileImageDTO usersUploadProfileImageDTO = new UsersUploadProfileImageDTO();
@@ -32,17 +37,13 @@ public interface UsersMapper {
         usersUploadProfileImageDTO.setImagePath(u.getImageProfilePath());
         return usersUploadProfileImageDTO;
     }
-//
+
 //    default UsersProfileDTO usersToDTO(Users u) throws IOException {
 //        UsersProfileDTO usersProfileDTO = new UsersProfileDTO();
 //        usersProfileDTO.setId(u.getId());
 //        usersProfileDTO.setImageProfilePath(u.getImageProfilePath());
 //        return usersProfileDTO;
 //    }
-
-
-
-
 
 
 }

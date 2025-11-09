@@ -1,6 +1,8 @@
 package com.example.tunehub.service;
+
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
+
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
@@ -27,11 +29,10 @@ public class FileUtils {
         Files.write(fileName, file.getBytes());
     }
 
+    //מקבלת את שם התמונה + סיומת
+    // מחזירה את התמונה בביס 64 של הנתיב המלא
+    public static String imageToBase64(String path) {
 
-    public static String getImage(String path) {
-        if (path == null || path.trim().isEmpty()) {
-            return null;
-        }
         Path fileName;
         if (path.contains(":") || path.startsWith("/") || path.startsWith("\\")) {
             fileName = Paths.get(path);
@@ -51,7 +52,7 @@ public class FileUtils {
         }
     }
 
-   //--------------------------Audio--------------------
+    //--------------------------Audio--------------------
     public static void uploadAudio(MultipartFile file) throws IOException, InterruptedException {
         String originalPath = UPLOAD_DIRECTORY + AUDIO_FOLDER + file.getOriginalFilename();
         File dest = new File(originalPath);
@@ -80,7 +81,7 @@ public class FileUtils {
     }
 
     public static InputStreamResource getAudio(String path) throws IOException {
-        Path filename= Paths.get(UPLOAD_DIRECTORY+path);
+        Path filename = Paths.get(UPLOAD_DIRECTORY + AUDIO_FOLDER + path);
         InputStream stream = Files.newInputStream(filename);
         return new InputStreamResource(stream);
     }
@@ -114,11 +115,20 @@ public class FileUtils {
         }
     }
 
-    // ------------------ Documents (לשלמות) ------------------
+    // Documents
     public static void uploadDocument(MultipartFile file) throws IOException {
-        String path = UPLOAD_DIRECTORY + DOCUMENTS_FOLDER + file.getOriginalFilename();
-        Path fileName = Paths.get(path);
+        Path fileName = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, file.getOriginalFilename());
         Files.write(fileName, file.getBytes());
+    }
+
+    // FileUtils.java (פונקציה מעודכנת)
+    public static void saveBase64ToFile(String base64Content, String fileName) throws IOException {
+        byte[] decodedBytes = java.util.Base64.getDecoder().decode(base64Content);
+
+        // השימוש בנתיב הקבוע + השם המקורי השמור
+        Path filePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
+
+        Files.write(filePath, decodedBytes);
     }
 }
 
