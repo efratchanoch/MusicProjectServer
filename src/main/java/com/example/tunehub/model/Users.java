@@ -71,6 +71,7 @@ public class Users {
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
 
+
     public Users() {
     }
 
@@ -98,6 +99,10 @@ public class Users {
         this.favoriteSheetsMusic = favoriteSheetsMusic;
         this.favoritePosts = favoritePosts;
         this.roles = roles;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public String getCity() {

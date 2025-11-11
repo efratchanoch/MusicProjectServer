@@ -6,6 +6,8 @@ import com.example.tunehub.model.*;
 import com.example.tunehub.service.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -169,40 +171,42 @@ public class SheetMusicController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     @PostMapping("/uploadSheetMusic")
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") SheetMusicUploadDTO dto) {
         try {
+            // 1. יצירת Entity מה-DTO
             SheetMusic s = sheetMusicMapper.SheetMusicUploadDTOtoSheetMusic(dto);
+
+            // 2. יצירת שם ייחודי לקובץ
             String uniqueFileName = FileUtils.generateUniqueFileName(file);
             s.setFileName(uniqueFileName);
 
-            // 2. קבלת ה-ID מתוך ה-DTO
+            // 3. קבלת User reference מה-ID ב-DTO
             Long userId = dto.getUser().getId();
-
-            // 3. יצירת רפרנס למשתמש
             Users userReference = usersRepository.getReferenceById(userId);
-
-            // 4. הגדרת הרפרנס המנוהל על המודל
             s.setUser(userReference);
 
-            s.setPages(FileUtils.getPDFpageCount(file.getBytes()));
+            // 4. ספירת עמודי PDF
+            s.setPages(FileUtils.getPDFPageCount(file.getBytes()));
 
-
-            // 5. שמירת המודל (כעת עם user ו-dateUploaded)
+            // 5. שמירת ה-Entity במסד
             sheetMusicRepository.save(s);
 
-            // 6. שמירת קובץ והמרה ל-ResponseDTO (זה יחזיר את userId ואת dateUploaded)
+            // 6. שמירת הקובץ (הקובץ נשמר בנפרד, לא ב-DTO)
             FileUtils.uploadDocument(file, uniqueFileName);
 
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s), HttpStatus.CREATED);
+            // 7. החזרת ה-ResponseDTO
+            SheetMusicResponseDTO responseDTO = sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s);
+            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 //    // 2. קבלת דף מוזיקה יחיד
 //    @GetMapping("/{id}")
@@ -229,4 +233,15 @@ public class SheetMusicController {
 //                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
 //                .body(resource);
 //    }
+//@GetMapping("/docs/{docPath}")
+//public ResponseEntity<Resource> getDocument(@PathVariable String docPath) throws IOException {
+//    InputStreamResource resource = new InputStreamResource(
+//            Files.newInputStream(Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, docPath))
+//    );
+//    return ResponseEntity.ok()
+//            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
+//            .contentType(MediaType.APPLICATION_PDF)
+//            .body(resource);
+//}
+
 }

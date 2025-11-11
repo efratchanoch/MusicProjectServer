@@ -1,11 +1,13 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.dto.PostResponseDTO;
+import com.example.tunehub.dto.PostUploadDTO;
 import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.PostMapper;
 import com.example.tunehub.service.PostRepository;
-import jakarta.annotation.Resource;
+import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -15,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -141,25 +145,132 @@ public class PostController {
 //        }
 //    }
 
-    @GetMapping("/audio/{audioPath}")
-    public ResponseEntity<Resource> getReport(@PathVariable String audioPath) throws IOException {
-        InputStreamResource resource=FileUtils.getAudio(audioPath);
+//    @GetMapping("/audio/{audioPath}")
+//    public ResponseEntity<Resource> getReport(@PathVariable String audioPath) throws IOException {
+//        InputStreamResource resource=FileUtils.getAudio(audioPath);
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + audioPath + "\"")
+//                .contentType(MediaType.parseMediaType("audio/mpeg"))
+//                .body((Resource) resource);
+//    }
+//
+//    @PostMapping("/video")
+//    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
+//        try {
+//            FileUtils.uploadVideo(file);
+//            return ResponseEntity.ok("Video uploaded successfully!");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("Error uploading video");
+//        }
+//    }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + audioPath + "\"")
-                .contentType(MediaType.parseMediaType("audio/mpeg"))
-                .body((Resource) resource);
-    }
+    @PostMapping("/uploadPost")
+    public ResponseEntity<PostResponseDTO> createPost(
+            @RequestPart("data") PostUploadDTO dto,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "audio", required = false) MultipartFile audio,
+            @RequestPart(value = "video", required = false) MultipartFile video) {
 
-    @PostMapping("/video")
-    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
         try {
-            FileUtils.uploadVideo(file);
-            return ResponseEntity.ok("Video uploaded successfully!");
+            // יצירת Entity מה-DTO
+            Post post = postMapper.postUploadDTOtoPost(dto);
+
+            // ==================== Images ====================
+            List<String> imagesBase64 = new ArrayList<>();
+            if (images != null && !images.isEmpty()) {
+                List<String> imageNames = new ArrayList<>();
+                for (MultipartFile img : images) {
+                    String uniqueName = FileUtils.generateUniqueFileName(img);
+                    FileUtils.uploadImage(img, uniqueName);
+                    imageNames.add(uniqueName);
+
+                    // המרת התמונה ל-Base64 מיד
+                    String base64 = FileUtils.imageToBase64(uniqueName);
+                    if (base64 != null) imagesBase64.add(base64);
+                }
+                post.setImagesPath(imageNames);
+            }
+
+            // ==================== Audio ====================
+            if (audio != null) {
+                String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
+                FileUtils.uploadAudio(audio, uniqueAudioName);
+                post.setAudioPath(uniqueAudioName);
+            }
+
+            // ==================== Video ====================
+            if (video != null) {
+                String uniqueVideoName = FileUtils.generateUniqueFileName(video);
+                FileUtils.uploadVideo(video, uniqueVideoName);
+                post.setVideoPath(uniqueVideoName);
+            }
+
+            // ==================== שמירה במסד ====================
+            postRepository.save(post);
+
+            // ==================== בניית DTO ====================
+            PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
+
+            // הצבת התמונות ב-Base64 שהפקנו כבר
+            responseDTO.setImagesBase64(imagesBase64);
+
+            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error uploading video");
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    // ==================== הזרמת אודיו ====================
+    @GetMapping("/audio/{audioPath}")
+    public ResponseEntity<Resource> getAudio(@PathVariable String audioPath) throws IOException {
+        InputStreamResource resource = FileUtils.getAudio(audioPath);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + audioPath + "\"")
+                .contentType(MediaType.parseMediaType("audio/mpeg"))
+                .body(resource);
+    }
+
+    // ==================== הזרמת וידאו ====================
+    @GetMapping("/video/{videoPath}")
+    public ResponseEntity<Resource> getVideo(@PathVariable String videoPath) throws IOException {
+        InputStreamResource resource = FileUtils.getVideo(videoPath);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + videoPath + "\"")
+                .contentType(MediaType.parseMediaType("video/mp4"))
+                .body(resource);
+    }
+
+    // ==================== הזרמת מסמכים / PDF ====================
+    @GetMapping("/documents/{docPath}")
+    public ResponseEntity<Resource> getDocument(@PathVariable String docPath) throws IOException {
+        InputStreamResource resource = FileUtils.getDocument(docPath);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
+                .contentType(MediaType.APPLICATION_PDF) // או MediaType.APPLICATION_OCTET_STREAM אם לא PDF
+                .body(resource);
+    }
+
+    // ==================== הזרמת תמונה ====================
+    @GetMapping("/image/{imagePath}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imagePath) throws IOException {
+        InputStreamResource resource = new InputStreamResource(
+                new ByteArrayInputStream(FileUtils.imageToBase64(imagePath).getBytes())
+        );
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imagePath + "\"")
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(resource);
+    }
+
+
 }

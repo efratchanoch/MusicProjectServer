@@ -22,14 +22,24 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 
 
-    //********תפקיד הפונקציה:
-    //מה הפונקציה מקבלת?
-    //
     @Override
+
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+
+        // 1. 🔑 הוספת לוגיקת הדילוג (התיקון העיקרי ל-403)
+        String path = httpServletRequest.getRequestURI();
+
+        // אם הנתיב הוא Login, Sign Up או Sign Out, דלג על בדיקת ה-JWT
+        if (path.startsWith("/api/users/signin") || path.startsWith("/api/users/signup")) {
+            filterChain.doFilter(httpServletRequest, httpServletResponse);
+            return;
+        }
+        // ----------------------------------------------------
+
         try{
-            String jwt=jwtUtils.getJwtFromCookies(httpServletRequest);
-            //*********מהי השאלה כאן???
+            String jwt=jwtUtils.getJwtFromCookies(httpServletRequest); // כאן אתה עדיין משתמש ב-Cookies!
+
+            // הלוגיקה הקיימת שלך לבדיקת הטוקן
             if(jwt !=null && jwtUtils.validateJwtToken(jwt)){
                 String userName=jwtUtils.getUserNameFromJwtToken(jwt);
                 UserDetails userDetails= userDetailsService.loadUserByUsername(userName);
@@ -45,10 +55,37 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
         catch (Exception e)
         {
+            // ⚠️ מומלץ לא רק להדפיס, אלא לשלוח קוד שגיאה 401 אם אימות נכשל.
+            // כרגע נשאיר את ההדפסה כפי שהיא, אך ה-403 נפתר על ידי הדילוג.
             System.out.println(e);
         }
-        //***************מה משמעות ה-filter??
+
+        // אם הבקשה לא דולגה בצעד 1, היא תמשיך מכאן לפילטר הבא
         filterChain.doFilter(httpServletRequest,httpServletResponse);
     }
+//    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+//        try{
+//            String jwt=jwtUtils.getJwtFromCookies(httpServletRequest);
+//            //*********מהי השאלה כאן???
+//            if(jwt !=null && jwtUtils.validateJwtToken(jwt)){
+//                String userName=jwtUtils.getUserNameFromJwtToken(jwt);
+//                UserDetails userDetails= userDetailsService.loadUserByUsername(userName);
+//
+//                UsernamePasswordAuthenticationToken authentication=
+//                        new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+//                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
+//
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//            }
+//
+//        }
+//        catch (Exception e)
+//        {
+//            System.out.println(e);
+//        }
+//        //***************מה משמעות ה-filter??
+//        filterChain.doFilter(httpServletRequest,httpServletResponse);
+//    }
 
 }

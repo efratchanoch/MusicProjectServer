@@ -23,9 +23,9 @@ public class Post {
 
     private int likes = 0;
 
-    private String audio;
+    private String audioPath;
 
-    private String video;
+    private String videoPath;
 
     private LocalDate dateUploaded;
 
@@ -34,7 +34,6 @@ public class Post {
 
     private List<String> imagesPath;
 
-    private List<String> audiosPath;
 
     @ManyToMany
     private List<Users> usersFavorite;
@@ -42,60 +41,19 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audio, String video, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<String> audiosPath, List<Users> usersFavorite) {
+    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<Users> usersFavorite) {
         this.id = id;
         this.user = user;
         this.title = title;
         this.content = content;
         this.hearts = hearts;
         this.likes = likes;
-        this.audio = audio;
-        this.video = video;
+        this.audioPath = audioPath;
+        this.videoPath = videoPath;
         this.dateUploaded = dateUploaded;
         this.comments = comments;
         this.imagesPath = imagesPath;
-        this.audiosPath = audiosPath;
         this.usersFavorite = usersFavorite;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public List<String> getImagesPath() {
-        return imagesPath;
-    }
-
-    public void setImagesPath(List<String> imagesPath) {
-        this.imagesPath = imagesPath;
-    }
-
-    public List<String> getAudiosPath() {
-        return audiosPath;
-    }
-
-    public void setAudiosPath(List<String> audiosPath) {
-        this.audiosPath = audiosPath;
-    }
-
-    public List<Users> getUsersFavorite() {
-        return usersFavorite;
-    }
-
-    public void setUsersFavorite(List<Users> usersFavorite) {
-        this.usersFavorite = usersFavorite;
-    }
-
-    public String getAudio() {
-        return audio;
-    }
-
-    public void setAudio(String audio) {
-        this.audio = audio;
     }
 
     public Long getId() {
@@ -106,22 +64,6 @@ public class Post {
         this.id = id;
     }
 
-    public String getVideo() {
-        return video;
-    }
-
-    public void setVideo(String video) {
-        this.video = video;
-    }
-
-    public Long getPost_id() {
-        return id;
-    }
-
-    public void setPost_id(Long post_id) {
-        this.id = post_id;
-    }
-
     public Users getUser() {
         return user;
     }
@@ -130,12 +72,20 @@ public class Post {
         this.user = user;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getContent() {
         return content;
     }
 
     public void setContent(String content) {
-        content = content;
+        this.content = content;
     }
 
     public int getHearts() {
@@ -154,6 +104,22 @@ public class Post {
         this.likes = likes;
     }
 
+    public String getAudioPath() {
+        return audioPath;
+    }
+
+    public void setAudioPath(String audioPath) {
+        this.audioPath = audioPath;
+    }
+
+    public String getVideoPath() {
+        return videoPath;
+    }
+
+    public void setVideoPath(String videoPath) {
+        this.videoPath = videoPath;
+    }
+
     public LocalDate getDateUploaded() {
         return dateUploaded;
     }
@@ -170,6 +136,20 @@ public class Post {
         this.comments = comments;
     }
 
+    public List<String> getImagesPath() {
+        return imagesPath;
+    }
 
+    public void setImagesPath(List<String> imagesPath) {
+        this.imagesPath = imagesPath;
+    }
+
+    public List<Users> getUsersFavorite() {
+        return usersFavorite;
+    }
+
+    public void setUsersFavorite(List<Users> usersFavorite) {
+        this.usersFavorite = usersFavorite;
+    }
 }
 

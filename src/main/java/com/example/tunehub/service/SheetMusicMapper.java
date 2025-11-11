@@ -35,9 +35,7 @@ public interface SheetMusicMapper {
     SheetMusic SheetMusicUploadDTOtoSheetMusic(SheetMusicUploadDTO s);
 
 
-    @Mapping(
-            target = "filePath",
-            expression = "java(com.example.tunehub.service.FileUtils.docsToBase64(s.getFileName()))")
+    @Mapping(target = "filePath", source = "fileName")
     SheetMusicResponseDTO sheetMusicToSheetMusicResponseDTO(SheetMusic s);
 
     List<SheetMusicResponseDTO> sheetMusicListToSheetMusicResponseDTOlist(List<SheetMusic> s);

@@ -1,8 +1,14 @@
+
 package com.example.tunehub.service;
 
 import java.io.ByteArrayInputStream;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.*;
+import java.util.Base64;
+import java.util.List;
+import java.util.UUID;
 
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
@@ -11,13 +17,6 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.*;
-import java.util.Base64;
-import java.util.UUID;
-
 public class FileUtils {
     private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media";
     private static String IMAGES_FOLDER = "images";
@@ -25,171 +24,144 @@ public class FileUtils {
     private static String VIDEO_FOLDER = "video";
     private static String DOCUMENTS_FOLDER = "docs";
 
-    // Genric
+    // ------------------ Generic ------------------
 
     /**
-     * יוצר שם קובץ ייחודי באמצעות UUID ושומר על הסיומת המקורית.
+     * Generate a unique file name using UUID and preserve the original extension.
      */
     public static String generateUniqueFileName(MultipartFile file) {
         String originalFileName = file.getOriginalFilename();
-
-        // 1. קביעת הסיומת (Extension)
         String fileExtension = "";
         int lastDotIndex = originalFileName.lastIndexOf(".");
-
         if (lastDotIndex != -1) {
-            // אם נמצאה נקודה, קח את החלק שאחריה (הסיומת)
             fileExtension = originalFileName.substring(lastDotIndex);
         }
-
-        // 2. יצירת UUID ושילובו עם הסיומת
-        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-        return uniqueFileName;
+        return UUID.randomUUID().toString() + fileExtension;
     }
 
-    // Images
+    // ------------------ Images ------------------
+
+    /**
+     * Save an image file on disk.
+     */
     public static void uploadImage(MultipartFile file, String uniqueFileName) throws IOException {
         Path fileName = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, uniqueFileName);
+        Files.createDirectories(fileName.getParent());
         Files.write(fileName, file.getBytes());
     }
 
-    //מקבלת את שם התמונה + סיומת
-    // מחזירה את התמונה בביס 64 של הנתיב המלא
-    public static String imageToBase64(String path) {
-
-        Path fileName;
-        if (path.contains(":") || path.startsWith("/") || path.startsWith("\\")) {
-            fileName = Paths.get(path);
-        } else {
-            try {
-                Path baseDir = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER);
-                fileName = baseDir.resolve(path);
-            } catch (InvalidPathException e) {
-                return null;
-            }
-        }
+    /**
+     * Convert an image to Base64 string.
+     */
+    public static String imageToBase64(String fileName) {
         try {
-            byte[] byteImage = Files.readAllBytes(fileName);
+            Path fullPath = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, fileName);
+            byte[] byteImage = Files.readAllBytes(fullPath);
             return Base64.getEncoder().encodeToString(byteImage);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
 
-    //--------------------------Audio--------------------
-    public static void uploadAudio(MultipartFile file) throws IOException, InterruptedException {
-        String originalPath = UPLOAD_DIRECTORY + AUDIO_FOLDER + file.getOriginalFilename();
-        File dest = new File(originalPath);
-        file.transferTo(dest); // שמירה ראשונית
-
-        String outputPath = UPLOAD_DIRECTORY + AUDIO_FOLDER + "encoded_" + file.getOriginalFilename();
-
-        try {
-            FFmpeg ffmpeg = new FFmpeg(); // ה-binary מטופל ע"י ה-dependency
-            FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(originalPath)
-                    .addOutput(outputPath)
-                    .setAudioCodec("aac")
-                    .setAudioBitRate(128000)
-                    .done();
-
-            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
-            executor.createJob(builder).run();
-
-            System.out.println("אודיו מקודד ושמור ב: " + outputPath);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IOException("שגיאה בהמרת האודיו עם FFmpeg", e);
-        }
-
+    public static List<String> imagesToBase64(List<String> fileNames) {
+        if (fileNames == null) return List.of();
+        return fileNames.stream()
+                .map(FileUtils::imageToBase64)
+                .filter(b -> b != null)
+                .toList();
     }
 
-    public static InputStreamResource getAudio(String path) throws IOException {
-        Path filename = Paths.get(UPLOAD_DIRECTORY + AUDIO_FOLDER + path);
-        InputStream stream = Files.newInputStream(filename);
+
+    // ==================== Audio ====================
+    /**
+     * Saves the uploaded audio file with a unique name.
+     * @param file MultipartFile received from the request
+     * @param uniqueAudioName String unique filename (UUID + extension)
+     * @throws IOException if saving fails
+     */
+    public static void uploadAudio(MultipartFile file, String uniqueAudioName) throws IOException {
+        Path filePath = Paths.get(UPLOAD_DIRECTORY, AUDIO_FOLDER, uniqueAudioName);
+        Files.createDirectories(filePath.getParent()); // יוודא שהתיקיה קיימת
+        file.transferTo(filePath.toFile());
+    }
+
+    /**
+     * Returns an InputStreamResource for streaming the audio file.
+     * @param fileName name of the saved audio file
+     * @return InputStreamResource ready for ResponseEntity
+     * @throws IOException if reading the file fails
+     */
+    public static InputStreamResource getAudio(String fileName) throws IOException {
+        Path path = Paths.get(UPLOAD_DIRECTORY, AUDIO_FOLDER, fileName);
+        InputStream stream = Files.newInputStream(path);
         return new InputStreamResource(stream);
     }
 
-    // ------------------ Video ------------------
-    public static void uploadVideo(MultipartFile file) throws IOException {
-        String originalPath = UPLOAD_DIRECTORY + VIDEO_FOLDER + file.getOriginalFilename();
-        File dest = new File(originalPath);
-        file.transferTo(dest); // שמירה ראשונית
-
-        String outputPath = UPLOAD_DIRECTORY + VIDEO_FOLDER + "encoded_" + file.getOriginalFilename();
-
-        try {
-            FFmpeg ffmpeg = new FFmpeg(); // ה-binary מטופל ע"י ה-dependency
-            FFmpegBuilder builder = new FFmpegBuilder()
-                    .setInput(originalPath)
-                    .addOutput(outputPath)
-                    .setVideoCodec("libx264")
-                    .setVideoPreset("slow")
-                    .setConstantRateFactor(22)
-                    .setAudioCodec("aac")
-                    .done();
-
-            FFmpegExecutor executor = new FFmpegExecutor(ffmpeg);
-            executor.createJob(builder).run();
-
-            System.out.println("וידאו מקודד ושמור ב: " + outputPath);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new IOException("שגיאה בהמרת הווידאו עם FFmpeg", e);
-        }
+// ==================== Video ====================
+    /**
+     * Saves the uploaded video file with a unique name.
+     * @param file MultipartFile received from the request
+     * @param uniqueVideoName String unique filename (UUID + extension)
+     * @throws IOException if saving fails
+     */
+    public static void uploadVideo(MultipartFile file, String uniqueVideoName) throws IOException {
+        Path filePath = Paths.get(UPLOAD_DIRECTORY, VIDEO_FOLDER, uniqueVideoName);
+        file.transferTo(filePath.toFile());
     }
 
-    // Documents
-    public static void uploadDocument(MultipartFile file, String uniqueFileName) throws IOException {
-        Path fileName = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
-
-        Files.write(fileName, file.getBytes());
-
-
+    /**
+     * Returns an InputStreamResource for streaming the video file.
+     * @param fileName name of the saved video file
+     * @return InputStreamResource ready for ResponseEntity
+     * @throws IOException if reading the file fails
+     */
+    public static InputStreamResource getVideo(String fileName) throws IOException {
+        Path path = Paths.get(UPLOAD_DIRECTORY, VIDEO_FOLDER, fileName);
+        InputStream stream = Files.newInputStream(path);
+        return new InputStreamResource(stream);
     }
 
-    public static int getPDFpageCount(byte[] pdfBytes) {
 
-        if (pdfBytes == null || pdfBytes.length == 0) {
-            return 0;
-        }
-        // שימוש ב-try-with-resources כדי להבטיח סגירת PDDocument
+    // ------------------ Documents / PDF ------------------
+
+    /**
+     * Save document (PDF or other) to disk.
+     */
+    public static String uploadDocument(MultipartFile file, String uniqueFileName) throws IOException {
+//        String uniqueName = generateUniqueFileName(file);
+        Path filePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
+        Files.createDirectories(filePath.getParent());
+        Files.write(filePath, file.getBytes());
+        return uniqueFileName;
+    }
+
+    /**
+     * Get number of pages in a PDF document.
+     */
+    public static int getPDFPageCount(byte[] pdfBytes) throws IOException {
+        if (pdfBytes == null || pdfBytes.length == 0) return 0;
         try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdfBytes))) {
             return document.getNumberOfPages();
-        } catch (IOException e) {
-            System.err.println("שגיאה בניתוח קובץ PDF לחישוב עמודים: " + e.getMessage());
-            return 0;
         }
     }
 
+    /**
+     * Convert document to Base64 string (optional, small PDFs only).
+     */
+//    public static String docsToBase64(String fileName) throws IOException {
+//        Path path = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
+//        byte[] fileBytes = Files.readAllBytes(path);
+//        return Base64.getEncoder().encodeToString(fileBytes);
+//    }
 
-    public static String docsToBase64(String uniqueFileName) {
-
-        if (uniqueFileName == null || uniqueFileName.isEmpty()) {
-            return null;
-        }
-
-        try {
-            // 1. בנה את הנתיב הסופי
-            Path fileNamePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
-
-            // 2. קרא את הביתים (פעולה שיכולה לזרוק IOException)
-            byte[] fileBytes = Files.readAllBytes(fileNamePath);
-
-            // 3. קודד ל-Base64 והחזר
-            return Base64.getEncoder().encodeToString(fileBytes);
-
-        } catch (IOException e) {
-            // טיפול בשגיאה: אם הקובץ לא נמצא, אין הרשאה, או שגיאת I/O אחרת
-            System.err.println("שגיאה בקידוד קובץ ל-Base64: " + uniqueFileName + ". הודעה: " + e.getMessage());
-            e.printStackTrace();
-
-            // 4. החזרת null במקרה של כישלון קריאה
-            return null;
-        }
+    /**
+     * Stream document file to client (recommended for multiple or large PDFs).
+     */
+    public static InputStreamResource getDocument(String fileName) throws IOException {
+        Path path = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
+        InputStream stream = Files.newInputStream(path);
+        return new InputStreamResource(stream);
     }
-
-
 }
-
 

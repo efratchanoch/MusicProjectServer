@@ -36,13 +36,6 @@ public class UsersMusiciansDTO {
         return city;
     }
 
-    public EUserType getEUserType() {
-        return EUserType;
-    }
-
-    public void setEUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
-    }
 
     public void setCity(String city) {
         this.city = city;
@@ -80,13 +73,6 @@ public class UsersMusiciansDTO {
         this.instruments = instruments;
     }
 
-    public EUserType getEUserType() {
-        return EUserType;
-    }
-
-    public void setEUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
-    }
 
     public EUserType getUserType() {
         return EUserType;

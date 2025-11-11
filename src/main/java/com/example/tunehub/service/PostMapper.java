@@ -1,17 +1,33 @@
 package com.example.tunehub.service;
 
-import com.example.tunehub.dto.PostDTO;
-import com.example.tunehub.dto.PostMediaDTO;
-import com.example.tunehub.dto.UsersUploadProfileImageDTO;
+import com.example.tunehub.dto.*;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.io.IOException;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
+    @Mapping(source = "userId", target = "user.id")
+    @Mapping(target = "dateUploaded", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "hearts", constant = "0")
+    @Mapping(target = "likes", constant = "0")
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "usersFavorite", ignore = true)
+    Post postUploadDTOtoPost(PostUploadDTO dto);
+
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "content", source = "content")
+    @Mapping(target = "imagesBase64", ignore = true) // <-- פשוט מתעלמים מה-mapping של Base64
+    PostResponseDTO postToPostResponseDTO(Post post);
+
+
+
+
+
 
     List<PostMediaDTO> PostToDTO(List<Post> posts);
 
@@ -23,11 +39,11 @@ public interface PostMapper {
     List<PostDTO> PostsToPostsDTO(List<Post> p);
 
 
-    default PostMediaDTO PostToDTO(Post p) throws IOException {
-        PostMediaDTO postMediaDTO = new PostMediaDTO();
-        postMediaDTO.setId(p.getId());
-        return postMediaDTO;
-    }
+//    default PostMediaDTO PostToDTO(Post p) throws IOException {
+//        PostMediaDTO postMediaDTO = new PostMediaDTO();
+//        postMediaDTO.setId(p.getId());
+//        return postMediaDTO;
+//    }
 
 //    default PostDTO PostToDTO(Post p) throws IOException {
 //        PostDTO postDTO =new PostDTO();
