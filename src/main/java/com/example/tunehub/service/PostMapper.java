@@ -2,7 +2,6 @@ package com.example.tunehub.service;
 
 import com.example.tunehub.dto.PostDTO;
 import com.example.tunehub.dto.PostMediaDTO;
-import com.example.tunehub.dto.UsersProfileDTO;
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
@@ -11,7 +10,7 @@ import org.mapstruct.Mapper;
 import java.io.IOException;
 import java.util.List;
 
-@Mapper(componentModel = "spring",uses={UsersMapper.class,CommentMapper.class})
+@Mapper(componentModel = "spring")
 public interface PostMapper {
 
     List<PostMediaDTO> PostToDTO(List<Post> posts);
@@ -20,6 +19,7 @@ public interface PostMapper {
 
     Post PostDTOtoPost(PostDTO p);
 
+    //    PostDTO PosttoPostDTO(Post p);
     List<PostDTO> PostsToPostsDTO(List<Post> p);
 
 
