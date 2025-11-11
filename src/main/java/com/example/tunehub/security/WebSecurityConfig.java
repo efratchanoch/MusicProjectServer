@@ -78,12 +78,9 @@ public class WebSecurityConfig {
         //משבית את הגנת CSRF על ידי הפעלת שיטת `csrf()` והשבתתה
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
-                  //  corsConfiguration.setAllowedOrigins(List.of("*")); //לשנות בהמשך ל4200
-                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200"));
-                    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    //corsConfiguration.setAllowedMethods(List.of("*"));
-                    corsConfiguration.setAllowedHeaders(List.of("*"));
-                    corsConfiguration.setAllowCredentials(true);//לאפשר עוגיות
+                    corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200")); // 👍 לתקן!                    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowedMethods(List.of("*"));
+                    corsConfiguration.setAllowedHeaders(List.of("*"));                    corsConfiguration.setAllowCredentials(true);//לאפשר עוגיות
                     return corsConfiguration;
                 }))
 
@@ -99,7 +96,6 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/instrument/**").permitAll()
                                         .requestMatchers("/api/teacher/**").permitAll()
                                         .requestMatchers(HttpMethod.POST).permitAll()
-                                        .requestMatchers("/error").permitAll()
                         //  .anyRequest().authenticated()
                 );
         //.httpBasic(Customizer.withDefaults());

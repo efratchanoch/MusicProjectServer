@@ -1,7 +1,10 @@
 package com.example.tunehub.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class UsersLogInDTO {
     private String name;
+    @JsonIgnore
     private String password;
 
     public String getName() {

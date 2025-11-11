@@ -32,6 +32,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -203,7 +204,7 @@ public class UsersController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
             return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(userDetails.getUsername());
+                    .body(Map.of("username", userDetails.getUsername()));
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -213,7 +214,9 @@ public class UsersController {
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(
-            @RequestPart("image") MultipartFile file,
+            // ⭐️ תיקון: הפוך את הקובץ לאופציונלי ב-Spring Boot
+            @RequestPart(value = "image", required = false) MultipartFile file,
+
             @RequestPart("profile") UsersSignUpDTO user) {
 
         try {
@@ -221,9 +224,15 @@ public class UsersController {
             if (u != null)
                 return new ResponseEntity<>(HttpStatus.CONFLICT);
 
-            String uniqueFileName = FileUtils.generateUniqueFileName(file);
-            FileUtils.uploadImage(file,uniqueFileName);
-            user.setImageProfilePath(uniqueFileName);
+            // ⚠️ חשוב: עכשיו יש לבדוק אם הקובץ קיים לפני השימוש בו
+            if (file != null && !file.isEmpty()) {
+                String uniqueFileName = FileUtils.generateUniqueFileName(file);
+                FileUtils.uploadImage(file,uniqueFileName);
+                user.setImageProfilePath(uniqueFileName);
+            } else {
+                // אם אין קובץ, ודא שהנתיב לא נשאר NULL אם ה-DTO מצפה למחרוזת
+                user.setImageProfilePath(null); // או נתיב ברירת מחדל
+            }
 
             String pass = user.getPassword();
             user.setPassword(new BCryptPasswordEncoder().encode(pass));
@@ -240,11 +249,10 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.CREATED);
 
         } catch (Exception e) {
+            // במקרה של שגיאה, חזור 500
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
     @PostMapping("/signOut")
     public ResponseEntity<?> signOut() {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
