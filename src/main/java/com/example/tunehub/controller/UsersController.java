@@ -1,8 +1,12 @@
 package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.UsersMusiciansDTO;
+import com.example.tunehub.dto.UsersProfileDTO;
+import com.example.tunehub.dto.UsersSignUpDTO;
 import com.example.tunehub.dto.UsersUploadProfileImageDTO;
+import com.example.tunehub.model.ERole;
 import com.example.tunehub.model.EUserType;
+import com.example.tunehub.model.Role;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.security.jwt.JwtUtils;
@@ -24,7 +28,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -126,83 +132,6 @@ public class UsersController {
         }
     }
 
-
-    //Put
-    @PutMapping("/updateUser/{id}")
-    public ResponseEntity<Users> signUpUser(@PathVariable Long id, @RequestBody Users user) {
-        try {
-            Users u = usersRepository.findUsersById(id);
-            if (u == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-
-            Users existingWithSameName = usersRepository.findUsersByName(user.getName());
-            if (existingWithSameName != null && !existingWithSameName.getId().equals(id)) {
-                return new ResponseEntity<>(null, HttpStatus.CONFLICT);
-            }
-
-            u.setName(user.getName());
-            u.setEmail(user.getEmail());
-            u.setPassword(user.getPassword());
-            u.setActive(user.isActive());
-            u.setDescription(user.getDescription());
-            u.setUserType(user.getUserType());
-            //date-
-            user.setEditedIn(LocalDate.now());
-
-            Users updatedUser = usersRepository.save(u);
-            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-//    //Post
-//    @PostMapping("/signUp")
-//    public ResponseEntity<Users> signUpUser(@RequestBody Users user) {
-//        try {
-//            Users existingUser = usersRepository.findUsersByName(user.getName());
-//            if (existingUser != null) {
-//                return new ResponseEntity<>(HttpStatus.CONFLICT);
-//            }
-//
-//            user.setCreatedAt(LocalDate.now());
-//            user.setEditedIn(null);//האם מיותר ?
-//            Users savedUser = usersRepository.save(user);
-//            return new ResponseEntity<>(savedUser, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-
-    @PostMapping("/signIn")
-    public ResponseEntity<?> signIn(@RequestBody Users u) {
-        try {
-            Authentication authentication=authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(u.getName(),u.getPassword()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            CustomUserDetails userDetails=(CustomUserDetails)authentication.getPrincipal();
-            ResponseCookie jwtCookie=jwtUtils.generateJwtCookie(userDetails);
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,jwtCookie.toString())
-                    .body(userDetails.getUsername());
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-    }
-
-    @PostMapping("/uploadImageProfile")
-    public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
-        try {
-            FileUtils.uploadImage(file);
-            p.setImageProfilePath(file.getOriginalFilename());
-            Users users = usersRepository.save(p);
-            return new ResponseEntity<>(users, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @GetMapping("musicianById/{id}")
     public ResponseEntity<UsersMusiciansDTO> getMusicianById(@PathVariable Long id) {
         try {
@@ -234,6 +163,109 @@ public class UsersController {
         }
     }
 
+    //Put
+    @PutMapping("/updateUser/{id}")
+    public ResponseEntity<Users> signUpUser(@PathVariable Long id, @RequestBody Users user) {
+        try {
+            Users u = usersRepository.findUsersById(id);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+
+            Users existingWithSameName = usersRepository.findUsersByName(user.getName());
+            if (existingWithSameName != null && !existingWithSameName.getId().equals(id)) {
+                return new ResponseEntity<>(null, HttpStatus.CONFLICT);
+            }
+
+            u.setName(user.getName());
+            u.setEmail(user.getEmail());
+            u.setPassword(user.getPassword());
+            u.setIsActive(user.isActive());
+            u.setDescription(user.getDescription());
+            u.setUserType(user.getUserType());
+            //date-
+            user.setEditedIn(LocalDate.now());
+
+            Users updatedUser = usersRepository.save(u);
+            return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/signIn")
+    public ResponseEntity<?> signIn(@RequestBody Users u) {
+        try {
+            Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(u.getName(), u.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .body(userDetails.getUsername());
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+
+    @PostMapping("/signUp")
+    public ResponseEntity<?> signUp(
+            @RequestPart("image") MultipartFile file,
+            @RequestPart("profile") UsersSignUpDTO user) {
+
+        try {
+            Users u = usersRepository.findByName(user.getName());
+            if (u != null)
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+
+            String uniqueFileName = FileUtils.generateUniqueFileName(file);
+            FileUtils.uploadImage(file,uniqueFileName);
+            user.setImageProfilePath(uniqueFileName);
+
+            String pass = user.getPassword();
+            user.setPassword(new BCryptPasswordEncoder().encode(pass));
+
+            Users us = usersMapper.UsersSignUpDTOtoUsers(user);
+
+            Role roleUser = roleRepository.findByRole(ERole.ROLE_USER)
+                    .orElseThrow(() -> new RuntimeException("Role not found"));
+
+            us.getRoles().add(roleUser);
+
+            usersRepository.save(us);
+
+            return new ResponseEntity<>(null, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PostMapping("/signOut")
+    public ResponseEntity<?> signOut() {
+        ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body("you've been signed out!");
+    }
+
+
+    @PostMapping("/uploadImageProfile")
+    public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
+        try {
+            String uniqueFileName = FileUtils.generateUniqueFileName(file);
+            FileUtils.uploadImage(file,uniqueFileName);
+            p.setImageProfilePath(uniqueFileName);
+//            Users users = usersMapper.UsersProfileDTOtoUsers();
+            Users users = usersRepository.save(p);
+            return new ResponseEntity<>(users, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     //Delete
     @DeleteMapping("/DeleteAllUser/{id}")
@@ -256,24 +288,6 @@ public class UsersController {
 //        return "hello";
 //    }
 
-    @PostMapping("/signUp")
-    public ResponseEntity<Users> signUp(@RequestBody Users user) {
-
-        Users u = usersRepository.findByName(user.getName());
-        if (u != null)
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        String pass = user.getPassword();//הסיסמא שהמשתמש הכניס - לא מוצפנת
-        user.setPassword(new BCryptPasswordEncoder().encode(pass));
-
-        user.getRoles().add(roleRepository.findById((long) 1).get());
-        usersRepository.save(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }
-
-
-}
-
-
 //   @GetMapping("/hotUsers")
 //    public ResponseEntity<List<Users>> getHotUsers()   {
 //        try{
@@ -290,6 +304,33 @@ public class UsersController {
 //    }
 
 
+    // Heart - Beat
+    private Long getCurrentUserId(Principal principal) {
+        // יש להתאים את הפונקציה בהתאם ליישום ה-Security שלך (JWT/OAuth2)
+        return Long.parseLong(principal.getName());
+    }
+
+    @PostMapping("/heartbeat")
+    public ResponseEntity<?> sendHeartbeat(Principal principal) {
+        try {
+            // 1. קבל את ה-ID מהטוקן
+            Long userId = getCurrentUserId(principal);
+
+            // 2. עדכן את הסטטוס ואת חותמת הזמן
+            usersRepository.findById(userId).ifPresent(user -> {
+                user.setIsActive(true); // מגדיר את המשתמש כפעיל
+                user.setLastActivityTimestamp(new Date()); // שעת הפעילות הנוכחית
+                usersRepository.save(user);
+            });
+
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            // חשוב לרשום את e.printStackTrace() ללוגים שלך כדי לדעת מה השתבש
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}
 
 
 

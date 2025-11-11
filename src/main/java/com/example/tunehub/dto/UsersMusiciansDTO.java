@@ -10,7 +10,7 @@ public class UsersMusiciansDTO {
     private String country;
     private boolean active;
     private String description;
-    private InstrumentDTO instruments;
+    private InstrumentResponseDTO instruments;
     private EUserType EUserType;
     private LocalDate createDate;
 
@@ -64,12 +64,20 @@ public class UsersMusiciansDTO {
         this.description = description;
     }
 
-    public InstrumentDTO getInstruments() {
+    public InstrumentResponseDTO getInstruments() {
         return instruments;
     }
 
-    public void setInstruments(InstrumentDTO instruments) {
+    public void setInstruments(InstrumentResponseDTO instruments) {
         this.instruments = instruments;
+    }
+
+    public EUserType getEUserType() {
+        return EUserType;
+    }
+
+    public void setEUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
     }
 
     public EUserType getUserType() {

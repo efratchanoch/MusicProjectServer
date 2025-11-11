@@ -5,6 +5,7 @@ import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Date;
 import java.util.List;
 
 public interface UsersRepository  extends JpaRepository<Users, Long> {
@@ -32,4 +33,7 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
 
     UsersMusiciansDTO findMusicianDtoById(Long id);
+
+    // Spring Data JPA תבנה את השאילתה אוטומטית:
+    List<Users> findAllByLastActivityTimestampBeforeAndIsActiveIsTrue(Date threshold);
 }

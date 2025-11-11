@@ -2,10 +2,9 @@ package com.example.tunehub.dto;
 
 public class UsersSignUpDTO {
     private String name;
-    private String city;
     private String email;
     private String password;
-    private String country;
+    private String imageProfilePath;
 
     public String getName() {
         return name;
@@ -13,14 +12,6 @@ public class UsersSignUpDTO {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 
     public String getEmail() {
@@ -39,11 +30,11 @@ public class UsersSignUpDTO {
         this.password = password;
     }
 
-    public String getCountry() {
-        return country;
+    public String getImageProfilePath() {
+        return imageProfilePath;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setImageProfilePath(String imageProfilePath) {
+        this.imageProfilePath = imageProfilePath;
     }
 }

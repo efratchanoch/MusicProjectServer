@@ -1,11 +1,13 @@
 package com.example.tunehub.service;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 
 import net.bramp.ffmpeg.FFmpeg;
 import net.bramp.ffmpeg.FFmpegExecutor;
 import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,18 +16,40 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.util.Base64;
+import java.util.UUID;
 
 public class FileUtils {
     private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media";
     private static String IMAGES_FOLDER = "images";
     private static String AUDIO_FOLDER = "audio";
     private static String VIDEO_FOLDER = "video";
-    private static String DOCUMENTS_FOLDER = "documents";
+    private static String DOCUMENTS_FOLDER = "docs";
+
+    // Genric
+
+    /**
+     * יוצר שם קובץ ייחודי באמצעות UUID ושומר על הסיומת המקורית.
+     */
+    public static String generateUniqueFileName(MultipartFile file) {
+        String originalFileName = file.getOriginalFilename();
+
+        // 1. קביעת הסיומת (Extension)
+        String fileExtension = "";
+        int lastDotIndex = originalFileName.lastIndexOf(".");
+
+        if (lastDotIndex != -1) {
+            // אם נמצאה נקודה, קח את החלק שאחריה (הסיומת)
+            fileExtension = originalFileName.substring(lastDotIndex);
+        }
+
+        // 2. יצירת UUID ושילובו עם הסיומת
+        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+        return uniqueFileName;
+    }
 
     // Images
-    public static void uploadImage(MultipartFile file) throws IOException {
-        String path = UPLOAD_DIRECTORY + IMAGES_FOLDER + file.getOriginalFilename();
-        Path fileName = Paths.get(path);
+    public static void uploadImage(MultipartFile file, String uniqueFileName) throws IOException {
+        Path fileName = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, uniqueFileName);
         Files.write(fileName, file.getBytes());
     }
 
@@ -116,20 +140,56 @@ public class FileUtils {
     }
 
     // Documents
-    public static void uploadDocument(MultipartFile file) throws IOException {
-        Path fileName = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, file.getOriginalFilename());
+    public static void uploadDocument(MultipartFile file, String uniqueFileName) throws IOException {
+        Path fileName = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
+
         Files.write(fileName, file.getBytes());
+
+
     }
 
-    // FileUtils.java (פונקציה מעודכנת)
-    public static void saveBase64ToFile(String base64Content, String fileName) throws IOException {
-        byte[] decodedBytes = java.util.Base64.getDecoder().decode(base64Content);
+    public static int getPDFpageCount(byte[] pdfBytes) {
 
-        // השימוש בנתיב הקבוע + השם המקורי השמור
-        Path filePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
-
-        Files.write(filePath, decodedBytes);
+        if (pdfBytes == null || pdfBytes.length == 0) {
+            return 0;
+        }
+        // שימוש ב-try-with-resources כדי להבטיח סגירת PDDocument
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdfBytes))) {
+            return document.getNumberOfPages();
+        } catch (IOException e) {
+            System.err.println("שגיאה בניתוח קובץ PDF לחישוב עמודים: " + e.getMessage());
+            return 0;
+        }
     }
+
+
+    public static String docsToBase64(String uniqueFileName) {
+
+        if (uniqueFileName == null || uniqueFileName.isEmpty()) {
+            return null;
+        }
+
+        try {
+            // 1. בנה את הנתיב הסופי
+            Path fileNamePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
+
+            // 2. קרא את הביתים (פעולה שיכולה לזרוק IOException)
+            byte[] fileBytes = Files.readAllBytes(fileNamePath);
+
+            // 3. קודד ל-Base64 והחזר
+            return Base64.getEncoder().encodeToString(fileBytes);
+
+        } catch (IOException e) {
+            // טיפול בשגיאה: אם הקובץ לא נמצא, אין הרשאה, או שגיאת I/O אחרת
+            System.err.println("שגיאה בקידוד קובץ ל-Base64: " + uniqueFileName + ". הודעה: " + e.getMessage());
+            e.printStackTrace();
+
+            // 4. החזרת null במקרה של כישלון קריאה
+            return null;
+        }
+    }
+
+
 }
 
 

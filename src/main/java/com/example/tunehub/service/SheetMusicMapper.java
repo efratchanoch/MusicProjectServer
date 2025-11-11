@@ -28,5 +28,17 @@ public interface SheetMusicMapper {
   //  List<SheetMusicResponseDTO> toResponseDtoList(List<SheetMusic> entities);
 
     @Mapping(target = "dateUploaded", expression = "java(java.time.LocalDate.now())")
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "hearts", constant = "0")
+    @Mapping(target = "likes", constant = "0")
+    @Mapping(target = "category", qualifiedByName = "toSheetMusicCategory")
     SheetMusic SheetMusicUploadDTOtoSheetMusic(SheetMusicUploadDTO s);
+
+
+    @Mapping(
+            target = "filePath",
+            expression = "java(com.example.tunehub.service.FileUtils.docsToBase64(s.getFileName()))")
+    SheetMusicResponseDTO sheetMusicToSheetMusicResponseDTO(SheetMusic s);
+
+    List<SheetMusicResponseDTO> sheetMusicListToSheetMusicResponseDTOlist(List<SheetMusic> s);
 }

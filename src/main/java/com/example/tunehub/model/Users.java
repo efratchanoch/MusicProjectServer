@@ -3,6 +3,7 @@ package com.example.tunehub.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,10 @@ public class Users {
 
     private LocalDate editedIn; //תאריך עריכה
 
-    private boolean active;
+    private boolean isActive = false;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastActivityTimestamp;
 
     private String city;
 
@@ -70,7 +74,7 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean active, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -79,7 +83,8 @@ public class Users {
         this.EUserType = EUserType;
         this.createdAt = createdAt;
         this.editedIn = editedIn;
-        this.active = active;
+        this.isActive = isActive;
+        this.lastActivityTimestamp = lastActivityTimestamp;
         this.city = city;
         this.country = country;
         this.followers = followers;
@@ -224,11 +229,19 @@ public class Users {
     }
 
     public boolean isActive() {
-        return active;
+        return isActive;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setIsActive(boolean active) {
+        isActive = active;
+    }
+
+    public Date getLastActivityTimestamp() {
+        return lastActivityTimestamp;
+    }
+
+    public void setLastActivityTimestamp(Date lastActivityTimestamp) {
+        this.lastActivityTimestamp = lastActivityTimestamp;
     }
 
     public Teacher getTeacher() {
@@ -281,14 +294,6 @@ public class Users {
 
 
 
-//
-//    @Override
-//    public String toString() {
-//        return "Users{" +
-//                "id=" + id +
-//                ", name='" + name + '\'' +
-//                ", email='" + email + '\'' +
-//                '}';
-//    }
+
 
 }

@@ -8,9 +8,9 @@ import java.util.List;
 public class SheetMusicUploadDTO {
     private String name;
 
-    private List<InstrumentDTO> instruments;
+    private List<InstrumentResponseDTO> instruments;
 
-    private SheetMusicCategoryDTO category;
+    private SheetMusicCategoryResponseDTO category;
 
     private EDifficultyLevel level;
 
@@ -45,19 +45,19 @@ public class SheetMusicUploadDTO {
         this.name = name;
     }
 
-    public List<InstrumentDTO> getInstruments() {
+    public List<InstrumentResponseDTO> getInstruments() {
         return instruments;
     }
 
-    public void setInstruments(List<InstrumentDTO> instruments) {
+    public void setInstruments(List<InstrumentResponseDTO> instruments) {
         this.instruments = instruments;
     }
 
-    public SheetMusicCategoryDTO getCategory() {
+    public SheetMusicCategoryResponseDTO getCategory() {
         return category;
     }
 
-    public void setCategory(SheetMusicCategoryDTO category) {
+    public void setCategory(SheetMusicCategoryResponseDTO category) {
         this.category = category;
     }
 

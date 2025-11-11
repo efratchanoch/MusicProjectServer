@@ -1,5 +1,6 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.dto.SheetMusicCategoryResponseDTO;
 import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.SheetMusicCategory;
 import com.example.tunehub.model.Teacher;
@@ -27,26 +28,26 @@ public class SheetMusicCategoryController {
 
     //Get
     @GetMapping("/sheetMusicCategoryById/{id}")
-    public ResponseEntity<SheetMusicCategory> getSheetMusicCategoryById(@PathVariable Long id) {
+    public ResponseEntity<SheetMusicCategoryResponseDTO> getSheetMusicCategoryById(@PathVariable Long id) {
         try {
             SheetMusicCategory sc = sheetMusicCategoryRepository.findSheetMusicCategoryById(id);
             if (sc == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sc, HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicCategoryMapper.sheetMusicCategoryToSheetMusicCategoryDTO(sc), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/sheetMusicByName/{name}")
-    public ResponseEntity<List<SheetMusicCategory>> getSheetMusicByName(@PathVariable String name) {
+    public ResponseEntity<List<SheetMusicCategoryResponseDTO>> getSheetMusicByName(@PathVariable String name) {
         try {
             List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAllByName(name);
             if (sc == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sc, HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicCategoryMapper.sheetMusicCategoryListToSheetMusicCategoryDTOList(sc), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -54,13 +55,13 @@ public class SheetMusicCategoryController {
 
 
     @GetMapping("/sheetMusicCategories")
-    public ResponseEntity<List<SheetMusicCategory>> getSheetMusicCategories() {
+    public ResponseEntity<List<SheetMusicCategoryResponseDTO>> getSheetMusicCategories() {
         try {
             List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAll();
             if (sc == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sc, HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicCategoryMapper.sheetMusicCategoryListToSheetMusicCategoryDTOList(sc), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -70,16 +71,15 @@ public class SheetMusicCategoryController {
     //Delete
     @PreAuthorize("hasAnyRole('ROLE_SUPER_ADMIN', 'ROLE_ADMIN')")
     @DeleteMapping("/sheetMusicCategoryById/{id}")
-    public ResponseEntity DeleteSheetMusicCategoryById(@PathVariable Long id){
-        try{
-            if(sheetMusicCategoryRepository.existsById(id)){
+    public ResponseEntity DeleteSheetMusicCategoryById(@PathVariable Long id) {
+        try {
+            if (sheetMusicCategoryRepository.existsById(id)) {
                 sheetMusicCategoryRepository.deleteById(id);
                 return new ResponseEntity(HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        catch(Exception e){
-            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
