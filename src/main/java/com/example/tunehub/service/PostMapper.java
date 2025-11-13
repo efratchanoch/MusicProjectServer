@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 import java.io.IOException;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = UsersMapper.class)
 public interface PostMapper {
     @Mapping(source = "userId", target = "user.id")
     @Mapping(target = "dateUploaded", expression = "java(java.time.LocalDate.now())")
@@ -19,13 +19,13 @@ public interface PostMapper {
     @Mapping(target = "usersFavorite", ignore = true)
     Post postUploadDTOtoPost(PostUploadDTO dto);
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "user", source = "user")
     @Mapping(target = "content", source = "content")
-    @Mapping(target = "imagesBase64", ignore = true) // <-- פשוט מתעלמים מה-mapping של Base64
+    @Mapping(target = "imagesBase64", expression = "java(com.example.tunehub.service.FileUtils.imagesToBase64(post.getImagesPath()))")
     PostResponseDTO postToPostResponseDTO(Post post);
 
 
-
+    List<PostResponseDTO> postListToPostResponseDTOlist(List<Post> post);
 
 
 

@@ -96,6 +96,7 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/instrument/**").permitAll()
                                         .requestMatchers("/api/teacher/**").permitAll()
                                         .requestMatchers(HttpMethod.POST).permitAll()
+                                        .requestMatchers(HttpMethod.GET).permitAll()
                         //  .anyRequest().authenticated()
                 );
         //.httpBasic(Customizer.withDefaults());

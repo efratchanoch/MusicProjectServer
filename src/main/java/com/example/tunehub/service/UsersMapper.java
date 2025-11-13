@@ -12,8 +12,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public  interface  UsersMapper {
-
-
     @Mapping(
             target = "imageProfilePath",
             expression = "java(com.example.tunehub.service.FileUtils.imageToBase64(u.getImageProfilePath()))")

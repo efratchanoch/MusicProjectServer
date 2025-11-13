@@ -2,11 +2,12 @@ package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.PostResponseDTO;
 import com.example.tunehub.dto.PostUploadDTO;
-import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
+import com.example.tunehub.model.Users;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.PostMapper;
 import com.example.tunehub.service.PostRepository;
+import com.example.tunehub.service.UsersRepository;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -28,35 +29,38 @@ import java.util.List;
 public class PostController {
     private PostRepository postRepository;
     private PostMapper postMapper;
+    private UsersRepository usersRepository;
 
     @Autowired
-    public PostController(PostRepository postRepository, PostMapper postMapper) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
+        this.usersRepository = usersRepository;
     }
+
 
     //Get
     @GetMapping("/postById/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long id) {
         try {
             Post p = postRepository.findPostById(id);
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postToPostResponseDTO(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/posts")
-    public ResponseEntity<List<Post>> getPosts() {
+    public ResponseEntity<List<PostResponseDTO>> getPosts() {
         try {
             List<Post> p = postRepository.findAll();
-            if (p == null) {
+            if (p.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -64,26 +68,26 @@ public class PostController {
 
 
     @GetMapping("/postsByUserId/{id}")
-    public ResponseEntity<List<Post>> getPostsByUserId(@PathVariable Long id) {
+    public ResponseEntity<List<PostResponseDTO>> getPostsByUserId(@PathVariable Long id) {
         try {
             List<Post> p = postRepository.findAllByUserId(id);
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/favoritePostsByUserId/{id}")
-    public ResponseEntity<List<Post>> getFavoritePostsByUserId(@PathVariable Long id) {
+    public ResponseEntity<List<PostResponseDTO>> getFavoritePostsByUserId(@PathVariable Long id) {
         try {
             List<Post> p = postRepository.findAllByUsersFavorite_Id(id);
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -91,13 +95,13 @@ public class PostController {
 
 
     @GetMapping("/newPosts")
-    public ResponseEntity<List<Post>> getNewPosts() {
+    public ResponseEntity<List<PostResponseDTO>> getNewPosts() {
         try {
             List<Post> p = postRepository.findByDateUploaded(LocalDate.now());
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -105,26 +109,26 @@ public class PostController {
 
 
     @GetMapping("/postsByTitle/{title}")
-    public ResponseEntity<List<Post>> getPostsByName(@PathVariable String title) {
+    public ResponseEntity<List<PostResponseDTO>> getPostsByName(@PathVariable String title) {
         try {
-            List<Post> ps = postRepository.findAllPostByTitle(title);
-            if (ps == null) {
+            List<Post> p = postRepository.findAllPostByTitle(title);
+            if (p.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(ps, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/postsByDate/{date}")
-    public ResponseEntity<List<Post>> getPostsByDate(@PathVariable LocalDate Date) {
+    public ResponseEntity<List<PostResponseDTO>> getPostsByDate(@PathVariable LocalDate Date) {
         try {
             List<Post> p = postRepository.findByDateUploaded(Date);
-            if (p == null) {
+            if (p.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(p, HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -175,21 +179,16 @@ public class PostController {
             @RequestPart(value = "video", required = false) MultipartFile video) {
 
         try {
-            // יצירת Entity מה-DTO
+            // Convert DTO to Entity
             Post post = postMapper.postUploadDTOtoPost(dto);
 
             // ==================== Images ====================
-            List<String> imagesBase64 = new ArrayList<>();
             if (images != null && !images.isEmpty()) {
                 List<String> imageNames = new ArrayList<>();
                 for (MultipartFile img : images) {
                     String uniqueName = FileUtils.generateUniqueFileName(img);
                     FileUtils.uploadImage(img, uniqueName);
                     imageNames.add(uniqueName);
-
-                    // המרת התמונה ל-Base64 מיד
-                    String base64 = FileUtils.imageToBase64(uniqueName);
-                    if (base64 != null) imagesBase64.add(base64);
                 }
                 post.setImagesPath(imageNames);
             }
@@ -208,19 +207,19 @@ public class PostController {
                 post.setVideoPath(uniqueVideoName);
             }
 
-            // ==================== שמירה במסד ====================
+            // Save to database
+            Users user = usersRepository.findById(post.getUser().getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            post.setUser(user);
+
             postRepository.save(post);
 
-            // ==================== בניית DTO ====================
+            // Build DTO
             PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
-
-            // הצבת התמונות ב-Base64 שהפקנו כבר
-            responseDTO.setImagesBase64(imagesBase64);
 
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

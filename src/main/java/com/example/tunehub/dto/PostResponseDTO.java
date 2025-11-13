@@ -4,7 +4,7 @@ import java.util.List;
 
 public class PostResponseDTO {
     private Long id;
-    private Long userId;         // מזהה היוזר שפרסם את הפוסט
+    private UsersProfileDTO  user;         // מזהה היוזר שפרסם את הפוסט
     private String title;        // כותרת הפוסט
     private String content;
     private int hearts;          // לבבות
@@ -22,12 +22,12 @@ public class PostResponseDTO {
         this.id = id;
     }
 
-    public Long getUserId() {
-        return userId;
+    public UsersProfileDTO getUser() {
+        return user;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUser(UsersProfileDTO user) {
+        this.user = user;
     }
 
     public String getTitle() {
