@@ -249,7 +249,7 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            // במקרה של שגיאה, חזור 500
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

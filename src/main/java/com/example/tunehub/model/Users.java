@@ -27,7 +27,7 @@ public class Users {
 
     private LocalDate createdAt;
 
-    private LocalDate editedIn; //תאריך עריכה
+    private LocalDate editedIn;
 
     private boolean isActive = false;
 
@@ -39,10 +39,10 @@ public class Users {
     private String country;
 
     @ManyToMany(mappedBy = "following")
-    private List<Users> followers;  // מי עוקב אחרי המשתמש הזה
+    private List<Users> followers;
 
     @ManyToMany
-    private List<Users> following;  // מי שהמשתמש הזה עוקב אחריהם
+    private List<Users> following;
 
     @ManyToMany
     private List<Instrument> instrumentsUsers;
