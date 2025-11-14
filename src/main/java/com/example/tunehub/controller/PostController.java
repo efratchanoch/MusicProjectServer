@@ -15,6 +15,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -179,9 +181,20 @@ public class PostController {
             @RequestPart(value = "video", required = false) MultipartFile video) {
 
         try {
+            System.out.println("Received DTO: " + dto);
+            System.out.println("UserId from DTO: " + dto.getUserId());
+            System.out.println("Title: " + dto.getTitle());
+            System.out.println("Content: " + dto.getContent());
+
+            System.out.println("Received DTO: " + dto);
+            System.out.println("Audio: " + (audio != null ? audio.getOriginalFilename() : "null"));
+            System.out.println("Video: " + (video != null ? video.getOriginalFilename() : "null"));
+            if (dto.getUserId() == null) {
+                System.out.println("ERROR: userId is null!");
+            }
             // Convert DTO to Entity
             Post post = postMapper.postUploadDTOtoPost(dto);
-
+            System.out.println("DTO ID received: " + dto.getUserId());
             // ==================== Images ====================
             if (images != null && !images.isEmpty()) {
                 List<String> imageNames = new ArrayList<>();
@@ -208,18 +221,21 @@ public class PostController {
             }
 
             // Save to database
-            Users user = usersRepository.findById(post.getUser().getId())
+            System.out.println("DTO ID received: " + dto.getUserId());
+            Users user = usersRepository.findById(dto.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             post.setUser(user);
 
             postRepository.save(post);
-
+            System.out.println("Post saved successfully. Post ID: " + post.getId());
             // Build DTO
             PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
 
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 
         } catch (Exception e) {
+            e.printStackTrace();
+
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

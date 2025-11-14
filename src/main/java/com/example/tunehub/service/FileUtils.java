@@ -119,7 +119,6 @@ public class FileUtils {
     }
 
 
-    // ------------------ Documents / PDF ------------------
 
     /**
      * Save document (PDF or other) to disk.

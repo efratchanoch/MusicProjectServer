@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -171,33 +172,26 @@ public class SheetMusicController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @PostMapping("/uploadSheetMusic")
+    @PostMapping(value = "/uploadSheetMusic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
             @RequestPart("file") MultipartFile file,
             @RequestPart("data") SheetMusicUploadDTO dto) {
         try {
-            // 1. יצירת Entity מה-DTO
             SheetMusic s = sheetMusicMapper.SheetMusicUploadDTOtoSheetMusic(dto);
 
-            // 2. יצירת שם ייחודי לקובץ
             String uniqueFileName = FileUtils.generateUniqueFileName(file);
             s.setFileName(uniqueFileName);
 
-            // 3. קבלת User reference מה-ID ב-DTO
             Long userId = dto.getUser().getId();
             Users userReference = usersRepository.getReferenceById(userId);
             s.setUser(userReference);
 
-            // 4. ספירת עמודי PDF
             s.setPages(FileUtils.getPDFPageCount(file.getBytes()));
 
-            // 5. שמירת ה-Entity במסד
             sheetMusicRepository.save(s);
 
-            // 6. שמירת הקובץ (הקובץ נשמר בנפרד, לא ב-DTO)
             FileUtils.uploadDocument(file, uniqueFileName);
 
-            // 7. החזרת ה-ResponseDTO
             SheetMusicResponseDTO responseDTO = sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s);
             return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
 
@@ -208,26 +202,22 @@ public class SheetMusicController {
     }
 
 
-//    // 2. קבלת דף מוזיקה יחיד
 //    @GetMapping("/{id}")
 //    public ResponseEntity<SheetMusicResponseDTO> getSheetMusic(@PathVariable Long id) {
 //        SheetMusic sheetMusic = sheetMusicService.getSheetMusicById(id);
 //        return ResponseEntity.ok(convertToDto(sheetMusic));
 //    }
 //
-//    // 3. קבלת רשימת דפי מוזיקה
 //    @GetMapping
 //    public ResponseEntity<List<SheetMusicResponseDTO>> getAllSheetMusic() {
 //        List<SheetMusic> list = sheetMusicService.getAllSheetMusic();
 //        return ResponseEntity.ok(convertListToDto(list));
 //    }
 //
-//    // 4. הורדת הקובץ הפיזי (PDF/תמונה)
 //    @GetMapping("/{id}/download")
 //    public ResponseEntity<Resource> downloadSheetMusic(@PathVariable Long id) {
 //        Resource resource = sheetMusicService.downloadSheetMusic(id);
 //
-//        // הגדרת כותרות מתאימות להורדה...
 //        return ResponseEntity.ok()
 //                .contentType(MediaType.APPLICATION_OCTET_STREAM)
 //                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")

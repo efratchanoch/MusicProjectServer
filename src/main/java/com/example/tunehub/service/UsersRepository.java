@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface UsersRepository  extends JpaRepository<Users, Long> {
 
@@ -29,11 +30,13 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
     void deleteById(Long id);
 
 
-    Users findByName(String name);
 
 
     UsersMusiciansDTO findMusicianDtoById(Long id);
 
-    // Spring Data JPA תבנה את השאילתה אוטומטית:
     List<Users> findAllByLastActivityTimestampBeforeAndIsActiveIsTrue(Date threshold);
+
+    //Optional<Users> findByUsername(String username);
+
+    Users findByName(String name);
 }
