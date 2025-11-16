@@ -11,7 +11,7 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private ERole role;
+    private ERole name;
 
     @ManyToMany(mappedBy = "roles")
     private List<Users> users;
@@ -19,9 +19,9 @@ public class Role {
     public Role() {
     }
 
-    public Role(Long id, ERole role, List<Users> users) {
+    public Role(Long id, ERole name, List<Users> users) {
         this.id = id;
-        this.role = role;
+        this.name = name;
         this.users = users;
     }
 
@@ -33,13 +33,14 @@ public class Role {
         this.id = id;
     }
 
-    public ERole getRole() {
-        return role;
+    public ERole getName() {
+        return name;
     }
 
-    public void setRole(ERole role) {
-        this.role = role;
+    public void setName(ERole name) {
+        this.name = name;
     }
+
 
     public List<Users> getUsers() {
         return users;
@@ -48,4 +49,6 @@ public class Role {
     public void setUsers(List<Users> users) {
         this.users = users;
     }
+
+
 }

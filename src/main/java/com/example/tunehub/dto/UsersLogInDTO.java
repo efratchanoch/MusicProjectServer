@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UsersLogInDTO {
     private String name;
-    @JsonIgnore
+    //@JsonIgnore
     private String password;
 
     public String getName() {

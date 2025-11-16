@@ -1,9 +1,6 @@
 package com.example.tunehub.controller;
 
-import com.example.tunehub.dto.UsersMusiciansDTO;
-import com.example.tunehub.dto.UsersProfileDTO;
-import com.example.tunehub.dto.UsersSignUpDTO;
-import com.example.tunehub.dto.UsersUploadProfileImageDTO;
+import com.example.tunehub.dto.*;
 import com.example.tunehub.model.ERole;
 import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Role;
@@ -196,20 +193,39 @@ public class UsersController {
 
 
     @PostMapping("/signIn")
-    public ResponseEntity<?> signIn(@RequestBody Users u) {
+    public ResponseEntity<?> signIn(@RequestBody UsersLogInDTO u) {
         try {
-            Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(u.getName(), u.getPassword()));
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(u.getName(), u.getPassword())
+            );
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
-            return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                    .body(Map.of("username", userDetails.getUsername()));
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
 
+            // שליפת המשתמש מהמסד נתונים לפי ID או שם משתמש
+            Users userFromDb = usersRepository.findByName(userDetails.getUsername());
+
+            // הכנת DTO מינימלי
+            UsersProfileDTO profileDTO = usersMapper.UsersToUsersProfileDTO(userFromDb);
+//            profileDTO.setId(userFromDb.getId().toString());
+//            profileDTO.setName(userFromDb.getName());
+//            profileDTO.setImageProfilePath(userFromDb.getImageProfilePath());
+//            profileDTO.setRoles(userFromDb.getRoles().stream()
+//                    .map(role -> new RoleDTO(role.getRole()))
+//                    .collect(Collectors.toSet()));
+
+            ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    .body(profileDTO);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        }
     }
+
+
 
 
     @PostMapping("/signUp")
@@ -239,7 +255,7 @@ public class UsersController {
 
             Users us = usersMapper.UsersSignUpDTOtoUsers(user);
 
-            Role roleUser = roleRepository.findByRole(ERole.ROLE_USER)
+            Role roleUser = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Role not found"));
 
             us.getRoles().add(roleUser);

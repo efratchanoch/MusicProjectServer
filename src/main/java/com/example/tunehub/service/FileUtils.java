@@ -53,6 +53,8 @@ public class FileUtils {
         try {
             Path fullPath = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, fileName);
             byte[] byteImage = Files.readAllBytes(fullPath);
+            System.out.println("FULL PATH = " + fullPath);
+
             return Base64.getEncoder().encodeToString(byteImage);
         } catch (IOException e) {
             e.printStackTrace();

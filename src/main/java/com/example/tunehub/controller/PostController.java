@@ -4,6 +4,7 @@ import com.example.tunehub.dto.PostResponseDTO;
 import com.example.tunehub.dto.PostUploadDTO;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.service.FileUtils;
 import com.example.tunehub.service.PostMapper;
 import com.example.tunehub.service.PostRepository;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -172,73 +174,61 @@ public class PostController {
 //                    .body("Error uploading video");
 //        }
 //    }
+@PostMapping("/uploadPost")
+public ResponseEntity<PostResponseDTO> createPost(
+        @RequestPart("data") PostUploadDTO dto,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @RequestPart(value = "audio", required = false) MultipartFile audio,
+        @RequestPart(value = "video", required = false) MultipartFile video) {
 
-    @PostMapping("/uploadPost")
-    public ResponseEntity<PostResponseDTO> createPost(
-            @RequestPart("data") PostUploadDTO dto,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestPart(value = "audio", required = false) MultipartFile audio,
-            @RequestPart(value = "video", required = false) MultipartFile video) {
+    try {
+        // 🔑 קבלת המשתמש מה־JWT דרך SecurityContext
+        CustomUserDetails currentUserDetails = (CustomUserDetails) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        Users user = usersRepository.findUsersByName(currentUserDetails.getUsername());
 
-        try {
-            System.out.println("Received DTO: " + dto);
-            System.out.println("UserId from DTO: " + dto.getUserId());
-            System.out.println("Title: " + dto.getTitle());
-            System.out.println("Content: " + dto.getContent());
+        // Convert DTO to Entity
+        Post post = postMapper.postUploadDTOtoPost(dto);
+        post.setUser(user); // משתמש קיים מה־JWT
 
-            System.out.println("Received DTO: " + dto);
-            System.out.println("Audio: " + (audio != null ? audio.getOriginalFilename() : "null"));
-            System.out.println("Video: " + (video != null ? video.getOriginalFilename() : "null"));
-            if (dto.getUserId() == null) {
-                System.out.println("ERROR: userId is null!");
+        // ==================== Images ====================
+        if (images != null && !images.isEmpty()) {
+            List<String> imageNames = new ArrayList<>();
+            for (MultipartFile img : images) {
+                String uniqueName = FileUtils.generateUniqueFileName(img);
+                FileUtils.uploadImage(img, uniqueName);
+                imageNames.add(uniqueName);
             }
-            // Convert DTO to Entity
-            Post post = postMapper.postUploadDTOtoPost(dto);
-            System.out.println("DTO ID received: " + dto.getUserId());
-            // ==================== Images ====================
-            if (images != null && !images.isEmpty()) {
-                List<String> imageNames = new ArrayList<>();
-                for (MultipartFile img : images) {
-                    String uniqueName = FileUtils.generateUniqueFileName(img);
-                    FileUtils.uploadImage(img, uniqueName);
-                    imageNames.add(uniqueName);
-                }
-                post.setImagesPath(imageNames);
-            }
-
-            // ==================== Audio ====================
-            if (audio != null) {
-                String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
-                FileUtils.uploadAudio(audio, uniqueAudioName);
-                post.setAudioPath(uniqueAudioName);
-            }
-
-            // ==================== Video ====================
-            if (video != null) {
-                String uniqueVideoName = FileUtils.generateUniqueFileName(video);
-                FileUtils.uploadVideo(video, uniqueVideoName);
-                post.setVideoPath(uniqueVideoName);
-            }
-
-            // Save to database
-            System.out.println("DTO ID received: " + dto.getUserId());
-            Users user = usersRepository.findById(dto.getUserId())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-            post.setUser(user);
-
-            postRepository.save(post);
-            System.out.println("Post saved successfully. Post ID: " + post.getId());
-            // Build DTO
-            PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
-
-            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            post.setImagesPath(imageNames);
         }
+
+        // ==================== Audio ====================
+        if (audio != null) {
+            String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
+            FileUtils.uploadAudio(audio, uniqueAudioName);
+            post.setAudioPath(uniqueAudioName);
+        }
+
+        // ==================== Video ====================
+        if (video != null) {
+            String uniqueVideoName = FileUtils.generateUniqueFileName(video);
+            FileUtils.uploadVideo(video, uniqueVideoName);
+            post.setVideoPath(uniqueVideoName);
+        }
+
+        // Save to database
+        postRepository.save(post);
+
+        // Build DTO
+        PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+}
 
 
     // ==================== הזרמת אודיו ====================
