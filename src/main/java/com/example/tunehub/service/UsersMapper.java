@@ -19,6 +19,7 @@ public  interface  UsersMapper {
 
     @Mapping(target = "createdAt", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "isActive", expression = "java(true)")
+    @Mapping(target = "name", source = "name")
     Users UsersSignUpDTOtoUsers(UsersSignUpDTO u);
 
     Users UsersLogInDTOtoUsers(UsersLogInDTO u);

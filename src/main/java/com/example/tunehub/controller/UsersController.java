@@ -287,6 +287,7 @@ public class UsersController {
             Users users = usersRepository.save(p);
             return new ResponseEntity<>(users, HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
