@@ -253,16 +253,6 @@ public ResponseEntity<PostResponseDTO> createPost(
                 .body(resource);
     }
 
-    // ==================== הזרמת מסמכים / PDF ====================
-    @GetMapping("/documents/{docPath}")
-    public ResponseEntity<Resource> getDocument(@PathVariable String docPath) throws IOException {
-        InputStreamResource resource = FileUtils.getDocument(docPath);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
-                .contentType(MediaType.APPLICATION_PDF) // או MediaType.APPLICATION_OCTET_STREAM אם לא PDF
-                .body(resource);
-    }
 
     // ==================== הזרמת תמונה ====================
     @GetMapping("/image/{imagePath}")

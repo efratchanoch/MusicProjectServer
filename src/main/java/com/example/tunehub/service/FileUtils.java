@@ -50,6 +50,11 @@ public class FileUtils {
      * Convert an image to Base64 string.
      */
     public static String imageToBase64(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            System.out.println("fileName is null or empty, returning null");
+            return null; // או להחזיר תמונה ברירת מחדל
+        }
+
         try {
             Path fullPath = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, fileName);
             byte[] byteImage = Files.readAllBytes(fullPath);
@@ -61,6 +66,7 @@ public class FileUtils {
             return null;
         }
     }
+
 
     public static List<String> imagesToBase64(List<String> fileNames) {
         if (fileNames == null) return List.of();

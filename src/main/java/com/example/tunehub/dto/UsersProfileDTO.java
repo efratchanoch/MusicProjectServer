@@ -6,10 +6,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UsersProfileDTO {
-    private String id;
-    private String name;
-    private String imageProfilePath;
-    private Set<RoleDTO> roles;
+        private String id;
+        private String name;
+        private String imageProfilePath;
+        private Set<RoleDTO> roles;
 
     public String getId() {
         return id;

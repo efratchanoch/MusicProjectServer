@@ -21,6 +21,7 @@ public class Users {
 
     private String email;
 
+    @Column(length = 4000)
     private String description;
 
     private EUserType EUserType;
@@ -53,7 +54,7 @@ public class Users {
     private String imageProfilePath;
 
     @OneToMany(mappedBy = "user")
-    private List<SheetMusic> sheetMusic;
+    private List<SheetMusic> sheetsMusic;
 
     @OneToMany(mappedBy = "user")
     private List<Post> posts;
@@ -67,14 +68,18 @@ public class Users {
     @ManyToMany(mappedBy = "usersFavorite")
     private List<Post> favoritePosts;
 
+    @ManyToMany(mappedBy = "mentionedUsers")
+    private Set<Post> mentionedInPosts = new HashSet<>();
+
     //Security
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
 
+
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Post> mentionedInPosts, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -92,12 +97,21 @@ public class Users {
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
-        this.sheetMusic = sheetMusic;
+        this.sheetsMusic = sheetsMusic;
         this.posts = posts;
         this.comments = comments;
         this.favoriteSheetsMusic = favoriteSheetsMusic;
         this.favoritePosts = favoritePosts;
+        this.mentionedInPosts = mentionedInPosts;
         this.roles = roles;
+    }
+
+    public Set<Post> getMentionedInPosts() {
+        return mentionedInPosts;
+    }
+
+    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
+        this.mentionedInPosts = mentionedInPosts;
     }
 
     public String getCity() {
@@ -252,12 +266,16 @@ public class Users {
         this.teacher = teacher;
     }
 
-    public List<SheetMusic> getSheetMusic() {
-        return sheetMusic;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
-    public void setSheetMusic(List<SheetMusic> sheetMusic) {
-        this.sheetMusic = sheetMusic;
+    public List<SheetMusic> getSheetsMusic() {
+        return sheetsMusic;
+    }
+
+    public void setSheetsMusic(List<SheetMusic> sheetsMusic) {
+        this.sheetsMusic = sheetsMusic;
     }
 
     public List<Post> getPosts() {

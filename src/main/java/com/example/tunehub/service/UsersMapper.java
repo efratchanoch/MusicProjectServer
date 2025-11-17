@@ -22,6 +22,11 @@ public  interface  UsersMapper {
     @Mapping(target = "name", source = "name")
     Users UsersSignUpDTOtoUsers(UsersSignUpDTO u);
 
+    @Mapping(
+            target = "imageProfilePath",
+            expression = "java(com.example.tunehub.service.FileUtils.imageToBase64(u.getImageProfilePath()))")
+    UsersProfileFullDTO UsersToUsersProfileFullDTO(Users u);
+
     Users UsersLogInDTOtoUsers(UsersLogInDTO u);
 
     @Mapping(target = "profile", source = "u")
