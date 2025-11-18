@@ -94,6 +94,7 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/sheetMusic/**").permitAll()
                                         .requestMatchers("/api/sheetMusicCategory/**").permitAll()
                                         .requestMatchers("/api/instrument/**").permitAll()
+                                        .requestMatchers("/api/users/signIn").permitAll()
                                         .requestMatchers("/api/teacher/**").permitAll()
                                         .requestMatchers(HttpMethod.POST).permitAll()
                                         .requestMatchers(HttpMethod.GET).permitAll()
@@ -102,8 +103,11 @@ public class WebSecurityConfig {
         //.httpBasic(Customizer.withDefaults());
 
         // fix H2 database console: Refused to display ' in a frame because it set 'X-Frame-Options' to 'deny'
-        http.headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()));
-
+        http.headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "frame-ancestors 'self' http://localhost:4200;"
+                ))
+        );
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 

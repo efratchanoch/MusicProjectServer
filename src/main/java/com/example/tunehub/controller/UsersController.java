@@ -9,6 +9,7 @@ import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.security.jwt.JwtUtils;
 import com.example.tunehub.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -38,31 +39,28 @@ public class UsersController {
     private RoleRepository roleRepository;
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
-    private SearchService searchService;
-
+    private AIChatService aiChatService;
 
     @Autowired
-    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils, SearchService searchService) {
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils,AIChatService aiChatService) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
         this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.searchService = searchService;
+        this.aiChatService=aiChatService;
     }
-
-
 
 
     //Get
     @GetMapping("/userById/{id}")
-    public ResponseEntity<UsersProfileFullDTO> getUserById(@PathVariable Long id) {
+    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
         try {
             Users u = usersRepository.findUsersById(id);
             if (u == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(usersMapper.UsersToUsersProfileFullDTO(u), HttpStatus.OK);
+            return new ResponseEntity<>(u, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -147,7 +145,7 @@ public class UsersController {
         }
     }
 
-    @GetMapping("/musicians")
+    @GetMapping("musicians")
     public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
         try {
             List<Users> u = usersRepository.findAll();
@@ -158,7 +156,6 @@ public class UsersController {
 
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -227,6 +224,13 @@ public class UsersController {
         }
     }
 
+//    @GetMapping("/chat")
+//    public String getResponse(@RequestParam String prompt){
+//        return aiChatService.getResponse(prompt);
+//    }
+
+
+
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(
@@ -243,7 +247,7 @@ public class UsersController {
             // ⚠️ חשוב: עכשיו יש לבדוק אם הקובץ קיים לפני השימוש בו
             if (file != null && !file.isEmpty()) {
                 String uniqueFileName = FileUtils.generateUniqueFileName(file);
-                FileUtils.uploadImage(file, uniqueFileName);
+                FileUtils.uploadImage(file,uniqueFileName);
                 user.setImageProfilePath(uniqueFileName);
             } else {
                 // אם אין קובץ, ודא שהנתיב לא נשאר NULL אם ה-DTO מצפה למחרוזת
@@ -269,7 +273,6 @@ public class UsersController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
     @PostMapping("/signOut")
     public ResponseEntity<?> signOut() {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
@@ -282,7 +285,7 @@ public class UsersController {
     public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) {
         try {
             String uniqueFileName = FileUtils.generateUniqueFileName(file);
-            FileUtils.uploadImage(file, uniqueFileName);
+            FileUtils.uploadImage(file,uniqueFileName);
             p.setImageProfilePath(uniqueFileName);
 //            Users users = usersMapper.UsersProfileDTOtoUsers();
             Users users = usersRepository.save(p);
@@ -356,12 +359,6 @@ public class UsersController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @GetMapping("/search")
-    public List<UsersDTO> search(@RequestParam("name") String name) {
-        return searchService.searchUsers(name);
-    }
-
 }
 
 
