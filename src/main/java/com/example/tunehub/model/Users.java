@@ -1,6 +1,5 @@
 package com.example.tunehub.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -22,7 +21,7 @@ public class Users {
 
     private String email;
 
-    @Column(length = 4000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private EUserType EUserType;
@@ -39,14 +38,6 @@ public class Users {
     private String city;
 
     private String country;
-
-//    @ManyToMany(mappedBy = "following")
-//    @JsonIgnore
-//    private List<Users> followers;
-//
-//    @ManyToMany
-//    @JsonIgnore
-//    private List<Users> following;
 
     @ManyToMany
     private List<Instrument> instrumentsUsers;
@@ -65,24 +56,26 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
 
-    @ManyToMany(mappedBy = "usersFavorite")
-    private List<SheetMusic> favoriteSheetsMusic;
-
-    @ManyToMany(mappedBy = "usersFavorite")
-    private List<Post> favoritePosts;
-
     @ManyToMany(mappedBy = "mentionedUsers")
     private Set<Post> mentionedInPosts = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Notification> receivedNotifications;
+
+    @OneToMany(mappedBy = "actor")
+    private List<Notification> sentNotifications;
+
+    @Column(nullable = false)
+    private int followerCount = 0;
 
     //Security
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
 
-
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Post> mentionedInPosts, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -95,75 +88,18 @@ public class Users {
         this.lastActivityTimestamp = lastActivityTimestamp;
         this.city = city;
         this.country = country;
-//        this.followers = followers;
-//        this.following = following;
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
         this.sheetsMusic = sheetsMusic;
         this.posts = posts;
         this.comments = comments;
-        this.favoriteSheetsMusic = favoriteSheetsMusic;
-        this.favoritePosts = favoritePosts;
         this.mentionedInPosts = mentionedInPosts;
+        this.receivedNotifications = receivedNotifications;
+        this.sentNotifications = sentNotifications;
+        this.followerCount = followerCount;
         this.roles = roles;
     }
-
-    public Set<Post> getMentionedInPosts() {
-        return mentionedInPosts;
-    }
-
-    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
-        this.mentionedInPosts = mentionedInPosts;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public List<SheetMusic> getFavoriteSheetsMusic() {
-        return favoriteSheetsMusic;
-    }
-
-    public void setFavoriteSheetsMusic(List<SheetMusic> favoriteSheetsMusic) {
-        this.favoriteSheetsMusic = favoriteSheetsMusic;
-    }
-
-    public List<Post> getFavoritePosts() {
-        return favoritePosts;
-    }
-
-    public void setFavoritePosts(List<Post> favoritePosts) {
-        this.favoritePosts = favoritePosts;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-//    public List<Users> getFollowers() {
-//        return followers;
-//    }
-//
-//    public void setFollowers(List<Users> followers) {
-//        this.followers = followers;
-//    }
-//
-//    public List<Users> getFollowing() {
-//        return following;
-//    }
-//
-//    public void setFollowing(List<Users> followOn) {
-//        this.following = followOn;
-//    }
 
     public Long getId() {
         return id;
@@ -183,22 +119,6 @@ public class Users {
 
     public String getPassword() {
         return password;
-    }
-
-    public List<Instrument> getInstrumentsUsers() {
-        return instrumentsUsers;
-    }
-
-    public void setInstrumentsUsers(List<Instrument> instrumentsUsers) {
-        this.instrumentsUsers = instrumentsUsers;
-    }
-
-    public String getImageProfilePath() {
-        return imageProfilePath;
-    }
-
-    public void setImageProfilePath(String imageProfilePath) {
-        this.imageProfilePath = imageProfilePath;
     }
 
     public void setPassword(String password) {
@@ -221,11 +141,11 @@ public class Users {
         this.description = description;
     }
 
-    public EUserType getUserType() {
+    public EUserType getEUserType() {
         return EUserType;
     }
 
-    public void setUserType(EUserType EUserType) {
+    public void setEUserType(EUserType EUserType) {
         this.EUserType = EUserType;
     }
 
@@ -257,8 +177,33 @@ public class Users {
         return lastActivityTimestamp;
     }
 
+
     public void setLastActivityTimestamp(Date lastActivityTimestamp) {
         this.lastActivityTimestamp = lastActivityTimestamp;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public List<Instrument> getInstrumentsUsers() {
+        return instrumentsUsers;
+    }
+
+    public void setInstrumentsUsers(List<Instrument> instrumentsUsers) {
+        this.instrumentsUsers = instrumentsUsers;
     }
 
     public Teacher getTeacher() {
@@ -269,8 +214,12 @@ public class Users {
         this.teacher = teacher;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public String getImageProfilePath() {
+        return imageProfilePath;
+    }
+
+    public void setImageProfilePath(String imageProfilePath) {
+        this.imageProfilePath = imageProfilePath;
     }
 
     public List<SheetMusic> getSheetsMusic() {
@@ -297,12 +246,36 @@ public class Users {
         this.comments = comments;
     }
 
-    public EUserType getEUserType() {
-        return EUserType;
+    public Set<Post> getMentionedInPosts() {
+        return mentionedInPosts;
     }
 
-    public void setEUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
+    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
+        this.mentionedInPosts = mentionedInPosts;
+    }
+
+    public List<Notification> getReceivedNotifications() {
+        return receivedNotifications;
+    }
+
+    public void setReceivedNotifications(List<Notification> receivedNotifications) {
+        this.receivedNotifications = receivedNotifications;
+    }
+
+    public List<Notification> getSentNotifications() {
+        return sentNotifications;
+    }
+
+    public void setSentNotifications(List<Notification> sentNotifications) {
+        this.sentNotifications = sentNotifications;
+    }
+
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
     }
 
     public Set<Role> getRoles() {
@@ -312,9 +285,6 @@ public class Users {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-
-
-
 
 
 }

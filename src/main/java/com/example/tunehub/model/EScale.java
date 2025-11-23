@@ -1,12 +1,7 @@
 package com.example.tunehub.model;
 
 public enum EScale {
-    // תווים טבעיים
     C, D, E, F, G, A, B,
-
-    // תווים עם סולמית (#)
-    C_SHARP, D_SHARP, F_SHARP, G_SHARP, A_SHARP,
-
-    // תווים עם במול (b)
-    D_FLAT, E_FLAT, G_FLAT, A_FLAT, B_FLAT;
+    C_MAJOR, D_MAJOR, F_MAJOR, G_MAJOR, A_MAJOR,
+    D_MINOR , E_MINOR , G_MINOR , A_MINOR , B_MINOR ;
 }

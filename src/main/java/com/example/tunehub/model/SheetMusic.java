@@ -11,7 +11,7 @@ public class SheetMusic {
     @GeneratedValue
     private Long id;
 
-    private String name;
+    private String title;
 
     @Enumerated(EnumType.STRING)
     private EScale scale;
@@ -37,19 +37,21 @@ public class SheetMusic {
     @ManyToMany
     private List<Instrument> instruments;
 
-    @ManyToOne
-    private SheetMusicCategory category;
-
     @ManyToMany
-    private List<Users> usersFavorite;
+    private List<SheetMusicCategory> categories;
 
+    private String composer;
+
+    private String lyricist;
+
+    private String imageCoverName;
 
     public SheetMusic() {
     }
 
-    public SheetMusic(Long id, String name, EScale scale, int likes, String fileName, int hearts, int downloads, LocalDate dateUploaded, EDifficultyLevel level, int pages, Users user, List<Instrument> instruments, SheetMusicCategory category, List<Users> usersFavorite) {
+    public SheetMusic(Long id, String title, EScale scale, int likes, String fileName, int hearts, int downloads, LocalDate dateUploaded, EDifficultyLevel level, int pages, Users user, List<Instrument> instruments, List<SheetMusicCategory> categories, String composer, String lyricist, String imageCoverName) {
         this.id = id;
-        this.name = name;
+        this.title = title;
         this.scale = scale;
         this.likes = likes;
         this.fileName = fileName;
@@ -60,32 +62,10 @@ public class SheetMusic {
         this.pages = pages;
         this.user = user;
         this.instruments = instruments;
-        this.category = category;
-        this.usersFavorite = usersFavorite;
-    }
-
-    public int getDownloads() {
-        return downloads;
-    }
-
-    public void setDownloads(int downloads) {
-        this.downloads = downloads;
-    }
-
-    public List<Users> getUsersFavorite() {
-        return usersFavorite;
-    }
-
-    public void setUsersFavorite(List<Users> usersFavorite) {
-        this.usersFavorite = usersFavorite;
-    }
-
-    public int getPages() {
-        return pages;
-    }
-
-    public void setPages(int pages) {
-        this.pages = pages;
+        this.categories = categories;
+        this.composer = composer;
+        this.lyricist = lyricist;
+        this.imageCoverName = imageCoverName;
     }
 
     public Long getId() {
@@ -96,12 +76,12 @@ public class SheetMusic {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public EScale getScale() {
@@ -120,12 +100,28 @@ public class SheetMusic {
         this.likes = likes;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     public int getHearts() {
         return hearts;
     }
 
     public void setHearts(int hearts) {
         this.hearts = hearts;
+    }
+
+    public int getDownloads() {
+        return downloads;
+    }
+
+    public void setDownloads(int downloads) {
+        this.downloads = downloads;
     }
 
     public LocalDate getDateUploaded() {
@@ -144,6 +140,14 @@ public class SheetMusic {
         this.level = level;
     }
 
+    public int getPages() {
+        return pages;
+    }
+
+    public void setPages(int pages) {
+        this.pages = pages;
+    }
+
     public Users getUser() {
         return user;
     }
@@ -160,20 +164,36 @@ public class SheetMusic {
         this.instruments = instruments;
     }
 
-    public SheetMusicCategory getCategory() {
-        return category;
+    public List<SheetMusicCategory> getCategories() {
+        return categories;
     }
 
-    public void setCategory(SheetMusicCategory category) {
-        this.category = category;
+    public void setCategories(List<SheetMusicCategory> categories) {
+        this.categories = categories;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getComposer() {
+        return composer;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setComposer(String composer) {
+        this.composer = composer;
+    }
+
+    public String getLyricist() {
+        return lyricist;
+    }
+
+    public void setLyricist(String lyricist) {
+        this.lyricist = lyricist;
+    }
+
+    public String getImageCoverName() {
+        return imageCoverName;
+    }
+
+    public void setImageCoverName(String imageCoverName) {
+        this.imageCoverName = imageCoverName;
     }
 }
 

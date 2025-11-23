@@ -30,8 +30,8 @@ public class Teacher extends Users {
     public Teacher() {
     }
 
-    public Teacher(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Post> mentionedInPosts, Set<Role> roles, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
-        super(id, name, password, email, description, EUserType, createdAt, editedIn, isActive, lastActivityTimestamp, city, country, instrumentsUsers, teacher, imageProfilePath, sheetsMusic, posts, comments, favoriteSheetsMusic, favoritePosts, mentionedInPosts, roles);
+    public Teacher(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
+        super(id, name, password, email, description, EUserType, createdAt, editedIn, isActive, lastActivityTimestamp, city, country, instrumentsUsers, teacher, imageProfilePath, sheetsMusic, posts, comments, mentionedInPosts, receivedNotifications, sentNotifications, followerCount, roles);
         this.pricePerLesson = pricePerLesson;
         this.experience = experience;
         this.lessonDuration = lessonDuration;

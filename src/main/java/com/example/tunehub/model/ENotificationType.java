@@ -1,0 +1,21 @@
+package com.example.tunehub.model;
+
+public enum ENotificationType {
+    NEW_LIKE,
+    FOLLOW_REQUEST,
+    FOLLOW_APPROVED,
+    NEW_POST,
+    FAVORITE_ADDED
+//    NEW_POST_BY_FOLLOWED,
+//    LIKE_ON_POST,
+//    COMMENT_ON_POST,
+//    NEW_FOLLOWER,
+//    FAVORITE_POST,
+//    SHEET_ADDED,
+//    TEACHER_REQUEST,
+//    TEACHER_APPROVED,
+//    ADMIN_ACTION,
+//    SYSTEM_ANNOUNCEMENT,
+//    MENTION_IN_POST,
+//    COLLAB_REQUEST
+}
