@@ -11,7 +11,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = UsersMapper.class)
 public interface PostMapper {
-    @Mapping(source = "userId", target = "user.id")
     @Mapping(target = "dateUploaded", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "hearts", constant = "0")
     @Mapping(target = "likes", constant = "0")

@@ -1,13 +1,12 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.dto.InstrumentResponseDTO;
 import com.example.tunehub.model.Instrument;
-import com.example.tunehub.model.Post;
 import com.example.tunehub.service.InstrumentMapper;
 import com.example.tunehub.service.InstrumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,13 +25,13 @@ public class InstrumentController {
 
     //Get
     @GetMapping("/instruments")
-    public ResponseEntity<List<Instrument>> getInstruments() {
+    public ResponseEntity<List<InstrumentResponseDTO>> getInstruments() {
         try {
             List<Instrument> i = instrumentRepository.findAll();
             if (i == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(i, HttpStatus.OK);
+            return new ResponseEntity<>(instrumentMapper.instrumentListToInstrumentResponseDTOList(i), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

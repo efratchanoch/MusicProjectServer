@@ -179,7 +179,7 @@ public class UsersController {
             u.setPassword(user.getPassword());
             u.setIsActive(user.isActive());
             u.setDescription(user.getDescription());
-            u.setUserType(user.getUserType());
+            //u.setUserType(user.getUserType());
             //date-
             user.setEditedIn(LocalDate.now());
 

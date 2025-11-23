@@ -22,7 +22,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     UsersRepository usersRepository;
 
 
-
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -36,6 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         {
             grantedAuthorities.add(new SimpleGrantedAuthority(role.getName().name()));
         }
-        return new CustomUserDetails(username,user.getPassword(),grantedAuthorities);//יוצר משתמש עבור האבטחה
+        return new CustomUserDetails(username,user.getPassword(),grantedAuthorities,user.getId());//יוצר משתמש עבור האבטחה
     }
+
 }

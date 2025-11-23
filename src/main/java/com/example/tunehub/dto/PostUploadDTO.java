@@ -1,37 +1,14 @@
 package com.example.tunehub.dto;
+//
+//public record PostUploadDTO (
+//        Long userId,
+//        String title,
+//        String content
+//
+//) {}
 
-import java.util.List;
+public record PostUploadDTO (
+     String title,
+     String content
 
-public class PostUploadDTO {
-    private Long userId;
-    private String title;
-    private String content;
-
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-
-}
-
+) {}

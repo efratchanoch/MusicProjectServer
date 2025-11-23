@@ -5,10 +5,7 @@ import com.example.tunehub.dto.PostUploadDTO;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.security.CustomUserDetails;
-import com.example.tunehub.service.FileUtils;
-import com.example.tunehub.service.PostMapper;
-import com.example.tunehub.service.PostRepository;
-import com.example.tunehub.service.UsersRepository;
+import com.example.tunehub.service.*;
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -34,13 +31,18 @@ public class PostController {
     private PostRepository postRepository;
     private PostMapper postMapper;
     private UsersRepository usersRepository;
+    private AuthService authService;
 
     @Autowired
-    public PostController(PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.usersRepository = usersRepository;
+        this.authService = authService;
     }
+
+
+
 
 
     //Get
@@ -183,10 +185,11 @@ public ResponseEntity<PostResponseDTO> createPost(
 
     try {
         // 🔑 קבלת המשתמש מה־JWT דרך SecurityContext
-        CustomUserDetails currentUserDetails = (CustomUserDetails) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
-        Users user = usersRepository.findUsersByName(currentUserDetails.getUsername());
+//        CustomUserDetails currentUserDetails = (CustomUserDetails) SecurityContextHolder
+//                .getContext().getAuthentication().getPrincipal();
+//        Users user = usersRepository.findUsersByName(currentUserDetails.getUsername());
 
+        Users user = authService.getCurrentUser();
         // Convert DTO to Entity
         Post post = postMapper.postUploadDTOtoPost(dto);
         post.setUser(user); // משתמש קיים מה־JWT

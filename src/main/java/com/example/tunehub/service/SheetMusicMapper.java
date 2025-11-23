@@ -25,17 +25,20 @@ public interface SheetMusicMapper {
 //    @Mapping(target = "user", source = "entity.user") // המרה באמצעות UserProfileMapper
 //    SheetMusicResponseDTO toResponseDto(SheetMusic entity);
 
-  //  List<SheetMusicResponseDTO> toResponseDtoList(List<SheetMusic> entities);
+    //  List<SheetMusicResponseDTO> toResponseDtoList(List<SheetMusic> entities);
 
     @Mapping(target = "dateUploaded", expression = "java(java.time.LocalDate.now())")
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "hearts", constant = "0")
     @Mapping(target = "likes", constant = "0")
-    @Mapping(target = "category", qualifiedByName = "toSheetMusicCategory")
+    @Mapping(target = "instruments", ignore = true)
+    @Mapping(target = "categories", ignore = true)
     SheetMusic SheetMusicUploadDTOtoSheetMusic(SheetMusicUploadDTO s);
 
-
     @Mapping(target = "filePath", source = "fileName")
+    @Mapping(
+            target = "imageCoverName",
+            expression = "java(com.example.tunehub.service.FileUtils.imageToBase64(s.getImageCoverName()))")
     SheetMusicResponseDTO sheetMusicToSheetMusicResponseDTO(SheetMusic s);
 
     List<SheetMusicResponseDTO> sheetMusicListToSheetMusicResponseDTOlist(List<SheetMusic> s);

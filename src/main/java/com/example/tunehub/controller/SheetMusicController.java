@@ -1,10 +1,10 @@
 package com.example.tunehub.controller;
 
-import com.example.tunehub.dto.SheetMusicResponseDTO;
-import com.example.tunehub.dto.SheetMusicUploadDTO;
+import com.example.tunehub.dto.*;
 import com.example.tunehub.model.*;
 import com.example.tunehub.service.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -17,23 +17,25 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/sheetMusic")
 public class SheetMusicController {
     private final UsersMapper usersMapper;
     private final UsersRepository usersRepository;
-    private SheetMusicRepository sheetMusicRepository;
-    private SheetMusicMapper sheetMusicMapper;
+    private final SheetMusicRepository sheetMusicRepository;
+    private final SheetMusicMapper sheetMusicMapper;
+    private final AuthService authService;
+    private final InstrumentRepository instrumentRepository;
+    private final SheetMusicCategoryRepository categoryRepository;
+    private final SheetAnalysisAgentService agentService;
+    private final PdfTextExtractorService extractor;
+    private final SheetMusicService sheetMusicService;
+    //private HebrewTransliterator transliterator;
 
-    @Autowired
-    public SheetMusicController(SheetMusicRepository sheetMusicRepository, SheetMusicMapper sheetMusicMapper, UsersMapper usersMapper, UsersRepository usersRepository) {
-        this.sheetMusicRepository = sheetMusicRepository;
-        this.sheetMusicMapper = sheetMusicMapper;
-        this.usersMapper = usersMapper;
-        this.usersRepository = usersRepository;
-    }
 
     //Get
     @GetMapping("/sheetMusicById/{id}")
@@ -77,23 +79,23 @@ public class SheetMusicController {
         }
     }
 
-    @GetMapping("/favoriteSheetsMusicByUserId/{id}")
-    public ResponseEntity<List<SheetMusicResponseDTO>> getFavoriteSheetsMusicByUserId(@PathVariable Long id) {
-        try {
-            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite_Id(id);
-            if (s == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @GetMapping("/favoriteSheetsMusicByUserId/{id}")
+//    public ResponseEntity<List<SheetMusicResponseDTO>> getFavoriteSheetsMusicByUserId(@PathVariable Long id) {
+//        try {
+//            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite_Id(id);
+//            if (s == null) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
-    @GetMapping("/sheetsMusicByName/{name}")
-    public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByName(String name) {
+    @GetMapping("/sheetsMusicByTitle/{title}")
+    public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByTitle(String title) {
         try {
-            List<SheetMusic> s = sheetMusicRepository.findAllByName(name);
+            List<SheetMusic> s = sheetMusicRepository.findAllByTitle(title);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -106,7 +108,7 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusicByCategory/{category_id}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByCategory(@PathVariable Long category_id) {
         try {
-            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByCategory_Id(category_id);
+            List<SheetMusic> s = sheetMusicRepository.findAllByCategories_Id(category_id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
@@ -160,49 +162,38 @@ public class SheetMusicController {
         }
     }
 
-    @DeleteMapping("/sheetsMusicByCategoryId/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN' ,'ROLE_SUPER_ADMIN')")
-    public ResponseEntity deleteAllSheetsMusicByCategoryId(@PathVariable Long id) {
-        try {
-            List<SheetMusic> s = sheetMusicRepository.findAllByCategoryId(id);
-            if (s == null) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    //לאאא למחוקק!! שמתי בהערה כי עשה שגיאה ברפוזיטורי
+//    @DeleteMapping("/sheetsMusicByCategoryId/{id}")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN' ,'ROLE_SUPER_ADMIN')")
+//    public ResponseEntity deleteAllSheetsMusicByCategoryId(@PathVariable Long id) {
+//        try {
+//            List<SheetMusic> s = sheetMusicRepository.findAllByCategories_Id(id);
+//            if (s == null) {
+//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//
+//            }
+//            sheetMusicRepository.deleteAllByCategoryId(id);
+//            return new ResponseEntity(HttpStatus.NO_CONTENT);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
-            }
-            sheetMusicRepository.deleteAllByCategoryId(id);
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
     @PostMapping(value = "/uploadSheetMusic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
             @RequestPart("file") MultipartFile file,
+            @RequestPart(name  = "image", required = false) MultipartFile image,
             @RequestPart("data") SheetMusicUploadDTO dto) {
+
         try {
-            SheetMusic s = sheetMusicMapper.SheetMusicUploadDTOtoSheetMusic(dto);
-
-            String uniqueFileName = FileUtils.generateUniqueFileName(file);
-            s.setFileName(uniqueFileName);
-
-            Long userId = dto.getUser().getId();
-            Users userReference = usersRepository.getReferenceById(userId);
-            s.setUser(userReference);
-
-            s.setPages(FileUtils.getPDFPageCount(file.getBytes()));
-
-            sheetMusicRepository.save(s);
-
-            FileUtils.uploadDocument(file, uniqueFileName);
-
-            SheetMusicResponseDTO responseDTO = sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s);
-            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
-
+            SheetMusicResponseDTO response = sheetMusicService.upload(dto, file, image);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
 //    @GetMapping("/{id}")
@@ -248,4 +239,136 @@ public class SheetMusicController {
                 .body(resource);
     }
 
+    @PostMapping(value = "/analyzePDF", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SheetMusicFinalResponseAIDTO> analyzeSheetMusicPDF(@RequestPart("file") MultipartFile file) {
+        try {
+            if (file.isEmpty() || file.getBytes().length == 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            byte[] pdfBytes = file.getBytes();
+
+            // 1️⃣ שלב AI – ניתוח PDF
+            SheetMusicResponseAI aiResponse = agentService.analyzePdfBytes(pdfBytes);
+
+            // 2️⃣ טיפול בכלי נגינה: הוספה ל-DB ובניית DTO עם ID
+            List<InstrumentResponseDTO> finalInstrumentsDTO = new ArrayList<>();
+            List<Instrument> instrumentsForSheet = new ArrayList<>();
+            // aiResponse.instruments() מחזיר List<String>
+            for (String instrumentName : aiResponse.instruments()) {
+                // 2.1. חיפוש קיים לפי שם (פונקציית findByName ב-Repository)
+                Instrument existing = instrumentRepository.findByName(instrumentName);
+                if (existing == null) {
+                    // 2.2. יצירת חדש אם לא קיים
+                    existing = new Instrument();
+                    existing.setName(instrumentName);
+                    existing = instrumentRepository.save(existing); // שמירה ב-DB לקבלת ID
+                }
+                // 2.3. בניית ה-DTO הסופי עם ה-ID
+                finalInstrumentsDTO.add(new InstrumentResponseDTO(existing.getId(), existing.getName()));
+                instrumentsForSheet.add(existing);
+            }
+
+            // 3️⃣ בדיקה עבור קטגוריות – תמיכה במספר קטגוריות
+            // 3️⃣ טיפול בקטגוריות: הוספה ל-DB ובניית DTO עם ID
+            List<SheetMusicCategoryResponseDTO> finalCategoriesDTO = new ArrayList<>();
+            List<SheetMusicCategory> categoriesForSheet = new ArrayList<>();
+// aiResponse.suggestedCategory() מחזיר List<String>
+            if (aiResponse.suggestedCategories() != null) {
+                for (String categoryName : aiResponse.suggestedCategories()) {
+                    // 3.1. חיפוש קיים לפי שם
+                    SheetMusicCategory existingCat = categoryRepository.findByName(categoryName);
+                    if (existingCat == null) {
+                        // 3.2. יצירת חדש אם לא קיים
+                        existingCat = new SheetMusicCategory();
+                        existingCat.setName(categoryName);
+                        existingCat = categoryRepository.save(existingCat); // שמירה ב-DB לקבלת ID
+                    }
+                    // 3.3. בניית ה-DTO הסופי עם ה-ID
+                    finalCategoriesDTO.add(new SheetMusicCategoryResponseDTO(existingCat.getId(), existingCat.getName()));
+                    categoriesForSheet.add(existingCat);
+                }
+            }
+
+            // 4️⃣ מיפוי הסולם ורמת הקושי לאינאומים שלך
+            EScale scaleEnum = null;
+            if (aiResponse.scale() != null) {
+                for (EScale scale : EScale.values()) {
+                    if (scale.name().equalsIgnoreCase(aiResponse.scale())) {
+                        scaleEnum = scale;
+                        break;
+                    }
+                }
+            }
+
+            EDifficultyLevel levelEnum = null;
+            if (aiResponse.difficulty() != null) {
+                for (EDifficultyLevel level : EDifficultyLevel.values()) {
+                    if (level.name().equalsIgnoreCase(aiResponse.difficulty())) {
+                        levelEnum = level;
+                        break;
+                    }
+                }
+            }
+
+//            // 5️⃣ שמירה בDB כ-SheetMusic (הקוד שבוטל חוזר לחיים)
+//            SheetMusic sheet = new SheetMusic();
+//            sheet.setTitle(aiResponse.title());
+//            sheet.setScale(scaleEnum);
+//            sheet.setLevel(levelEnum);
+//            // sheet.setPages(pages); // שימוש במספר העמודים אם קיימת פונקציה
+//            sheet.setInstruments(instrumentsForSheet);
+//            sheet.setCategories(categoriesForSheet);
+//            sheet.setFileName(file.getOriginalFilename());
+//
+//            // **תיקון: שימוש בשדות החדשים מה-DTO**
+//            sheet.setComposer(aiResponse.composer());
+//            sheet.setLyricist(aiResponse.lyricist());
+//
+////            sheet.setDateUploaded(LocalDate.now());
+//
+//            sheetMusicRepository.save(sheet); // שמירת ה-Entity המלא
+
+            // 6️⃣ החזרת DTO מעודכן עם IDs
+            SheetMusicFinalResponseAIDTO response = new SheetMusicFinalResponseAIDTO(
+                    aiResponse.title(),
+                    aiResponse.scale(),
+                    finalInstrumentsDTO,
+                    aiResponse.difficulty(),
+                    finalCategoriesDTO, // כבר מכיל IDs
+                    aiResponse.composer(),
+                    aiResponse.lyricist()
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // ניתן להוסיף הודעת שגיאה ספציפית יותר כאן
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * פונקציה שמדמה ניתוח PDF עם AI.
+     * כאן אפשר לשים את קריאה ל-Gemini או OpenAI.
+     * חובה להחזיר את הנתונים באנגלית בלבד
+     */
+//    private SheetMusicResponseAI analyzePDFWithAI(byte[] pdfBytes) {
+//        // 🔹 כרגע מחזיר דוגמה סטטית
+//        return new SheetMusicResponseAI(
+//                "Ode to Joy",                   // title
+//                "C_MAJOR",                       // scale
+//                List.of(new InstrumentResponseDTO(null, "Piano"), new InstrumentResponseDTO(null, "Violin")), // instruments
+//                "BEGINNER",                      // difficulty
+//                List.of(
+//                        new SheetMusicCategoryResponseDTO(null, "Classical"),
+//                        new SheetMusicCategoryResponseDTO(null, "Orchestral"),
+//                        new SheetMusicCategoryResponseDTO(null, "Choir")
+//                ), // suggestedCategory
+//                "Ludwig van Beethoven",          // composer
+//                "N/A"                            // lyricist
+//        );
+//    }
 }
+
