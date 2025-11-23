@@ -42,8 +42,6 @@ public class FileUtils {
      * Save an image file on disk.
      */
     public static void uploadImage(MultipartFile file, String uniqueFileName) throws IOException {
-        if (file == null)
-            return;
         Path fileName = Paths.get(UPLOAD_DIRECTORY, IMAGES_FOLDER, uniqueFileName);
         Files.createDirectories(fileName.getParent());
         Files.write(fileName, file.getBytes());
@@ -55,7 +53,7 @@ public class FileUtils {
     public static String imageToBase64(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             System.out.println("fileName is null or empty, returning null");
-            return null;
+            return null; // או להחזיר תמונה ברירת מחדל
         }
 
         try {
@@ -137,9 +135,6 @@ public class FileUtils {
      */
     public static String uploadDocument(MultipartFile file, String uniqueFileName) throws IOException {
 //        String uniqueName = generateUniqueFileName(file);
-        if (file == null){
-            return null;
-        }
         Path filePath = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, uniqueFileName);
         Files.createDirectories(filePath.getParent());
         Files.write(filePath, file.getBytes());
@@ -159,11 +154,11 @@ public class FileUtils {
     /**
      * Convert document to Base64 string (optional, small PDFs only).
      */
-    public static String docsToBase64(String fileName) throws IOException {
-        Path path = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
-        byte[] fileBytes = Files.readAllBytes(path);
-        return Base64.getEncoder().encodeToString(fileBytes);
-    }
+//    public static String docsToBase64(String fileName) throws IOException {
+//        Path path = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
+//        byte[] fileBytes = Files.readAllBytes(path);
+//        return Base64.getEncoder().encodeToString(fileBytes);
+//    }
 
     /**
      * Stream document file to client (recommended for multiple or large PDFs).

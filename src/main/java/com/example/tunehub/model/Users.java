@@ -1,5 +1,6 @@
 package com.example.tunehub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -71,7 +72,6 @@ public class Users {
     //Security
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
-
     public Users() {
     }
 
@@ -101,6 +101,72 @@ public class Users {
         this.roles = roles;
     }
 
+    public List<Notification> getReceivedNotifications() {
+        return receivedNotifications;
+    }
+
+    public void setReceivedNotifications(List<Notification> receivedNotifications) {
+        this.receivedNotifications = receivedNotifications;
+    }
+
+    public List<Notification> getSentNotifications() {
+        return sentNotifications;
+    }
+
+    public void setSentNotifications(List<Notification> sentNotifications) {
+        this.sentNotifications = sentNotifications;
+    }
+
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
+    }
+
+    public Set<Post> getMentionedInPosts() {
+        return mentionedInPosts;
+    }
+
+    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
+        this.mentionedInPosts = mentionedInPosts;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+//    public List<Users> getFollowers() {
+//        return followers;
+//    }
+//
+//    public void setFollowers(List<Users> followers) {
+//        this.followers = followers;
+//    }
+//
+//    public List<Users> getFollowing() {
+//        return following;
+//    }
+//
+//    public void setFollowing(List<Users> followOn) {
+//        this.following = followOn;
+//    }
+
     public Long getId() {
         return id;
     }
@@ -119,6 +185,22 @@ public class Users {
 
     public String getPassword() {
         return password;
+    }
+
+    public List<Instrument> getInstrumentsUsers() {
+        return instrumentsUsers;
+    }
+
+    public void setInstrumentsUsers(List<Instrument> instrumentsUsers) {
+        this.instrumentsUsers = instrumentsUsers;
+    }
+
+    public String getImageProfilePath() {
+        return imageProfilePath;
+    }
+
+    public void setImageProfilePath(String imageProfilePath) {
+        this.imageProfilePath = imageProfilePath;
     }
 
     public void setPassword(String password) {
@@ -141,11 +223,11 @@ public class Users {
         this.description = description;
     }
 
-    public EUserType getEUserType() {
+    public EUserType getUserType() {
         return EUserType;
     }
 
-    public void setEUserType(EUserType EUserType) {
+    public void setUserType(EUserType EUserType) {
         this.EUserType = EUserType;
     }
 
@@ -177,33 +259,8 @@ public class Users {
         return lastActivityTimestamp;
     }
 
-
     public void setLastActivityTimestamp(Date lastActivityTimestamp) {
         this.lastActivityTimestamp = lastActivityTimestamp;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public List<Instrument> getInstrumentsUsers() {
-        return instrumentsUsers;
-    }
-
-    public void setInstrumentsUsers(List<Instrument> instrumentsUsers) {
-        this.instrumentsUsers = instrumentsUsers;
     }
 
     public Teacher getTeacher() {
@@ -214,12 +271,8 @@ public class Users {
         this.teacher = teacher;
     }
 
-    public String getImageProfilePath() {
-        return imageProfilePath;
-    }
-
-    public void setImageProfilePath(String imageProfilePath) {
-        this.imageProfilePath = imageProfilePath;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public List<SheetMusic> getSheetsMusic() {
@@ -246,36 +299,12 @@ public class Users {
         this.comments = comments;
     }
 
-    public Set<Post> getMentionedInPosts() {
-        return mentionedInPosts;
+    public EUserType getEUserType() {
+        return EUserType;
     }
 
-    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
-        this.mentionedInPosts = mentionedInPosts;
-    }
-
-    public List<Notification> getReceivedNotifications() {
-        return receivedNotifications;
-    }
-
-    public void setReceivedNotifications(List<Notification> receivedNotifications) {
-        this.receivedNotifications = receivedNotifications;
-    }
-
-    public List<Notification> getSentNotifications() {
-        return sentNotifications;
-    }
-
-    public void setSentNotifications(List<Notification> sentNotifications) {
-        this.sentNotifications = sentNotifications;
-    }
-
-    public int getFollowerCount() {
-        return followerCount;
-    }
-
-    public void setFollowerCount(int followerCount) {
-        this.followerCount = followerCount;
+    public void setEUserType(EUserType EUserType) {
+        this.EUserType = EUserType;
     }
 
     public Set<Role> getRoles() {
@@ -285,6 +314,9 @@ public class Users {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+
+
 
 
 }

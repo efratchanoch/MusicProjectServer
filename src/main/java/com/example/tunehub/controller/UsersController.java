@@ -200,7 +200,7 @@ public class UsersController {
             // יש לשים לב שהשדות הללו היו חסרים בקוד המקורי שהצגת לפונקציה זו, אבל היו בפונקציית @RequestBody הישנה.
             // נשאיר אותם כפי שהיו בקוד המקורי שנתת לעריכה:
              u.setIsActive(isActive);
-             u.setUserType(userType);
+             //u.setUserType(userType);
             u.setCity(city);
             u.setCountry(country);
             u.setDescription(description);
