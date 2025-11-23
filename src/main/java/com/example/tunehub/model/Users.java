@@ -1,5 +1,6 @@
 package com.example.tunehub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -39,11 +40,13 @@ public class Users {
 
     private String country;
 
-    @ManyToMany(mappedBy = "following")
-    private List<Users> followers;
-
-    @ManyToMany
-    private List<Users> following;
+//    @ManyToMany(mappedBy = "following")
+//    @JsonIgnore
+//    private List<Users> followers;
+//
+//    @ManyToMany
+//    @JsonIgnore
+//    private List<Users> following;
 
     @ManyToMany
     private List<Instrument> instrumentsUsers;
@@ -79,7 +82,7 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Users> followers, List<Users> following, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Post> mentionedInPosts, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<SheetMusic> favoriteSheetsMusic, List<Post> favoritePosts, Set<Post> mentionedInPosts, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -92,8 +95,8 @@ public class Users {
         this.lastActivityTimestamp = lastActivityTimestamp;
         this.city = city;
         this.country = country;
-        this.followers = followers;
-        this.following = following;
+//        this.followers = followers;
+//        this.following = following;
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
         this.imageProfilePath = imageProfilePath;
@@ -146,21 +149,21 @@ public class Users {
         this.country = country;
     }
 
-    public List<Users> getFollowers() {
-        return followers;
-    }
-
-    public void setFollowers(List<Users> followers) {
-        this.followers = followers;
-    }
-
-    public List<Users> getFollowing() {
-        return following;
-    }
-
-    public void setFollowing(List<Users> followOn) {
-        this.following = followOn;
-    }
+//    public List<Users> getFollowers() {
+//        return followers;
+//    }
+//
+//    public void setFollowers(List<Users> followers) {
+//        this.followers = followers;
+//    }
+//
+//    public List<Users> getFollowing() {
+//        return following;
+//    }
+//
+//    public void setFollowing(List<Users> followOn) {
+//        this.following = followOn;
+//    }
 
     public Long getId() {
         return id;

@@ -4,7 +4,6 @@ import com.example.tunehub.dto.*;
 import com.example.tunehub.model.Users;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,6 +43,7 @@ public  interface  UsersMapper {
 //            expression = "java(usersRepository.findById(u.getId()).orElse(null))"
 //    )
     Users usersDTOtoUsers(UsersDTO u);
+
 
     default UsersUploadProfileImageDTO usersToDTO(Users u) throws IOException {
         UsersUploadProfileImageDTO usersUploadProfileImageDTO = new UsersUploadProfileImageDTO();

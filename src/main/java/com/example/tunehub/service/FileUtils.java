@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 
 public class FileUtils {
     private static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "\\media";
@@ -75,6 +76,7 @@ public class FileUtils {
                 .filter(b -> b != null)
                 .toList();
     }
+
 
 
     // ==================== Audio ====================
@@ -166,5 +168,8 @@ public class FileUtils {
         InputStream stream = Files.newInputStream(path);
         return new InputStreamResource(stream);
     }
+
+
 }
+
 

@@ -24,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +72,7 @@ public class WebSecurityConfig {
     }
 
 
+
     //********תפקיד הפונקציה:
     //מגדירה את שרשרת מסנן האבטחה
     @Bean
@@ -96,6 +98,7 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/instrument/**").permitAll()
                                         .requestMatchers("/api/users/signIn").permitAll()
                                         .requestMatchers("/api/teacher/**").permitAll()
+                                        .requestMatchers("/api/users/chat").permitAll()
                                         .requestMatchers(HttpMethod.POST).permitAll()
                                         .requestMatchers(HttpMethod.GET).permitAll()
                         //  .anyRequest().authenticated()
