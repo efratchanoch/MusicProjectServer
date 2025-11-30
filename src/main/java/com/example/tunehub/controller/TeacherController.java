@@ -63,7 +63,7 @@ public class TeacherController {
     @GetMapping("/teachersByName/{name}")
     public ResponseEntity<List<Teacher>> getTeachersByName(@PathVariable String name) {
         try {
-            List<Teacher> t = teacherRepository.findAllByName(name);
+            List<Teacher> t = teacherRepository.findAllByNameContainingIgnoreCase(name);
             if (t == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }

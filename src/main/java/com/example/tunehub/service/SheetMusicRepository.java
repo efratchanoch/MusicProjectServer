@@ -18,8 +18,9 @@ public interface SheetMusicRepository  extends JpaRepository<SheetMusic, Long> {
     List<SheetMusic> findAllSheetMusicByUser_Id(Long id);
 
     //List<SheetMusic> findAllSheetMusicByUsersFavorite_Id(Long id);
+    List<SheetMusic> findAllByTitleContainingIgnoreCase(String title);
 
-    List<SheetMusic> findAllByTitle(String title);
+    List<SheetMusic> findAllTop5ByTitleContainingIgnoreCase(String title);
 
     //List<SheetMusic> findAllSheetMusicByCategory_Id(Long categoryId);
     List<SheetMusic> findAllByCategories_Id(Long categoryId);

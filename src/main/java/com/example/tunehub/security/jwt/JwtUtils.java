@@ -83,17 +83,31 @@ public class JwtUtils {
     //********תפקיד הפונקציה:
     //מה הפונקציה מקבלת?
     //מה הפונקציה מחזירה?
+//    public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
+//        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
+//        ResponseCookie cookie = ResponseCookie.from("securitySample", jwt)
+//                .path("/api").maxAge(24*60*60).httpOnly(true).build();
+//        return cookie;
+//    }
+
     public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        ResponseCookie cookie = ResponseCookie.from("securitySample", jwt)
-                .path("/api").maxAge(24*60*60).httpOnly(true).build();
-        return cookie;
+        return ResponseCookie.from("securitySample", jwt)
+                .path("/")               // root path
+                .httpOnly(true)
+                .maxAge(24 * 60 * 60)   // 1 day
+                //.secure(true)           // אפשר להפעיל ב-HTTPS
+                .sameSite("Lax")         // ל־dev אפשר Lax
+                .build();
+    }public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from("securitySample", "")
+                .path("/")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(false)    // חייב להיות false ב-localhost
+                .sameSite("Lax")
+                .build();
     }
-    //********תפקיד הפונקציה:
-    //מה הפונקציה מקבלת?
-    //מה הפונקציה מחזירה?
-    public ResponseCookie getCleanJwtCookie(){
-        ResponseCookie cookie= ResponseCookie.from("securitySample",null).path("/api").build();
-        return cookie;
-    }
+
+
 }

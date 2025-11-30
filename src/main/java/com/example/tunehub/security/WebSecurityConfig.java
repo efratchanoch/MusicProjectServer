@@ -1,7 +1,6 @@
 package com.example.tunehub.security;
 
 
-
 import com.example.tunehub.security.jwt.AuthEntryPointJwt;
 import com.example.tunehub.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +28,9 @@ import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 import java.util.Arrays;
 import java.util.List;
 
-//הגדרות אבטחה
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
     @Qualifier("customUserDetailsService")
@@ -72,7 +71,6 @@ public class WebSecurityConfig {
     }
 
 
-
     //********תפקיד הפונקציה:
     //מגדירה את שרשרת מסנן האבטחה
     @Bean
@@ -81,8 +79,11 @@ public class WebSecurityConfig {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
                     corsConfiguration.setAllowedOrigins(List.of("http://localhost:4200")); // 👍 לתקן!                    corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:4200"));
+
                     corsConfiguration.setAllowedMethods(List.of("*"));
-                    corsConfiguration.setAllowedHeaders(List.of("*"));                    corsConfiguration.setAllowCredentials(true);//לאפשר עוגיות
+                    corsConfiguration.setAllowedHeaders(List.of("*"));
+                    corsConfiguration.setAllowCredentials(true);//לאפשר עוגיות
                     return corsConfiguration;
                 }))
 
@@ -90,17 +91,25 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                                 auth.requestMatchers("/h2-console/**").permitAll()
 //                                            .requestMatchers("/api/**/**").permitAll()
+                                        .requestMatchers("/ws-notifications/**").authenticated()
 
                                         .requestMatchers("/api/users/**").permitAll()
-                                        .requestMatchers("/api/post/**").permitAll()
-                                        .requestMatchers("/api/sheetMusic/**").permitAll()
-                                        .requestMatchers("/api/sheetMusicCategory/**").permitAll()
-                                        .requestMatchers("/api/instrument/**").permitAll()
+                                        .requestMatchers("/api/post/**").authenticated()
+                                        .requestMatchers("/api/sheetMusic/**").authenticated()
+                                        .requestMatchers("/api/sheetMusicCategory/**").authenticated()
+                                        .requestMatchers("/api/instrument/**").authenticated()
                                         .requestMatchers("/api/users/signIn").permitAll()
+                                        .requestMatchers("/api/users/signOut").authenticated()
                                         .requestMatchers("/api/teacher/**").permitAll()
+                                        .requestMatchers("/api/comment/**").authenticated()
+                                        .requestMatchers("/api/interaction/**").authenticated()
+                                        .requestMatchers("/api/notification/**").authenticated()
                                         .requestMatchers("/api/users/chat").permitAll()
-                                        .requestMatchers(HttpMethod.POST).permitAll()
-                                        .requestMatchers(HttpMethod.GET).permitAll()
+                                        .requestMatchers("/api/search/**").authenticated()
+                                        .requestMatchers("/api/post/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+//                                        .requestMatchers(HttpMethod.POST).permitAll()
+//                                        .requestMatchers(HttpMethod.GET).permitAll()
+
                         //  .anyRequest().authenticated()
                 );
         //.httpBasic(Customizer.withDefaults());

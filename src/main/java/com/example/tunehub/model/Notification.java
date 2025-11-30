@@ -30,6 +30,9 @@ public class Notification {
     @Enumerated(EnumType.STRING)
     private ETargetType targetType;
 
+    @Enumerated(EnumType.STRING)
+    private ENotificationCategory category;
+
     private Long targetId;
 
     private boolean isRead = false;
@@ -48,28 +51,9 @@ public class Notification {
         this.targetId = targetId;
         this.isRead = false; // ברירת מחדל: לא נקרא
 
+        this.category = getCategoryByType(type);
         // יצירת Title ו-Message (ראה הסבר בסעיף 2)
         setTitleAndMessageBasedOnType(type, actor);
-    }
-
-    private void setTitleAndMessageBasedOnType(ENotificationType type, Users actor) {
-        // נניח של-Users יש getName()
-        String actorName = (actor != null) ? actor.getName() : "משתמש";
-
-        switch (type) {
-            case NEW_LIKE:
-                this.title = "לייק חדש!";
-                this.message = actorName + " אהב את הפוסט שלך.";
-                break;
-            case FOLLOW_REQUEST:
-                this.title = "בקשת מעקב";
-                this.message = actorName + " רוצה לעקוב אחריך.";
-                break;
-            // ... הוסף לוגיקה לכל ENotificationType ...
-            default:
-                this.title = "הודעה חדשה";
-                this.message = "יש לך הודעה חדשה";
-        }
     }
 
     public Notification(Long id, Users user, Users actor, ENotificationType type, String title, String message, ETargetType targetType, Long targetId, boolean isRead, Instant createdAt) {
@@ -164,5 +148,174 @@ public class Notification {
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
+
+    public ENotificationCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ENotificationCategory category) {
+        this.category = category;
+    }
+
+
+
+    public void setTitleAndMessageBasedOnType(ENotificationType type, Users actor) {
+
+        String actorName = (actor != null) ? actor.getName() : "Someone";
+
+        switch (type) {
+
+            // -------------------------
+            // Likes & Favorites
+            // -------------------------
+            case LIKE_POST -> {
+                this.title = "New Engagement";
+                this.message = "people liked your post.";
+            }
+            case LIKE_COMMENT -> {
+                this.title = "New Engagement";
+                this.message = "people liked your comment.";
+            }
+            case LIKE_MUSIC -> {
+                this.title = "New Engagement";
+                this.message = "people liked your music track.";
+            }
+            case FAVORITE_POST -> {
+                this.title = "New Engagement";
+                this.message = "people added your post to favorites.";
+            }
+            case FAVORITE_MUSIC -> {
+                this.title = "New Engagement";
+                this.message = "people added your music track to favorites.";
+            }
+
+            // -------------------------
+            // Comments on post
+            // -------------------------
+            case COMMENT_ON_POST -> {
+                this.title = "New Comment on Your Post";
+                this.message = actorName + " commented on your post.";
+            }
+
+            // -------------------------
+            // Follow Updates
+            // -------------------------
+            case FOLLOWEE_NEW_POST -> {
+                this.title = "New Activity from Someone You Follow";
+                this.message = actorName + " posted new content.";
+            }
+            case FOLLOWEE_NEW_MUSIC -> {
+                this.title = "New Activity from Someone You Follow";
+                this.message = actorName + " uploaded new music.";
+            }
+            case FOLLOWEE_NEW_PROFILE_PICTURE -> {
+                this.title = "New Activity from Someone You Follow";
+                this.message = actorName + " updated their profile picture.";
+            }
+            case FOLLOWEE_NEW_VIDEO -> {
+                this.title = "New Activity from Someone You Follow";
+                this.message = actorName + " uploaded a new video.";
+            }
+            case FOLLOWEE_PROFILE_UPDATED -> {
+                this.title = "New Activity from Someone You Follow";
+                this.message = actorName + " updated their profile.";
+            }
+
+            // -------------------------
+            // Follow Requests
+            // -------------------------
+            case FOLLOW_REQUEST_RECEIVED -> {
+                this.title = "New Follow Request";
+                this.message = actorName + " wants to follow you.";
+            }
+            case FOLLOWER_REMOVED -> {
+                this.title = "Follower Update";
+                this.message = actorName + " removed you from their followers.";
+            }
+
+            // -------------------------
+            // Approved Follows
+            // -------------------------
+            case FOLLOW_REQUEST_ACCEPTED -> {
+                this.title = "Follow Request Accepted";
+                this.message = actorName + " approved your follow request.";
+            }
+            case FOLLOW_REQUEST_DECLINED -> {
+                this.title = "Follow Request Declined";
+                this.message = actorName + " declined your follow request.";
+            }
+
+            // -------------------------
+            // Admin
+            // -------------------------
+            case ADMIN_WARNING_POST -> {
+                this.title = "Content Warning";
+                this.message = "Your post violates our content guidelines. Continued issues may result in account removal.";
+            }
+            case ADMIN_WARNING_COMMENT -> {
+                this.title = "Content Warning";
+                this.message = "Your comment violates our content guidelines. Continued issues may result in account removal.";
+            }
+            case ADMIN_DELETED_POST -> {
+                this.title = "Post Removed";
+                this.message = "Your post was removed due to a policy violation.";
+            }
+            case ADMIN_DELETED_COMMENT -> {
+                this.title = "Comment Removed";
+                this.message = "Your comment was removed due to a policy violation.";
+            }
+            case ADMIN_PROMOTION_MANAGER -> {
+                this.title = "You’ve Been Granted Moderator Privileges";
+                this.message = "You can now moderate user content.";
+            }
+            case ADMIN_PROMOTION_SUPER_MANAGER -> {
+                this.title = "You’ve Been Granted Super-Moderator Privileges";
+                this.message = "You can now assign moderator roles to others.";
+            }
+
+            // -------------------------
+            // Default
+            // -------------------------
+            default -> {
+                this.title = "New Notification";
+                this.message = "You have a new notification.";
+            }
+        }
+    }
+
+
+
+    public ENotificationCategory getCategoryByType(ENotificationType type) {
+        return switch (type) {
+            // Likes & Favorites
+            case LIKE_POST, LIKE_COMMENT, LIKE_MUSIC,
+                 FAVORITE_POST, FAVORITE_MUSIC
+                    -> ENotificationCategory.LIKES_FAVORITES;
+
+            // Comments
+            case COMMENT_ON_POST
+                    -> ENotificationCategory.COMMENTS;
+
+            // Follow Updates
+            case FOLLOWEE_NEW_POST, FOLLOWEE_NEW_MUSIC, FOLLOWEE_NEW_PROFILE_PICTURE,
+                 FOLLOWEE_NEW_VIDEO, FOLLOWEE_PROFILE_UPDATED
+                    -> ENotificationCategory.FOLLOW_UPDATES;
+
+            // Approved Follows
+            case FOLLOW_REQUEST_ACCEPTED, FOLLOW_REQUEST_DECLINED
+                    -> ENotificationCategory.APPROVED_FOLLOWS;
+
+            // Follow Requests
+            case FOLLOW_REQUEST_RECEIVED, FOLLOWER_REMOVED
+                    -> ENotificationCategory.FOLLOW_REQUESTS;
+
+            // Admin
+            case ADMIN_WARNING_POST, ADMIN_WARNING_COMMENT,
+                 ADMIN_DELETED_POST, ADMIN_DELETED_COMMENT,
+                 ADMIN_PROMOTION_MANAGER, ADMIN_PROMOTION_SUPER_MANAGER
+                    -> ENotificationCategory.ADMIN;
+        };
+    }
+
 }
 

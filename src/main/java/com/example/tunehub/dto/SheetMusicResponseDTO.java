@@ -8,7 +8,7 @@ import java.util.List;
 
 public record SheetMusicResponseDTO (
         Long id,
-        String name,
+        String title,
         List<InstrumentResponseDTO> instruments, // אם יש DTO תגובה נפרד
         List<SheetMusicCategoryResponseDTO> categories, // אם יש DTO תגובה נפרד
         EDifficultyLevel level,

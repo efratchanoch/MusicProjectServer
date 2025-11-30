@@ -30,12 +30,12 @@ public class Like {
     private Instant createdAt;
 
     public Like() {}
-
-    public Like(Long id, ETargetType targetType, Long targetId) {
-        this.id = id;
+    public Like(Long userId, ETargetType targetType, Long targetId) {
+        this.userId = userId;   // חשוב! לא id
         this.targetType = targetType;
         this.targetId = targetId;
     }
+
 
     public Like(Long id, Long userId, ETargetType targetType, Long targetId, Instant createdAt) {
         this.id = id;

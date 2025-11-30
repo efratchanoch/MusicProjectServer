@@ -4,5 +4,6 @@ public enum EFollowStatus {
     PENDING,
     APPROVED,
     DENIED,
+    NONE
 //    CANCELED,
 }

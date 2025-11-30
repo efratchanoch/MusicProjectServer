@@ -1,6 +1,7 @@
 package com.example.tunehub.service;
 
 import com.example.tunehub.model.Post;
+import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.Teacher;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,8 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
     List<Teacher> findAllByExperience(int experience);
 
     List<Teacher> findAllByInstrumentsId(Long instrument_id);
+
+    List<Teacher> findAllByNameContainingIgnoreCase(String name);
+
+    List<Teacher> findAllTop5ByNameContainingIgnoreCase(String name);
 }

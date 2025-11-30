@@ -3,6 +3,7 @@ package com.example.tunehub.service;
 import com.example.tunehub.dto.UsersMusiciansDTO;
 import com.example.tunehub.dto.UsersProfileFullDTO;
 import com.example.tunehub.model.EUserType;
+import com.example.tunehub.model.SheetMusic;
 import com.example.tunehub.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-public interface UsersRepository  extends JpaRepository<Users, Long> {
+public interface UsersRepository extends JpaRepository<Users, Long> {
 
     Users findUsersByName(String name);
 
@@ -21,7 +22,8 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
     Users findUsersById(Long id);
 
-
+    List<Users> findAllByNameContainingIgnoreCase(String name);
+    List<Users> findAllTop5ByNameContainingIgnoreCase(String name);
 
     List<Users> findUsersByEUserType(EUserType user_type);//
 
@@ -36,8 +38,6 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
     void deleteById(Long id);
 
 
-
-
 //    UsersMusiciansDTO findMusicianDtoById(Long id);
 
     List<Users> findAllByLastActivityTimestampBeforeAndIsActiveIsTrue(Date threshold);
@@ -46,7 +46,6 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
     Users findByName(String name);
 
-    List<Users> findByNameContainingIgnoreCase(String namePart);
 
 
     @Modifying

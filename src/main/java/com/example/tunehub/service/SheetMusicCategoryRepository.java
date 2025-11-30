@@ -17,4 +17,8 @@ public interface SheetMusicCategoryRepository extends JpaRepository<SheetMusicCa
     Optional<SheetMusicCategory> findByNameContainingIgnoreCase(String partial);
 
     SheetMusicCategory findByName(String name);
+
+    List<SheetMusicCategory> findAllByNameContainingIgnoreCase(String name);
+
+    List<SheetMusicCategory> findAllTop5ByNameContainingIgnoreCase(String name);
 }

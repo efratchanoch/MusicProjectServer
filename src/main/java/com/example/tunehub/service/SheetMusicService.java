@@ -22,6 +22,8 @@ public class SheetMusicService {
     private final SheetMusicCategoryRepository categoryRepository;
     private final SheetMusicMapper sheetMusicMapper;
     private final AuthService authService;
+    private final LikeRepository likeRepository;
+    private final FavoriteRepository favoriteRepository;
 
     public SheetMusicResponseDTO upload(SheetMusicUploadDTO dto, MultipartFile file, MultipartFile image) throws Exception {
 
@@ -71,6 +73,6 @@ public class SheetMusicService {
         FileUtils.uploadImage(image, uniqueImageCoverName);
 
         // 9. מיפוי ל-ResponseDTO
-        return sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s);
+        return sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s,authService.getCurrentUserId(),likeRepository,favoriteRepository);
     }
 }

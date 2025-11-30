@@ -164,6 +164,26 @@ public class UsersController {
         }
     }
 
+    @GetMapping("musiciansByName/{name}")
+    public ResponseEntity<List<UsersMusiciansDTO>> getMusiciansByName(@PathVariable String name) {
+        try {
+            List<Users> u = usersRepository.findAllByNameContainingIgnoreCase(name);
+
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
+
     //Put
 // ב-UserController.java
 
@@ -200,7 +220,7 @@ public class UsersController {
             // יש לשים לב שהשדות הללו היו חסרים בקוד המקורי שהצגת לפונקציה זו, אבל היו בפונקציית @RequestBody הישנה.
             // נשאיר אותם כפי שהיו בקוד המקורי שנתת לעריכה:
              u.setIsActive(isActive);
-             //u.setUserType(userType);
+          //   u.setUserType(userType);
             u.setCity(city);
             u.setCountry(country);
             u.setDescription(description);

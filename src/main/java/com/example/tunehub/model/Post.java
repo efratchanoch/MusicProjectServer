@@ -3,7 +3,6 @@ package com.example.tunehub.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,8 +35,6 @@ public class Post {
 
     private List<String> imagesPath;
 
-    @ManyToMany
-    private List<Users> usersFavorite;
 
     @ManyToMany
     private Set<Users> mentionedUsers = new HashSet<>();
@@ -45,7 +42,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<Users> usersFavorite, Set<Users> mentionedUsers) {
+    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, Set<Users> mentionedUsers) {
         this.id = id;
         this.user = user;
         this.title = title;
@@ -57,7 +54,7 @@ public class Post {
         this.dateUploaded = dateUploaded;
         this.comments = comments;
         this.imagesPath = imagesPath;
-        this.usersFavorite = usersFavorite;
+
         this.mentionedUsers = mentionedUsers;
     }
 
@@ -157,12 +154,5 @@ public class Post {
         this.imagesPath = imagesPath;
     }
 
-    public List<Users> getUsersFavorite() {
-        return usersFavorite;
-    }
-
-    public void setUsersFavorite(List<Users> usersFavorite) {
-        this.usersFavorite = usersFavorite;
-    }
 }
 

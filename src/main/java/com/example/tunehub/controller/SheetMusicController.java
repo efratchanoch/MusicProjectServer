@@ -34,6 +34,8 @@ public class SheetMusicController {
     private final SheetAnalysisAgentService agentService;
     private final PdfTextExtractorService extractor;
     private final SheetMusicService sheetMusicService;
+    private final LikeRepository likeRepository;
+    private final FavoriteRepository favoriteRepository;
     //private HebrewTransliterator transliterator;
 
 
@@ -41,11 +43,12 @@ public class SheetMusicController {
     @GetMapping("/sheetMusicById/{id}")
     public ResponseEntity<SheetMusicResponseDTO> getSheetMusicById(@PathVariable Long id) {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             SheetMusic s = sheetMusicRepository.findSheetMusicById(id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -54,11 +57,12 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusic")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusic() {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             List<SheetMusic> s = sheetMusicRepository.findAll();
             if (s.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
 
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,11 +73,12 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusicByUserId/{id}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByUserId(@PathVariable Long id) {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUser_Id(id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -93,13 +98,14 @@ public class SheetMusicController {
 //    }
 
     @GetMapping("/sheetsMusicByTitle/{title}")
-    public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByTitle(String title) {
+    public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByTitle(@PathVariable String title) {
         try {
-            List<SheetMusic> s = sheetMusicRepository.findAllByTitle(title);
+            Long currentUserId = authService.getCurrentUserId();
+            List<SheetMusic> s = sheetMusicRepository.findAllByTitleContainingIgnoreCase(title);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -108,11 +114,12 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusicByCategory/{category_id}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByCategory(@PathVariable Long category_id) {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             List<SheetMusic> s = sheetMusicRepository.findAllByCategories_Id(category_id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -121,11 +128,12 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusicByScale/{scale}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByScale(@PathVariable EScale scale) {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByScale(scale);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -134,11 +142,12 @@ public class SheetMusicController {
     @GetMapping("/sheetsMusicByLevel/{level}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByLevel(@PathVariable EDifficultyLevel level) {
         try {
+            Long currentUserId = authService.getCurrentUserId();
             List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByLevel(level);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
+            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -182,7 +191,7 @@ public class SheetMusicController {
     @PostMapping(value = "/uploadSheetMusic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
             @RequestPart("file") MultipartFile file,
-            @RequestPart(name  = "image", required = false) MultipartFile image,
+            @RequestPart(name = "image", required = false) MultipartFile image,
             @RequestPart("data") SheetMusicUploadDTO dto) {
 
         try {
@@ -193,7 +202,6 @@ public class SheetMusicController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
 //    @GetMapping("/{id}")

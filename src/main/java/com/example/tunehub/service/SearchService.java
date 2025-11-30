@@ -22,12 +22,12 @@ public class SearchService {
 
     public List<UsersDTO> searchUsers(String q) {
         if (q == null || q.isBlank()) return List.of();
-        return usersRepository.findByNameContainingIgnoreCase(q)
+        return usersRepository.findAllByNameContainingIgnoreCase(q)
                 .stream()
                 .map(u -> new UsersDTO(u.getId(), u.getName()))
                 .toList();
     }
-
+//
 //    public List<PostResponseDTO> searchPosts(String q) {
 //        if (q == null || q.isBlank()) return List.of();
 //        return postRepo.searchByTitleOrContent(q)
@@ -51,6 +51,6 @@ public class SearchService {
 //                searchSheets(q)
 //        );
 //    }
-
+//
 
 }

@@ -10,4 +10,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     Optional<Favorite> findByUserIdAndTargetTypeAndTargetId(Long currentUserId, ETargetType targetType, Long targetId);
 
     boolean existsByUserIdAndTargetTypeAndTargetId(Long currentUserId, ETargetType targetType, Long targetId);
+
+    int countByTargetTypeAndTargetId(ETargetType eTargetType, Long id);
+
+    void deleteAllByTargetTypeAndTargetId(ETargetType eTargetType, Long id);
 }

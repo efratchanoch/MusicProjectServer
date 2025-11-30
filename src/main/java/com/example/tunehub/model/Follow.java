@@ -33,11 +33,12 @@ public class Follow {
     }
 
 
-    public Follow(Long followingId, Long followerId, EFollowStatus status) {
-        this.followingId = followingId;
+    public Follow(Long followerId, Long followingId, EFollowStatus status) {
         this.followerId = followerId;
+        this.followingId = followingId;
         this.status = status;
     }
+
 
     public Follow(Long id, Long followerId, Long followingId, EFollowStatus status, Instant createdAt) {
         this.id = id;

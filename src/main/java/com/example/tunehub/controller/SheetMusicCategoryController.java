@@ -40,10 +40,10 @@ public class SheetMusicCategoryController {
         }
     }
 
-    @GetMapping("/sheetMusicByName/{name}")
-    public ResponseEntity<List<SheetMusicCategoryResponseDTO>> getSheetMusicByName(@PathVariable String name) {
+    @GetMapping("/categoriesByName/{name}")
+    public ResponseEntity<List<SheetMusicCategoryResponseDTO>> getCategoriesByNamee(@PathVariable String name) {
         try {
-            List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAllByName(name);
+            List<SheetMusicCategory> sc = sheetMusicCategoryRepository.findAllByNameContainingIgnoreCase(name);
             if (sc == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }

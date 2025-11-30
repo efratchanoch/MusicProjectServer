@@ -7,10 +7,7 @@ import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.security.CustomUserDetails;
-import com.example.tunehub.service.CommentMapper;
-import com.example.tunehub.service.CommentRepository;
-import com.example.tunehub.service.PostRepository;
-import com.example.tunehub.service.UsersRepository;
+import com.example.tunehub.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,14 +30,20 @@ public class CommentController {
     private CommentRepository commentRepository;
     private CommentMapper commentMapper;
     private PostRepository postRepository;
+    private LikeRepository likeRepository;
+    private AuthService authService;
 
     @Autowired
-    public CommentController(CommentRepository commentRepository, CommentMapper commentMapper, PostRepository postRepository,UsersRepository usersRepository) {
+    public CommentController(UsersRepository usersRepository, CommentRepository commentRepository, CommentMapper commentMapper, PostRepository postRepository, LikeRepository likeRepository, AuthService authService) {
+        this.usersRepository = usersRepository;
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
         this.postRepository = postRepository;
-        this.usersRepository= usersRepository;
+        this.likeRepository = likeRepository;
+        this.authService = authService;
     }
+
+
 
 
     //Get
@@ -206,26 +209,25 @@ public class CommentController {
 //    }
 
     @PostMapping("/upload")
-    public CommentDTO uploadComment(@RequestBody CommentUploadDTO dto, @RequestParam Long userId) {
+    public CommentDTO uploadComment(@RequestBody CommentUploadDTO dto) {
         // מוצאים את הפוסט והמשתמש
-        Post post = postRepository.findById(dto.getPostId())
+        Post post = postRepository.findById(dto.postId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = authService.getCurrentUser();
 
         // ממפים את ה-UploadDTO ל-Entity בעזרת Mapper
         Comment comment = commentMapper.commentUploadDTOToComment(dto);
         comment.setPost(post);
         comment.setUser(user);
         comment.setDateUploaded(LocalDate.now());
-        comment.setLikes(0);
+
 
         // שומרים את התגובה במסד
         Comment savedComment = commentRepository.save(comment);
 
         // ממפים את ה-Entity ל-DTO בעזרת Mapper ומחזירים
-        return commentMapper.commentToCommentDTO(savedComment);
+        return commentMapper.commentToCommentDTO(savedComment,user.getId(),likeRepository);
     }
 
     @GetMapping("/byPost/{postId}/paged")
@@ -243,7 +245,7 @@ public class CommentController {
             // המרה ל-DTO
             List<CommentDTO> dtos = commentsPage.getContent()
                     .stream()
-                    .map(commentMapper::commentToCommentDTO)
+                    .map(comment -> commentMapper.commentToCommentDTO(comment, authService.getCurrentUserId(), likeRepository))
                     .collect(Collectors.toList());
 
             // הכנת DTO עם מידע על מספר הדפים והתגובות
