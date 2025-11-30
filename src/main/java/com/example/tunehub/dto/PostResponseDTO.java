@@ -8,7 +8,8 @@ public class PostResponseDTO {
     private String title;        // כותרת הפוסט
     private String content;
     private int hearts;          // לבבות
-    private int likes;           // לייקים
+    private int likes;
+    private Double rating;
     private String audioPath;    // שם הקובץ של האודיו (אם קיים)
     private String videoPath;    // שם הקובץ של הווידאו (אם קיים)
     private List<String> imagesBase64; // תמונות בפורמט Base64
@@ -86,6 +87,14 @@ public class PostResponseDTO {
         this.imagesBase64 = imagesBase64;
     }
 
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
 
     public String getDateUploaded() {
         return dateUploaded;

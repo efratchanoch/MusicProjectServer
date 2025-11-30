@@ -12,11 +12,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface PostRepository  extends JpaRepository<Post, Long> {
-    Post findUsersById(Long id);
+    //Post findUsersById(Long id);
 
     Post findPostById(Long id);
 
-    List<Post> findAllByUserId(Long id);
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
+    List<Post> findAllByUser_Id(@Param("userId") Long id);
+
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
+    List<Post> findAllUserPosts(@Param("userId") Long id);
 
     List<Post> findByDateUploaded(LocalDate dateUploaded);
 

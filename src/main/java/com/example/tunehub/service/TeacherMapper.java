@@ -1,14 +1,21 @@
 package com.example.tunehub.service;
 
 import com.example.tunehub.dto.*;
+import com.example.tunehub.model.Teacher;
 import com.example.tunehub.model.Users;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.io.IOException;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {InstrumentMapper.class}) // 💡 ודא ש-InstrumentMapper מוגדר
 public interface TeacherMapper {
 
+    List<TeacherListingDTO> toTeacherListingDTOList(List<Teacher> teachers);
 
+    @Mapping(target = "name", source = "user.name")
+    @Mapping(target = "city", source = "user.city")
+    @Mapping(target = "country", source = "user.country")
+    TeacherListingDTO toTeacherListingDTO(Teacher teacher);
 }

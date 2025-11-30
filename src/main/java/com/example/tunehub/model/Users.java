@@ -25,11 +25,17 @@ public class Users {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private EUserType EUserType;
+    @ElementCollection(targetClass = EUserType.class)
+    @CollectionTable(name = "user_types", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<EUserType> userTypes = new HashSet<>();
 
     private LocalDate createdAt;
 
     private LocalDate editedIn;
+
+    @Transient // ⬅️ חשוב! השדה הזה לא יישמר בבסיס הנתונים (MongoDB/SQL)
+    private Double rating;
 
     private boolean isActive = false;
 
@@ -43,8 +49,11 @@ public class Users {
     @ManyToMany
     private List<Instrument> instrumentsUsers;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private Teacher teacher;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, optional = true, cascade = CascadeType.ALL)
+    private Teacher teacherDetails;
 
     private String imageProfilePath;
 
@@ -75,21 +84,23 @@ public class Users {
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, Set<EUserType> userTypes, LocalDate createdAt, LocalDate editedIn, Double rating, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, Teacher teacherDetails, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.email = email;
         this.description = description;
-        this.EUserType = EUserType;
+        this.userTypes = userTypes;
         this.createdAt = createdAt;
         this.editedIn = editedIn;
+        this.rating = rating;
         this.isActive = isActive;
         this.lastActivityTimestamp = lastActivityTimestamp;
         this.city = city;
         this.country = country;
         this.instrumentsUsers = instrumentsUsers;
         this.teacher = teacher;
+        this.teacherDetails = teacherDetails;
         this.imageProfilePath = imageProfilePath;
         this.sheetsMusic = sheetsMusic;
         this.posts = posts;
@@ -104,6 +115,7 @@ public class Users {
     public List<Notification> getReceivedNotifications() {
         return receivedNotifications;
     }
+
 
     public void setReceivedNotifications(List<Notification> receivedNotifications) {
         this.receivedNotifications = receivedNotifications;
@@ -125,6 +137,14 @@ public class Users {
         this.followerCount = followerCount;
     }
 
+    public Teacher getTeacherDetails() {
+        return teacherDetails;
+    }
+
+    public void setTeacherDetails(Teacher teacherDetails) {
+        this.teacherDetails = teacherDetails;
+    }
+
     public Set<Post> getMentionedInPosts() {
         return mentionedInPosts;
     }
@@ -138,6 +158,13 @@ public class Users {
     }
 
 
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
 
     public void setCity(String city) {
         this.city = city;
@@ -223,12 +250,12 @@ public class Users {
         this.description = description;
     }
 
-    public EUserType getUserType() {
-        return EUserType;
+    public Set<EUserType> getUserTypes() {
+        return userTypes;
     }
 
-    public void setUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
+    public void setUserTypes(Set<EUserType> userTypes) {
+        this.userTypes = userTypes;
     }
 
     public LocalDate getCreatedAt() {
@@ -299,13 +326,7 @@ public class Users {
         this.comments = comments;
     }
 
-    public EUserType getEUserType() {
-        return EUserType;
-    }
 
-    public void setEUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
-    }
 
     public Set<Role> getRoles() {
         return roles;

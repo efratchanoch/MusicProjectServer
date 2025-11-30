@@ -10,6 +10,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import com.example.tunehub.service.UsersRatingUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,11 +46,14 @@ public class SheetMusicController {
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+
             return new ResponseEntity<>(sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     @GetMapping("/sheetsMusic")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusic() {
@@ -58,6 +62,8 @@ public class SheetMusicController {
             if (s.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
+            UsersRatingUtils.calculateAndSetSheetMusicStarRating( s);
+
             return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
         } catch (Exception e) {
 

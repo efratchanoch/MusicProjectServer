@@ -3,6 +3,7 @@ package com.example.tunehub.dto;
 import com.example.tunehub.model.EUserType;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 public record UsersMusiciansDTO (
          UsersProfileDTO profile,
@@ -11,7 +12,8 @@ public record UsersMusiciansDTO (
          boolean isActive,
          String description,
          InstrumentResponseDTO instruments,
-         EUserType EUserType,
-         LocalDate createDate
+         Set<EUserType> userTypes,
+         LocalDate createdAt,
+         TeacherListingDTO teacher
 ){}
 

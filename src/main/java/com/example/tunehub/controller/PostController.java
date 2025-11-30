@@ -2,6 +2,7 @@ package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.PostResponseDTO;
 import com.example.tunehub.dto.PostUploadDTO;
+import com.example.tunehub.model.Comment;
 import com.example.tunehub.model.Post;
 import com.example.tunehub.model.Users;
 import com.example.tunehub.security.CustomUserDetails;
@@ -32,13 +33,15 @@ public class PostController {
     private PostMapper postMapper;
     private UsersRepository usersRepository;
     private AuthService authService;
+    private CommentRepository commentRepository;
 
     @Autowired
-    public PostController(PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService) {
+    public PostController(PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService,CommentRepository commentRepository) {
         this.postRepository = postRepository;
         this.postMapper = postMapper;
         this.usersRepository = usersRepository;
         this.authService = authService;
+        this.commentRepository= commentRepository;
     }
 
 
@@ -62,12 +65,29 @@ public class PostController {
     @GetMapping("/posts")
     public ResponseEntity<List<PostResponseDTO>> getPosts() {
         try {
-            List<Post> p = postRepository.findAll();
-            if (p.isEmpty()) {
+            List<Post> posts = postRepository.findAll();
+            if (posts.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
+
+            // לולאה לחישוב דירוג עבור כל פוסט
+            for (Post post : posts) {
+
+                // 1. שלוף את התגובות באמצעות ה-Repository
+                // משתמשים בשיטה findByPostId שהגדרנו למעלה.
+                List<Comment> comments = commentRepository.findByPostId(post.getId());
+
+                // 2. חשב את הדירוג המשוקלל
+                double starRating = UsersRatingUtils.calculatePostStarRating(post, comments);
+
+                // 3. עדכן את שדה הדירוג של הפוסט
+                post.setRating(starRating);
+            }
+
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(posts), HttpStatus.OK);
+
         } catch (Exception e) {
+            System.err.println("Error fetching posts and calculating rating: " + e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -76,7 +96,8 @@ public class PostController {
     @GetMapping("/postsByUserId/{id}")
     public ResponseEntity<List<PostResponseDTO>> getPostsByUserId(@PathVariable Long id) {
         try {
-            List<Post> p = postRepository.findAllByUserId(id);
+            List<Post> p = postRepository.findAllUserPosts(id);
+            System.out.println("Backend returning " + p.size() + " posts for ID " + id);
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }

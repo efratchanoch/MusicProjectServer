@@ -8,8 +8,17 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+public class Teacher {
 
-public class Teacher extends Users {
+    @Id
+    private Long id;
+
+    @OneToOne
+    @MapsId                 // ⬅️ קריטי! אומר ל-JPA להשתמש באותו ה-ID של המשתמש
+    @JoinColumn(name = "id")
+    private Users user;
+
+
 
     private double pricePerLesson;
 
@@ -40,8 +49,9 @@ public class Teacher extends Users {
         this.instruments = instruments;
     }
 
-    public Teacher(Long id, String name, String password, String email, String description, EUserType EUserType, LocalDate createdAt, LocalDate editedIn, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
-        super(id, name, password, email, description, EUserType, createdAt, editedIn, isActive, lastActivityTimestamp, city, country, instrumentsUsers, teacher, imageProfilePath, sheetsMusic, posts, comments, mentionedInPosts, receivedNotifications, sentNotifications, followerCount, roles);
+    public Teacher(Long id, Users user, double pricePerLesson, int experience, double lessonDuration, double rating, List<Users> students, LocalDate dateUploaded, List<Instrument> instruments) {
+        this.id = id;
+        this.user = user;
         this.pricePerLesson = pricePerLesson;
         this.experience = experience;
         this.lessonDuration = lessonDuration;
@@ -49,6 +59,22 @@ public class Teacher extends Users {
         this.students = students;
         this.dateUploaded = dateUploaded;
         this.instruments = instruments;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 
     public double getPricePerLesson() {
@@ -86,6 +112,10 @@ public class Teacher extends Users {
     public List<Users> getStudents() {
         return students;
     }
+
+
+
+
 
     public void setStudents(List<Users> students) {
         this.students = students;

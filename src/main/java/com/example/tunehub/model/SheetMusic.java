@@ -24,6 +24,8 @@ public class SheetMusic {
 
     private int downloads = 0;
 
+    @Transient // ⬅️ חשוב! השדה הזה לא יישמר בבסיס הנתונים (MongoDB/SQL)
+    private Double rating;
     private LocalDate dateUploaded;
 
     @Enumerated(EnumType.STRING)
@@ -49,7 +51,7 @@ public class SheetMusic {
     public SheetMusic() {
     }
 
-    public SheetMusic(Long id, String title, EScale scale, int likes, String fileName, int hearts, int downloads, LocalDate dateUploaded, EDifficultyLevel level, int pages, Users user, List<Instrument> instruments, List<SheetMusicCategory> categories, String composer, String lyricist, String imageCoverName) {
+    public SheetMusic(Long id, String title, EScale scale, int likes, String fileName, int hearts, int downloads, Double rating, LocalDate dateUploaded, EDifficultyLevel level, int pages, Users user, List<Instrument> instruments, List<SheetMusicCategory> categories, String composer, String lyricist, String imageCoverName) {
         this.id = id;
         this.title = title;
         this.scale = scale;
@@ -57,6 +59,7 @@ public class SheetMusic {
         this.fileName = fileName;
         this.hearts = hearts;
         this.downloads = downloads;
+        this.rating = rating;
         this.dateUploaded = dateUploaded;
         this.level = level;
         this.pages = pages;
@@ -186,6 +189,14 @@ public class SheetMusic {
 
     public void setLyricist(String lyricist) {
         this.lyricist = lyricist;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 
     public String getImageCoverName() {

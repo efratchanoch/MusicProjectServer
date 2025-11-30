@@ -25,6 +25,8 @@ public class Post {
 
     private int likes = 0;
 
+    private Double rating;
+
     private String audioPath;
 
     private String videoPath;
@@ -45,13 +47,14 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, Users user, String title, String content, int hearts, int likes, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<Users> usersFavorite, Set<Users> mentionedUsers) {
+    public Post(Long id, Users user, String title, String content, int hearts, int likes, Double rating, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<Users> usersFavorite, Set<Users> mentionedUsers) {
         this.id = id;
         this.user = user;
         this.title = title;
         this.content = content;
         this.hearts = hearts;
         this.likes = likes;
+        this.rating = rating;
         this.audioPath = audioPath;
         this.videoPath = videoPath;
         this.dateUploaded = dateUploaded;
@@ -155,6 +158,14 @@ public class Post {
 
     public void setImagesPath(List<String> imagesPath) {
         this.imagesPath = imagesPath;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 
     public List<Users> getUsersFavorite() {

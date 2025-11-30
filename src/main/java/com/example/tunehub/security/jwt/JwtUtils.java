@@ -1,5 +1,6 @@
 package com.example.tunehub.security.jwt;
 
+import com.example.tunehub.model.Users;
 import io.jsonwebtoken.security.Keys;
 import com.example.tunehub.security.CustomUserDetails;
 import io.jsonwebtoken.*;
@@ -96,4 +97,37 @@ public class JwtUtils {
         ResponseCookie cookie= ResponseCookie.from("securitySample",null).path("/api").build();
         return cookie;
     }
+
+
+    // ******** תוספות חדשות ********
+
+    //********תפקיד הפונקציה: יצירת קוקי עבור ה-Refresh Token (תוקף ארוך)
+// ההגדרה HttpOnly היא קריטית לאבטחה!
+    public ResponseCookie generateRefreshCookie(String refreshToken) {
+        // מוגדר לשנה, path מוגבל לנקודת הקצה של הריענון
+        return ResponseCookie.from("refreshToken", refreshToken)
+                .path("/api/auth/refreshtoken")
+                .maxAge(365 * 24 * 60 * 60) // שנה בשניות
+                .httpOnly(true)
+                .build();
+    }
+
+    //********תפקיד הפונקציה: חילוץ ה-Refresh Token מהקוקי
+    public String getRefreshJwtFromCookies(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
+        if (cookie != null) {
+            return cookie.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    //********תפקיד הפונקציה: יצירת Access Token Cookie חדש (תוקף קצר)
+// משמש לרענון ה-Access Token בלבד
+    public ResponseCookie generateAccessCookie(String accessToken) {
+        // שם הקוקי הוא "securitySample" כפי שהיה לך
+        return ResponseCookie.from("securitySample", accessToken)
+                .path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
+    }
+
 }

@@ -19,7 +19,7 @@ public record SheetMusicResponseDTO (
         int downloads,
         int pages,
         String imageCoverName,
-
+        double rating,
         boolean isLiked,
         boolean isFavorite,
 
