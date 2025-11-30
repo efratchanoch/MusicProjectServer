@@ -1,6 +1,7 @@
 package com.example.tunehub.security;
 
 
+
 import com.example.tunehub.security.jwt.AuthEntryPointJwt;
 import com.example.tunehub.security.jwt.AuthTokenFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,7 @@ import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 import java.util.Arrays;
 import java.util.List;
 
+//הגדרות אבטחה
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -71,6 +73,7 @@ public class WebSecurityConfig {
     }
 
 
+
     //********תפקיד הפונקציה:
     //מגדירה את שרשרת מסנן האבטחה
     @Bean
@@ -104,6 +107,8 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/comment/**").authenticated()
                                         .requestMatchers("/api/interaction/**").authenticated()
                                         .requestMatchers("/api/notification/**").authenticated()
+                                        .requestMatchers("/api/teachers/**").permitAll()
+                                        .requestMatchers("api/role/**").permitAll()
                                         .requestMatchers("/api/users/chat").permitAll()
                                         .requestMatchers("/api/search/**").authenticated()
                                         .requestMatchers("/api/post/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

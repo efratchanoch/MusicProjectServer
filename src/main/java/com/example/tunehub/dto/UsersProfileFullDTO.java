@@ -1,7 +1,9 @@
 package com.example.tunehub.dto;
 import com.example.tunehub.model.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UsersProfileFullDTO {
     private String name;
@@ -10,8 +12,7 @@ public class UsersProfileFullDTO {
 
     private String description;
 
-    private EUserType EUserType;
-
+    private Set<EUserType> userTypes = new HashSet<>();
     private LocalDate createdAt;
 
     private LocalDate editedIn;
@@ -22,13 +23,15 @@ public class UsersProfileFullDTO {
 
     private String country;
 
+    private Double rating;
+
     private List<UsersProfileDTO> followers;
 
     private List<UsersProfileDTO> following;
 
     private List<InstrumentResponseDTO> instrumentsUsers;
 
-    private UsersProfileDTO teacher;
+    private TeacherListingDTO teacher;
 
     private String imageProfilePath;
 
@@ -66,12 +69,12 @@ public class UsersProfileFullDTO {
         this.description = description;
     }
 
-    public EUserType getEUserType() {
-        return EUserType;
+    public Set<EUserType> getUserTypes() {
+        return userTypes;
     }
 
-    public void setEUserType(EUserType EUserType) {
-        this.EUserType = EUserType;
+    public void setUserTypes(Set<EUserType> userTypes) {
+        this.userTypes = userTypes;
     }
 
     public LocalDate getCreatedAt() {
@@ -138,12 +141,20 @@ public class UsersProfileFullDTO {
         this.instrumentsUsers = instrumentsUsers;
     }
 
-    public UsersProfileDTO getTeacher() {
+    public TeacherListingDTO getTeacher() {
         return teacher;
     }
 
-    public void setTeacher(UsersProfileDTO teacher) {
+    public void setTeacher(TeacherListingDTO teacher) {
         this.teacher = teacher;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
     }
 
     public String getImageProfilePath() {

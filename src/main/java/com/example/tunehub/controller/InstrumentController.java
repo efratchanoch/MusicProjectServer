@@ -27,11 +27,17 @@ public class InstrumentController {
     @GetMapping("/instruments")
     public ResponseEntity<List<InstrumentResponseDTO>> getInstruments() {
         try {
-            List<Instrument> i = instrumentRepository.findAll();
-            if (i == null) {
+            List<Instrument> instrumentsList = instrumentRepository.findAll();
+
+            if (instrumentsList == null || instrumentsList.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(instrumentMapper.instrumentListToInstrumentResponseDTOList(i), HttpStatus.OK);
+
+            List<InstrumentResponseDTO> dtoList =
+                    instrumentMapper.instrumentListToInstrumentResponseDTOList(instrumentsList);
+
+            return new ResponseEntity<>(dtoList, HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

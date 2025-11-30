@@ -1,14 +1,20 @@
 package com.example.tunehub.controller;
 
+import com.example.tunehub.constants.CountryConstants;
+import com.example.tunehub.dto.TeacherListingDTO;
 import com.example.tunehub.dto.UsersMusiciansDTO;
+import com.example.tunehub.model.EUserType;
 import com.example.tunehub.model.Role;
 import com.example.tunehub.model.Teacher;
+import com.example.tunehub.model.Users;
 import com.example.tunehub.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import com.example.tunehub.dto.TeacherListingDTO; // ⬅️ ייבוא DTO
+import com.example.tunehub.service.TeacherMapper; // ⬅️ ייבוא המאפר
 
 import java.util.List;
 
@@ -46,6 +52,7 @@ public class TeacherController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     @GetMapping("/teachers")
     public ResponseEntity<List<Teacher>> getTeachers() {
@@ -111,6 +118,9 @@ public class TeacherController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+
 
 
     @GetMapping("/teachersByExperience/{experience}")
@@ -236,5 +246,46 @@ public class TeacherController {
 //        return ResponseEntity.ok(teachers);
 //    }
 
+    @GetMapping("/filter")
+    // ✅ שינוי: החזרת List<TeacherListingDTO>
+    public ResponseEntity<List<TeacherListingDTO>> filterTeachers(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String priceRange,
+            @RequestParam(required = false) Integer duration,
+            @RequestParam(required = false) String experience,
+            @RequestParam(required = false) Long instrumentId,
+            @RequestParam(required = false) String search
+    ) {
+        List<Teacher> teachers = teacherRepository.findTeachersByFilters(
+                city, country, priceRange, duration, experience, instrumentId, search);
 
+        List<TeacherListingDTO> dtos = teacherMapper.toTeacherListingDTOList(teachers);
+
+        return ResponseEntity.ok(dtos);
+    }
+
+    // ----------------------------------------------------------------------
+    // 2. נקודת קצה לשליפת רשימת הערים (דינמי)
+    // ----------------------------------------------------------------------
+    // GET: /api/teachers/cities
+    @GetMapping("/cities")
+    public ResponseEntity<List<String>> getAllTeacherCities() {
+        // שימוש בפונקציה מה-Custom Repository
+        List<String> cities = teacherRepository.getAllDistinctCities();
+        return ResponseEntity.ok(cities);
+    }
+
+    // ----------------------------------------------------------------------
+    // 3. נקודת קצה לשליפת רשימת המדינות (סטטי)
+    // ----------------------------------------------------------------------
+    // GET: /api/teachers/countries
+    @GetMapping("/countries")
+    public ResponseEntity<List<String>> getAvailableCountries() {
+        // שימוש ברשימה הקבועה
+        return ResponseEntity.ok(CountryConstants.COUNTRIES);
+    }
 }
+
+
+

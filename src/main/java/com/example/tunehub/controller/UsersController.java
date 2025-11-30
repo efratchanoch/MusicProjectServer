@@ -1,18 +1,20 @@
 package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.*;
-import com.example.tunehub.model.ERole;
-import com.example.tunehub.model.EUserType;
-import com.example.tunehub.model.Role;
-import com.example.tunehub.model.Users;
+import com.example.tunehub.model.*;
 import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.security.jwt.JwtUtils;
 import com.example.tunehub.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import com.example.tunehub.service.UsersRatingUtils;    // ⬅️ ייבוא ה-Utility Class
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,11 +22,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 @RestController
@@ -38,20 +43,28 @@ public class UsersController {
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
     private AIChatService aiChatService;
+    private InstrumentRepository instrumentRepository;
+    private TeacherRepository teacherRepository;
+    private RefreshTokenService refreshTokenService;
 
     @Autowired
-    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils,AIChatService aiChatService) {
+    public UsersController(UsersRepository usersRepository, UsersMapper usersMapper, RoleRepository roleRepository, AuthenticationManager authenticationManager, JwtUtils jwtUtils,AIChatService aiChatService,InstrumentRepository instrumentRepository,TeacherRepository teacherRepository,RefreshTokenService refreshTokenService) {
         this.usersRepository = usersRepository;
         this.usersMapper = usersMapper;
         this.roleRepository = roleRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.aiChatService=aiChatService;
+        this.instrumentRepository= instrumentRepository;
+        this.teacherRepository= teacherRepository;
+        this.refreshTokenService = refreshTokenService;
     }
 
 
     //Get
+
     @GetMapping("/userById/{id}")
+    @PreAuthorize("isAuthenticated()") // ⬅️ נדרש: כל משתמש מחובר יכול לגשת
     public ResponseEntity<UsersProfileFullDTO> getUserById(@PathVariable Long id) {
         try {
             Users u = usersRepository.findUsersById(id);
@@ -60,6 +73,8 @@ public class UsersController {
             }
 
             // המרה ל-DTO
+            UsersRatingUtils.calculateAndSetStarRating(u);
+
             UsersProfileFullDTO dto = usersMapper.UsersToUsersProfileFullDTO(u);
 
             return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -79,6 +94,7 @@ public class UsersController {
     }
 
 
+
     @GetMapping("/users")
     public ResponseEntity<List<Users>> getUsers() {
         try {
@@ -92,15 +108,43 @@ public class UsersController {
         }
     }
 
-    @GetMapping("/usersByUserType/{user_type}")
-    public ResponseEntity<List<Users>> getUserByUserType(@PathVariable EUserType user_type) {
+
+
+    @PutMapping("update-user-type/{userId}/{newType}")
+    public ResponseEntity<UsersMusiciansDTO> updateUserType(@PathVariable Long userId, @PathVariable String newType) {
         try {
-            List<Users> u = usersRepository.findUsersByEUserType(user_type);
-            if (u == null) {
+            EUserType EnewType = EUserType.valueOf(newType.toUpperCase());
+            if (newType == null) {
+                return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+            }
+
+            Users user = usersRepository.findById(userId).orElse(null);
+            if (user == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(u, HttpStatus.OK);
+
+            // ודא שהסוג החדש הוא MUSIC_LOVER
+
+
+            if (user.getUserTypes() == null) {
+                user.setUserTypes(new HashSet<>());
+            }
+
+            // 4. ⭐ השינוי המרכזי: הוספת הטיפוס החדש לאוסף הקיים
+            if (user.getUserTypes().contains(EnewType)) {
+                // אם הטיפוס כבר קיים, אין צורך לבצע שינוי
+                System.out.println("User already has the type: " + EnewType);
+            } else {
+                user.getUserTypes().add(EnewType);
+            }
+            Users updatedUser = usersRepository.save(user);
+
+            // *** שינוי: המרה ל-DTO לפני החזרה
+            UsersMusiciansDTO dto = usersMapper.UsersToUsersMusiciansDTO(updatedUser);
+
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -132,6 +176,46 @@ public class UsersController {
         }
     }
 
+
+    @GetMapping("/userByCity/{city}")
+    public ResponseEntity<List<UsersMusiciansDTO>> getUsersByCity(@PathVariable String city) {
+        try {
+            List<Users> u = usersRepository.findAllByCity(city);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/userByCountry/{country}")
+    public ResponseEntity<List<UsersMusiciansDTO>> getUsersByCountry(@PathVariable String country) {
+        try {
+            List<Users> u = usersRepository.findAllByCountry(country);
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/userByCreatedAt/{createdAt}")
+    public ResponseEntity<List<UsersMusiciansDTO>> getUsersByCreatedAt(@PathVariable String createdAt) {
+        try {
+            List<Users> u = usersRepository.findAllByCreatedAt(LocalDate.parse(createdAt));
+            if (u == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("musicianById/{id}")
     public ResponseEntity<UsersMusiciansDTO> getMusicianById(@PathVariable Long id) {
         try {
@@ -148,14 +232,16 @@ public class UsersController {
         }
     }
 
-    @GetMapping("musicians")
+     @GetMapping("/musicians")
     public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
         try {
-            List<Users> u = usersRepository.findAll();
+            // *** השינוי המרכזי: קוראים לפונקציה חדשה שמסננת לפי UserType
+            List<Users> u = usersRepository.findByUserType(EUserType.MUSICIANS);
 
-            if (u == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            if (u == null || u.isEmpty()) {
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
+
 
             return new ResponseEntity<>(usersMapper.UsersToUsersMusiciansDTO(u), HttpStatus.OK);
         } catch (Exception e) {
@@ -184,6 +270,52 @@ public class UsersController {
 
 
 
+    @GetMapping("/usersByUserType")
+    public ResponseEntity<List<UsersMusiciansDTO>> getUsersByUserType(
+            @RequestParam(required = true) List<EUserType> userTypes) {
+        try {
+            List<Users> users = usersRepository.findByUserTypeQuery(userTypes);
+            if (users == null || users.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+
+            for (Users user : users) {
+                System.out.println("User ID: " + user.getId() + ", Teacher object is null? " + (user.getTeacher() == null));
+                if (user.getTeacher() != null) {
+                    System.out.println("Teacher experience: " + user.getTeacher().getExperience());
+                    System.out.println("Teacher price: " + user.getTeacher().getPricePerLesson());
+                }
+            }
+            // המרה ל-DTO בעזרת Mapper
+            List<UsersMusiciansDTO> dtoList = usersMapper.UsersToUsersMusiciansDTO(users);
+
+            return new ResponseEntity<>(dtoList, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/joinTeacher/{studentId}/{teacherId}")
+    public ResponseEntity<?> joinTeacher(
+            @PathVariable Long studentId,
+            @PathVariable Long teacherId) {
+        try {
+            // קריאה ישירה לפונקציה ב-Repository
+            usersRepository.assignTeacherToStudent(studentId, teacherId);
+
+            // הצלחה - מחזיר 200 OK ללא תוכן
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            // כישלון - מחזיר 500 Internal Server Error
+            System.err.println("שגיאה בהצטרפות למורה: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to assign teacher.");
+        }
+    }
+
+
     //Put
 // ב-UserController.java
 
@@ -195,8 +327,8 @@ public class UsersController {
             @RequestParam(required = false) String city,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) boolean isActive,
-            @RequestParam(required = false) EUserType userType,
+            @RequestParam(required = false) Boolean  isActive,
+            @RequestParam(required = false) List<EUserType> userTypes,
             @RequestParam(required = false) String imageProfilePath,
             @RequestPart(value = "image", required = false) MultipartFile file) {
 
@@ -219,8 +351,15 @@ public class UsersController {
             u.setEmail(email);
             // יש לשים לב שהשדות הללו היו חסרים בקוד המקורי שהצגת לפונקציה זו, אבל היו בפונקציית @RequestBody הישנה.
             // נשאיר אותם כפי שהיו בקוד המקורי שנתת לעריכה:
-             u.setIsActive(isActive);
-          //   u.setUserType(userType);
+            // u.setIsActive(isActive);
+            // u.setUserType(userType);
+            if (isActive != null) {
+                u.setIsActive(isActive);
+            }
+
+            if (userTypes != null) {
+                u.setUserTypes(new HashSet<>(userTypes));
+            }
             u.setCity(city);
             u.setCountry(country);
             u.setDescription(description);
@@ -258,6 +397,7 @@ public class UsersController {
     @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@RequestBody UsersLogInDTO u) {
         try {
+            // 1. אימות המשתמש
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(u.getName(), u.getPassword())
             );
@@ -265,7 +405,18 @@ public class UsersController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-            // שליפת המשתמש מהמסד נתונים לפי ID או שם משתמש
+            // 2. יצירת Access Token וקוקי (טוקן קצר)
+            ResponseCookie jwtAccessCookie = jwtUtils.generateJwtCookie(userDetails); // ודא שאת משתמשת בפונקציה החדשה generateAccessCookie אם יישמת אותה
+
+            // 3. יצירת Refresh Token ושמירה ב-DB (טוקן ארוך)
+            // טען את המשתמש כדי לקבל את ה-ID
+            // עדיף להשתמש ב-userDetails.getId() אם ה-ID נמצא שם
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
+            // 4. יצירת קוקי נפרד עבור ה-Refresh Token
+            ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshCookie(refreshToken.getToken());
+
+            // 5. הכנת DTO והחזרת שתי העוגיות
             Users userFromDb = usersRepository.findByName(userDetails.getUsername());
 
             // הכנת DTO מינימלי
@@ -280,14 +431,43 @@ public class UsersController {
             ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                    // מצרף את שני הקוקיז לתגובה
+                    .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
                     .body(profileDTO);
 
         } catch (Exception e) {
+            System.out.println("Authentication failed for user: " + u.getName() + " Error: " + e.getMessage());
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
     }
 
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
+        // 1. קבל את ה-Refresh Token מהקוקי
+        String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
+
+        if (refreshToken != null) {
+            return refreshTokenService.findByToken(refreshToken)
+                    .map(refreshTokenService::verifyExpiration) // בדוק אם פג תוקף ב-DB
+                    .map(token -> {
+                        // 2. אם ה-Refresh Token תקף: צור Access Token חדש
+                        String newAccessToken = jwtUtils.generateTokenFromUsername(token.getUser().getName());
+
+                        // 3. צור קוקי חדש ל-Access Token בלבד
+                        ResponseCookie newAccessCookie = jwtUtils.generateAccessCookie(newAccessToken);
+
+                        // 4. החזר את הקוקי החדש
+                        return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+                                .body("Token refreshed successfully");
+                    })
+                    // אם לא נמצא, זה אומר שנגנב או בוטל - שלח שגיאה חזרה לקליינט
+                    .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+        }
+
+        return ResponseEntity.badRequest().body("Refresh Token is missing from request.");
+    }
     @PostMapping("/chat")
     public String getResponse(@RequestBody ChatRequest chatRequest){
         return aiChatService.getResponse(chatRequest.message(),chatRequest.conversationId());
@@ -323,6 +503,13 @@ public class UsersController {
 
             Users us = usersMapper.UsersSignUpDTOtoUsers(user);
 
+            if (us.getUserTypes() == null || us.getUserTypes().isEmpty()) {
+                // בדרך כלל משתמשים חדשים הם MUSIC_LOVER
+                us.setUserTypes(new HashSet<>(Collections.singletonList(EUserType.MUSIC_LOVER)));
+            }
+            if (us.getRoles() == null) {
+                us.setRoles(new HashSet<>());
+            }
             Role roleUser = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Role not found"));
 
@@ -361,19 +548,19 @@ public class UsersController {
     }
 
     //Delete
-    @DeleteMapping("/DeleteAllUser/{id}")
-    public ResponseEntity DeleteAllUserById(@PathVariable Long id) {
-        try {
-            if (usersRepository.existsById(id)) {
-                usersRepository.deleteById(id);
-                return new ResponseEntity(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @DeleteMapping("/DeleteAllUser/{id}")
+//    public ResponseEntity DeleteAllUserById(@PathVariable Long id) {
+//        try {
+//            if (usersRepository.existsById(id)) {
+//                usersRepository.deleteById(id);
+//                return new ResponseEntity(HttpStatus.NO_CONTENT);
+//            }
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 
 //    @GetMapping("/get")
@@ -423,6 +610,100 @@ public class UsersController {
             // חשוב לרשום את e.printStackTrace() ללוגים שלך כדי לדעת מה השתבש
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    @PostMapping("/signupTeacher/{id}")
+    @Transactional // ✅ כל הפעולות מתבצעות יחד בטרנזקציה אחת
+    public ResponseEntity<?> signUpAsTeacher(@PathVariable Long id,
+                                             @RequestBody TeacherSignUpDTO teacherDetails) {
+        try {
+            // 1. מצא את המשתמש הקיים
+            Users user = usersRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+
+            // 2. אימות נתונים (ללא שינוי)
+            if (user.getCity() == null || user.getCity().isEmpty() ||
+                    user.getCountry() == null || user.getCountry().isEmpty() ||
+                    user.getDescription() == null || user.getDescription().isEmpty()) {
+                return new ResponseEntity<>("City, Country, and Description must be filled before signing up as a teacher.", HttpStatus.BAD_REQUEST);
+            }
+
+            if (user.getUserTypes().contains(EUserType.TEACHER)) {
+                return new ResponseEntity<>("User is already a teacher.", HttpStatus.CONFLICT);
+            }
+
+                // 3. יצירת ישות Teacher חדשה
+                Teacher teacher = new Teacher();
+
+
+                teacher.setUser(user); // הכי חשוב!
+
+                // 4. העתקת נתוני ה-Teacher
+                teacher.setPricePerLesson(teacherDetails.getPricePerLesson());
+                teacher.setExperience(teacherDetails.getExperience());
+                teacher.setLessonDuration(teacherDetails.getLessonDuration());
+                teacher.setDateUploaded(LocalDate.now());
+
+                List<Instrument> instruments = instrumentRepository.findAllById(teacherDetails.getInstrumentsIds());
+                teacher.setInstruments(instruments);
+
+                // 5. שמירת ה-Teacher - מתבצעת ראשונה
+                // JPA אמור לזהות שה-ID קיים וליצור רשומה רק בטבלת TEACHER.
+                teacherRepository.save(teacher); // ⬅️ שמירת Teacher כעת מתבצעת לפני עדכון Users
+
+                // 6. עדכון שדות ה-Users הקיימים (בטבלת USERS)
+                user.getUserTypes().add(EUserType.TEACHER);
+                // 7. הוספת תפקיד 'מורה' (מומלץ להשתמש ב-ROLE_TEACHER אם קיים)
+                Role teacherRole = roleRepository.findByName(ERole.ROLE_USER) // 💡 תיקון: השתמשתי ב-ROLE_TEACHER
+                        .orElseThrow(() -> new RuntimeException("Teacher role not found."));
+                if (user.getRoles() == null) user.setRoles(new HashSet<>());
+                user.getRoles().add(teacherRole);
+
+                // 8. שמירת ה-Users המעודכן.
+                // 💡 השמירה הזו רק מעדכנת את הרשומה הקיימת בטבלת USERS.
+                usersRepository.save(user);
+
+
+
+            return new ResponseEntity<>("User successfully upgraded to Teacher.", HttpStatus.OK);
+        } catch (Exception e) {
+            // שגיאות כלליות
+            return new ResponseEntity<>("Failed to upgrade user to teacher: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    @DeleteMapping("delete/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println("--- DEBUGGING AUTHORITIES ---");
+        System.out.println("Name: " + authentication.getName());
+        System.out.println("Authenticated: " + authentication.isAuthenticated());
+        System.out.println("Authorities: " + authentication.getAuthorities());
+        System.out.println("-----------------------------");
+
+        // עכשיו בדוק אם הרולים נמצאים (אם לא, זו הבעיה ב-JWT Filter)
+        if (!authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"))) {
+            // אם הרול לא נמצא, זה נכשל!
+            System.out.println("AUTHORITY MISSING! This is the source of the 403.");
+            // return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // החזר 403 אמיתי כדי לבדוק
+        }
+        if (!usersRepository.existsById(userId)) {
+            // אם המשתמש לא נמצא, נחזיר 404 Not Found
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User with ID " + userId + " not found."
+            );
+        }
+
+        usersRepository.deleteById(userId);
+
+        return ResponseEntity.noContent().build();
     }
 }
 

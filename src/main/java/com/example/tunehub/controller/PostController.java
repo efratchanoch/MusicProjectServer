@@ -2,7 +2,9 @@ package com.example.tunehub.controller;
 
 import com.example.tunehub.dto.PostResponseDTO;
 import com.example.tunehub.dto.PostUploadDTO;
-import com.example.tunehub.model.*;
+import com.example.tunehub.model.Comment;
+import com.example.tunehub.model.Post;
+import com.example.tunehub.model.Users;
 import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.service.*;
 import jakarta.transaction.Transactional;
@@ -35,10 +37,11 @@ public class PostController {
     private PostMapper postMapper;
     private UsersRepository usersRepository;
     private AuthService authService;
+    private CommentRepository commentRepository;
     private NotificationService notificationService;
 
     @Autowired
-    public PostController(LikeRepository likeRepository, FavoriteRepository favoriteRepository, PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService, NotificationService notificationService) {
+    public PostController(LikeRepository likeRepository, FavoriteRepository favoriteRepository, PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService, NotificationService notificationService,CommentRepository commentRepository) {
         this.likeRepository = likeRepository;
         this.favoriteRepository = favoriteRepository;
         this.postRepository = postRepository;
@@ -46,6 +49,7 @@ public class PostController {
         this.usersRepository = usersRepository;
         this.authService = authService;
         this.notificationService = notificationService;
+        this.commentRepository= commentRepository;
     }
 
 
@@ -71,11 +75,29 @@ public class PostController {
     public ResponseEntity<List<PostResponseDTO>> getPosts() {
         try {
             Long currentUserId = authService.getCurrentUserId();
-            List<Post> p = postRepository.findAll();
-            if (p.isEmpty()) {
+
+            List<Post> posts = postRepository.findAll();
+            if (posts.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
+
+            // לולאה לחישוב דירוג עבור כל פוסט
+            for (Post post : posts) {
+
+                // 1. שלוף את התגובות באמצעות ה-Repository
+                // משתמשים בשיטה findByPostId שהגדרנו למעלה.
+                List<Comment> comments = commentRepository.findByPostId(post.getId());
+
+                // 2. חשב את הדירוג המשוקלל
+                double starRating = UsersRatingUtils.calculatePostStarRating(post, comments);
+
+                // 3. עדכן את שדה הדירוג של הפוסט
+                post.setRating(starRating);
+            }
+
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(posts), HttpStatus.OK);
+
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -85,26 +107,28 @@ public class PostController {
     @GetMapping("/postsByUserId/{id}")
     public ResponseEntity<List<PostResponseDTO>> getPostsByUserId(@PathVariable Long id) {
         try {
-            Long currentUserId = authService.getCurrentUserId();
-            List<Post> p = postRepository.findAllByUserId(id);
+//            Long currentUserId = authService.getCurrentUserId();
+
+            List<Post> p = postRepository.findAllUserPosts(id);
+            System.out.println("Backend returning " + p.size() + " posts for ID " + id);
+
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//
+
 //    @GetMapping("/favoritePostsByUserId/{id}")
 //    public ResponseEntity<List<PostResponseDTO>> getFavoritePostsByUserId(@PathVariable Long id) {
 //        try {
-//            Long currentUserId = authService.getCurrentUserId();
 //            List<Post> p = postRepository.findAllByUsersFavorite_Id(id);
 //            if (p == null) {
 //                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 //            }
-//            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
+//            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
 //        } catch (Exception e) {
 //            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 //        }
@@ -114,7 +138,7 @@ public class PostController {
     @GetMapping("/newPosts")
     public ResponseEntity<List<PostResponseDTO>> getNewPosts() {
         try {
-            Long currentUserId = authService.getCurrentUserId();
+           // Long currentUserId = authService.getCurrentUserId();
             List<Post> p = postRepository.findByDateUploaded(LocalDate.now());
             if (p == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -129,12 +153,11 @@ public class PostController {
     @GetMapping("/postsByTitle/{title}")
     public ResponseEntity<List<PostResponseDTO>> getPostsByName(@PathVariable String title) {
         try {
-            Long currentUserId = authService.getCurrentUserId();
-            List<Post> p = postRepository.findAllByTitleContainingIgnoreCase(title);
+            List<Post> p = postRepository.findAllPostByTitle(title);
             if (p.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p, currentUserId, likeRepository, favoriteRepository), HttpStatus.OK);
+            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -143,7 +166,7 @@ public class PostController {
     @GetMapping("/postsByDate/{date}")
     public ResponseEntity<List<PostResponseDTO>> getPostsByDate(@PathVariable LocalDate Date) {
         try {
-            Long currentUserId = authService.getCurrentUserId();
+      //      Long currentUserId = authService.getCurrentUserId();
             List<Post> p = postRepository.findByDateUploaded(Date);
             if (p.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
@@ -169,7 +192,7 @@ public class PostController {
 //        }
 //    }
 
-    //    @GetMapping("/audio/{audioPath}")
+//    @GetMapping("/audio/{audioPath}")
 //    public ResponseEntity<Resource> getReport(@PathVariable String audioPath) throws IOException {
 //        InputStreamResource resource=FileUtils.getAudio(audioPath);
 //
@@ -190,62 +213,62 @@ public class PostController {
 //                    .body("Error uploading video");
 //        }
 //    }
-    @PostMapping("/uploadPost")
-    public ResponseEntity<PostResponseDTO> createPost(
-            @RequestPart("data") PostUploadDTO dto,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestPart(value = "audio", required = false) MultipartFile audio,
-            @RequestPart(value = "video", required = false) MultipartFile video) {
+@PostMapping("/uploadPost")
+public ResponseEntity<PostResponseDTO> createPost(
+        @RequestPart("data") PostUploadDTO dto,
+        @RequestPart(value = "images", required = false) List<MultipartFile> images,
+        @RequestPart(value = "audio", required = false) MultipartFile audio,
+        @RequestPart(value = "video", required = false) MultipartFile video) {
 
-        try {
-            // 🔑 קבלת המשתמש מה־JWT דרך SecurityContext
+    try {
+        // 🔑 קבלת המשתמש מה־JWT דרך SecurityContext
 //        CustomUserDetails currentUserDetails = (CustomUserDetails) SecurityContextHolder
 //                .getContext().getAuthentication().getPrincipal();
 //        Users user = usersRepository.findUsersByName(currentUserDetails.getUsername());
 
-            Users user = authService.getCurrentUser();
-            // Convert DTO to Entity
-            Post post = postMapper.postUploadDTOtoPost(dto);
-            post.setUser(user); // משתמש קיים מה־JWT
+        Users user = authService.getCurrentUser();
+        // Convert DTO to Entity
+        Post post = postMapper.postUploadDTOtoPost(dto);
+        post.setUser(user); // משתמש קיים מה־JWT
 
-            // ==================== Images ====================
-            if (images != null && !images.isEmpty()) {
-                List<String> imageNames = new ArrayList<>();
-                for (MultipartFile img : images) {
-                    String uniqueName = FileUtils.generateUniqueFileName(img);
-                    FileUtils.uploadImage(img, uniqueName);
-                    imageNames.add(uniqueName);
-                }
-                post.setImagesPath(imageNames);
+        // ==================== Images ====================
+        if (images != null && !images.isEmpty()) {
+            List<String> imageNames = new ArrayList<>();
+            for (MultipartFile img : images) {
+                String uniqueName = FileUtils.generateUniqueFileName(img);
+                FileUtils.uploadImage(img, uniqueName);
+                imageNames.add(uniqueName);
             }
-
-            // ==================== Audio ====================
-            if (audio != null) {
-                String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
-                FileUtils.uploadAudio(audio, uniqueAudioName);
-                post.setAudioPath(uniqueAudioName);
-            }
-
-            // ==================== Video ====================
-            if (video != null) {
-                String uniqueVideoName = FileUtils.generateUniqueFileName(video);
-                FileUtils.uploadVideo(video, uniqueVideoName);
-                post.setVideoPath(uniqueVideoName);
-            }
-
-            // Save to database
-            postRepository.save(post);
-
-            // Build DTO
-            PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post, user.getId(), likeRepository, favoriteRepository);
-
-            return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            post.setImagesPath(imageNames);
         }
+
+        // ==================== Audio ====================
+        if (audio != null) {
+            String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
+            FileUtils.uploadAudio(audio, uniqueAudioName);
+            post.setAudioPath(uniqueAudioName);
+        }
+
+        // ==================== Video ====================
+        if (video != null) {
+            String uniqueVideoName = FileUtils.generateUniqueFileName(video);
+            FileUtils.uploadVideo(video, uniqueVideoName);
+            post.setVideoPath(uniqueVideoName);
+        }
+
+        // Save to database
+        postRepository.save(post);
+
+        // Build DTO
+        PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post);
+
+        return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+}
 
 
     // ==================== הזרמת אודיו ====================
