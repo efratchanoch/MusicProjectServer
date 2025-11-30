@@ -68,9 +68,15 @@ public class GeneralSearchService {
         }
 
         // 4. חיפוש מורים (מוגבל)
-        List<Teacher> teachers = teacherRepository.findAllTop5ByNameContainingIgnoreCase(searchTerm);
+        List<Users> usersTeacher = usersRepository.findAllTop5ByNameContainingIgnoreCase(searchTerm);
+
+        // 2. מסננים רק משתמשים שיש להם UserType TEACHER
+        List<Users> teachers = usersTeacher.stream()
+                .filter(u -> u.getUserTypes() != null &&
+                        u.getUserTypes().contains(EUserType.TEACHER))
+                .toList();
         if (teachers != null && !teachers.isEmpty()) {
-            results.setTeachers(teacherMapper.teacherListToUsersSearchDTOList(teachers));
+            results.setTeachers(usersMapper.usersListToUsersSearchDTOList(teachers));
         }
 
 

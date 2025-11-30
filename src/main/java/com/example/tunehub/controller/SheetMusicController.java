@@ -44,7 +44,7 @@ public class SheetMusicController {
     @GetMapping("/sheetMusicById/{id}")
     public ResponseEntity<SheetMusicResponseDTO> getSheetMusicById(@PathVariable Long id) {
         try {
-   //         Long currentUserId = authService.getCurrentUserId();
+            Long currentUserId = authService.getCurrentUserId();
             SheetMusic s = sheetMusicRepository.findSheetMusicById(id);
             if (s == null) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);

@@ -1,6 +1,5 @@
 package com.example.tunehub.controller;
 
-import com.example.tunehub.constants.CountryConstants;
 import com.example.tunehub.dto.TeacherListingDTO;
 import com.example.tunehub.dto.UsersMusiciansDTO;
 import com.example.tunehub.model.EUserType;
@@ -68,43 +67,60 @@ public class TeacherController {
     }
 
     @GetMapping("/teachersByName/{name}")
-    public ResponseEntity<List<Teacher>> getTeachersByName(@PathVariable String name) {
+    public ResponseEntity<List<Users>> getTeachersByName(@PathVariable String name) {
         try {
-            List<Teacher> t = teacherRepository.findAllByNameContainingIgnoreCase(name);
-            if (t == null) {
+            // 1. מחפשים משתמשים לפי שם
+            List<Users> users = usersRepository.findAllByNameContainingIgnoreCase(name);
+
+            if (users == null || users.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
-            return new ResponseEntity<>(t, HttpStatus.OK);
+
+            // 2. מסננים רק משתמשים שיש להם UserType TEACHER
+            List<Users> teachers = users.stream()
+                    .filter(u -> u.getUserTypes() != null &&
+                            u.getUserTypes().contains(EUserType.TEACHER))
+                    .toList();
+
+            if (teachers.isEmpty()) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            }
+
+            // 3. מחזירים את רשימת המורים
+            return new ResponseEntity<>(teachers, HttpStatus.OK);
+
         } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/teachersByCity/{city}")
-    public ResponseEntity<List<Teacher>> getTeachersByCity(@PathVariable String city) {
-        try {
-            List<Teacher> t = teacherRepository.findAllByCity(city);
-            if (t == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(t, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/teachersByCountry/{country}")
-    public ResponseEntity<List<Teacher>> getTeachersByCountry(@PathVariable String country) {
-        try {
-            List<Teacher> t = teacherRepository.findAllByCountry(country);
-            if (t == null) {
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(t, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//
+//    @GetMapping("/teachersByCity/{city}")
+//    public ResponseEntity<List<Teacher>> getTeachersByCity(@PathVariable String city) {
+//        try {
+//            List<Teacher> t = teacherRepository.findAllByCity(city);
+//            if (t == null) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(t, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+//
+//    @GetMapping("/teachersByCountry/{country}")
+//    public ResponseEntity<List<Teacher>> getTeachersByCountry(@PathVariable String country) {
+//        try {
+//            List<Teacher> t = teacherRepository.findAllByCountry(country);
+//            if (t == null) {
+//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+//            }
+//            return new ResponseEntity<>(t, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
     @GetMapping("/teachersByLessonDuration/{lessonDuration}")
     public ResponseEntity<List<Teacher>> getTeachersByLessonDuration(@PathVariable Double lessonDuration) {
@@ -246,45 +262,36 @@ public class TeacherController {
 //        return ResponseEntity.ok(teachers);
 //    }
 
-    @GetMapping("/filter")
-    // ✅ שינוי: החזרת List<TeacherListingDTO>
-    public ResponseEntity<List<TeacherListingDTO>> filterTeachers(
-            @RequestParam(required = false) String city,
-            @RequestParam(required = false) String country,
-            @RequestParam(required = false) String priceRange,
-            @RequestParam(required = false) Integer duration,
-            @RequestParam(required = false) String experience,
-            @RequestParam(required = false) Long instrumentId,
-            @RequestParam(required = false) String search
-    ) {
-        List<Teacher> teachers = teacherRepository.findTeachersByFilters(
-                city, country, priceRange, duration, experience, instrumentId, search);
-
-        List<TeacherListingDTO> dtos = teacherMapper.toTeacherListingDTOList(teachers);
-
-        return ResponseEntity.ok(dtos);
-    }
+//    @GetMapping("/filter")
+//    // ✅ שינוי: החזרת List<TeacherListingDTO>
+//    public ResponseEntity<List<TeacherListingDTO>> filterTeachers(
+//            @RequestParam(required = false) String city,
+//            @RequestParam(required = false) String country,
+//            @RequestParam(required = false) String priceRange,
+//            @RequestParam(required = false) Integer duration,
+//            @RequestParam(required = false) String experience,
+//            @RequestParam(required = false) Long instrumentId,
+//            @RequestParam(required = false) String search
+//    ) {
+//        List<Teacher> teachers = teacherRepository.findTeachersByFilters(
+//                city, country, priceRange, duration, experience, instrumentId, search);
+//
+//        List<TeacherListingDTO> dtos = teacherMapper.toTeacherListingDTOList(teachers);
+//
+//        return ResponseEntity.ok(dtos);
+//    }
 
     // ----------------------------------------------------------------------
     // 2. נקודת קצה לשליפת רשימת הערים (דינמי)
     // ----------------------------------------------------------------------
     // GET: /api/teachers/cities
-    @GetMapping("/cities")
-    public ResponseEntity<List<String>> getAllTeacherCities() {
-        // שימוש בפונקציה מה-Custom Repository
-        List<String> cities = teacherRepository.getAllDistinctCities();
-        return ResponseEntity.ok(cities);
-    }
+
 
     // ----------------------------------------------------------------------
     // 3. נקודת קצה לשליפת רשימת המדינות (סטטי)
     // ----------------------------------------------------------------------
     // GET: /api/teachers/countries
-    @GetMapping("/countries")
-    public ResponseEntity<List<String>> getAvailableCountries() {
-        // שימוש ברשימה הקבועה
-        return ResponseEntity.ok(CountryConstants.COUNTRIES);
-    }
+
 }
 
 

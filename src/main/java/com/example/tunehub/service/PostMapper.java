@@ -23,10 +23,10 @@ public interface PostMapper {
     @Mapping(target = "content", source = "content")
     @Mapping(target = "imagesBase64", expression = "java(com.example.tunehub.service.FileUtils.imagesToBase64(p.getImagesPath()))")
     @Mapping(
-            target = "isLiked",
+            target = "liked",
             expression = "java(likeRepo.existsByUserIdAndTargetTypeAndTargetId(currentUserId,  com.example.tunehub.model.ETargetType.POST, p.getId()))")
     @Mapping(
-            target = "isFavorite",
+            target = "favorite",
             expression = "java(favRepo.existsByUserIdAndTargetTypeAndTargetId(currentUserId, com.example.tunehub.model.ETargetType.POST, p.getId()))")
     @Mapping(
             target = "likes",
@@ -36,16 +36,13 @@ public interface PostMapper {
             expression = "java(favRepo.countByTargetTypeAndTargetId( com.example.tunehub.model.ETargetType.POST, p.getId()))")
     PostResponseDTO postToPostResponseDTO(
             Post p,
-            @Context
-            Long currentUserId,
+            @Context Long currentUserId,
             @Context LikeRepository likeRepo,
             @Context FavoriteRepository favRepo);
 
-
     List<PostResponseDTO> postListToPostResponseDTOlist(
             List<Post> p,
-            @Context
-            Long currentUserId,
+            @Context Long currentUserId,
             @Context LikeRepository likeRepo,
             @Context FavoriteRepository favRepo);
 

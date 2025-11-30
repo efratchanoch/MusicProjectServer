@@ -236,7 +236,7 @@ public class UsersController {
     public ResponseEntity<List<UsersMusiciansDTO>> getMusicians() {
         try {
             // *** השינוי המרכזי: קוראים לפונקציה חדשה שמסננת לפי UserType
-            List<Users> u = usersRepository.findByUserType(EUserType.MUSICIANS);
+            List<Users> u = usersRepository.findByUserType(EUserType.MUSICIAN);
 
             if (u == null || u.isEmpty()) {
                 return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
@@ -411,10 +411,10 @@ public class UsersController {
             // 3. יצירת Refresh Token ושמירה ב-DB (טוקן ארוך)
             // טען את המשתמש כדי לקבל את ה-ID
             // עדיף להשתמש ב-userDetails.getId() אם ה-ID נמצא שם
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+   //         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 
             // 4. יצירת קוקי נפרד עבור ה-Refresh Token
-            ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshCookie(refreshToken.getToken());
+   //         ResponseCookie jwtRefreshCookie = jwtUtils.generateRefreshCookie(refreshToken.getToken());
 
             // 5. הכנת DTO והחזרת שתי העוגיות
             Users userFromDb = usersRepository.findByName(userDetails.getUsername());
@@ -433,7 +433,7 @@ public class UsersController {
             return ResponseEntity.ok()
                     // מצרף את שני הקוקיז לתגובה
                     .header(HttpHeaders.SET_COOKIE, jwtAccessCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
+                 //   .header(HttpHeaders.SET_COOKIE, jwtRefreshCookie.toString())
                     .body(profileDTO);
 
         } catch (Exception e) {
@@ -442,32 +442,32 @@ public class UsersController {
         }
     }
 
-    @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
-        // 1. קבל את ה-Refresh Token מהקוקי
-        String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
-
-        if (refreshToken != null) {
-            return refreshTokenService.findByToken(refreshToken)
-                    .map(refreshTokenService::verifyExpiration) // בדוק אם פג תוקף ב-DB
-                    .map(token -> {
-                        // 2. אם ה-Refresh Token תקף: צור Access Token חדש
-                        String newAccessToken = jwtUtils.generateTokenFromUsername(token.getUser().getName());
-
-                        // 3. צור קוקי חדש ל-Access Token בלבד
-                        ResponseCookie newAccessCookie = jwtUtils.generateAccessCookie(newAccessToken);
-
-                        // 4. החזר את הקוקי החדש
-                        return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
-                                .body("Token refreshed successfully");
-                    })
-                    // אם לא נמצא, זה אומר שנגנב או בוטל - שלח שגיאה חזרה לקליינט
-                    .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
-        }
-
-        return ResponseEntity.badRequest().body("Refresh Token is missing from request.");
-    }
+//    @PostMapping("/refreshtoken")
+//    public ResponseEntity<?> refreshtoken(HttpServletRequest request) {
+//        // 1. קבל את ה-Refresh Token מהקוקי
+//        String refreshToken = jwtUtils.getRefreshJwtFromCookies(request);
+//
+//        if (refreshToken != null) {
+//            return refreshTokenService.findByToken(refreshToken)
+//                    .map(refreshTokenService::verifyExpiration) // בדוק אם פג תוקף ב-DB
+//                    .map(token -> {
+//                        // 2. אם ה-Refresh Token תקף: צור Access Token חדש
+//                        String newAccessToken = jwtUtils.generateTokenFromUsername(token.getUser().getName());
+//
+//                        // 3. צור קוקי חדש ל-Access Token בלבד
+//                        ResponseCookie newAccessCookie = jwtUtils.generateAccessCookie(newAccessToken);
+//
+//                        // 4. החזר את הקוקי החדש
+//                        return ResponseEntity.ok()
+//                                .header(HttpHeaders.SET_COOKIE, newAccessCookie.toString())
+//                                .body("Token refreshed successfully");
+//                    })
+//                    // אם לא נמצא, זה אומר שנגנב או בוטל - שלח שגיאה חזרה לקליינט
+//                    .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
+//        }
+//
+//        return ResponseEntity.badRequest().body("Refresh Token is missing from request.");
+//    }
     @PostMapping("/chat")
     public String getResponse(@RequestBody ChatRequest chatRequest){
         return aiChatService.getResponse(chatRequest.message(),chatRequest.conversationId());

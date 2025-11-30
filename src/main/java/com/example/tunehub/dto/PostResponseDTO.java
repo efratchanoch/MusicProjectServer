@@ -15,6 +15,25 @@ public class PostResponseDTO {
     private List<String> imagesBase64; // תמונות בפורמט Base64
     private String dateUploaded; // תאריך העלאה (לדוגמה כמחרוזת)
 
+    boolean isLiked;
+    boolean isFavorite;
+
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+    }
+
+    public boolean isFavorite() {
+        return isFavorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        isFavorite = favorite;
+    }
+
     public Long getId() {
         return id;
     }
