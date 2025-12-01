@@ -18,7 +18,6 @@ public class GeneralSearchController {
         this.generalSearchService = generalSearchService;
     }
 
-
     @GetMapping("/global/{searchTerm}")
     public ResponseEntity<GlobalSearchResponseDTO> globalSearch(@PathVariable String searchTerm) {
         try {
