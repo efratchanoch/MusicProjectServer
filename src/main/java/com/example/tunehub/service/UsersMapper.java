@@ -43,10 +43,9 @@ public  interface  UsersMapper {
     @Mapping(target = "createdAt", source = "u.createdAt")
     @Mapping(target = "teacher", source = "u.teacherDetails")
     public abstract UsersMusiciansDTO UsersToUsersMusiciansDTO(Users u);
+
     public abstract List<UsersMusiciansDTO> UsersToUsersMusiciansDTO(List<Users> u);
-
     List<UsersUploadProfileImageDTO> UsersToDTO(List<Users> users);
-
     Users UsersProfileImageDTOtoUsers(UsersUploadProfileImageDTO u);
 
     //List<UsersMusiciansDTO> UsersToUsersMusiciansDTO(List<Users> u);
@@ -66,6 +65,12 @@ public  interface  UsersMapper {
         return usersUploadProfileImageDTO;
     }
 
+//    default UsersUploadProfileImageDTO userToUploadProfileImageDTO(Users u) throws IOException {
+//        UsersUploadProfileImageDTO dto = new UsersUploadProfileImageDTO();
+//        dto.setId(u.getId());
+//        dto.setImagePath(u.getImageProfilePath());
+//        return dto;
+//    }
     @Mapping(target = "profile", source = "u")
     UsersSearchDTO usersToUsersSearchDTO(Users u);
 

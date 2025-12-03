@@ -32,6 +32,8 @@ public class NotificationLikesAndFavoritesDTO {
         this.count = count;
     }
 
+
+
     public boolean isRead() {
         return isRead;
     }

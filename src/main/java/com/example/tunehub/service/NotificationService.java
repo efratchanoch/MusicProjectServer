@@ -6,6 +6,7 @@ import com.example.tunehub.dto.NotificationResponseDTO;
 import com.example.tunehub.dto.NotificationSimpleDTO;
 import com.example.tunehub.model.*;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,21 +30,25 @@ import java.util.Optional;
 
 public class NotificationService {
 
-
     private final NotificationRepository notificationRepository;
     private final UsersRepository usersRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final AuthService authService;
     private final NotificationMapper notificationMapper;
+    private final EntityManager entityManager;  // 🚨 הוסף inject ל-EntityManager
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepository, UsersRepository usersRepository, SimpMessagingTemplate messagingTemplate, AuthService authService, NotificationMapper notificationMapper) {
+    public NotificationService(NotificationRepository notificationRepository, UsersRepository usersRepository, SimpMessagingTemplate messagingTemplate, AuthService authService, NotificationMapper notificationMapper, EntityManager entityManager) {
         this.notificationRepository = notificationRepository;
         this.usersRepository = usersRepository;
         this.messagingTemplate = messagingTemplate;
         this.authService = authService;
         this.notificationMapper = notificationMapper;
+        this.entityManager = entityManager;
     }
+
+
+
 
 
     private ENotificationType getNotificationTypeByTargetTypeAndInteractionType(ETargetType targetType, String interactionType) {
@@ -68,11 +75,7 @@ public class NotificationService {
         }
     }
 
-    /**
-     * צור התראה ושדר אותה בזמן אמת ל-user channel (לפי userId).
-     * targetUserId = המיועד לקבל את ההתראה.
-     * sender = מי היזם (נלקח מה־AuthService).
-     */
+
     @Transactional
     public void createAndSendNotification(Long targetUserId,
                                           ENotificationType type,
@@ -94,13 +97,12 @@ public class NotificationService {
         n.setTargetType(null);
         n.setTargetId(targetEntityId);
         n.setRead(false);
-        n.setCreatedAt(Instant.now());
+        n.setCreatedAt(OffsetDateTime.now());
 
         notificationRepository.save(n);
 
         NotificationResponseDTO dto = notificationMapper.NotificationToNotificationResponseDTO(n);
 
-        // שליחה לפי USER ID (הגיוני וברי-קיימא)
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(target.getId()),
                 "/queue/notifications",
@@ -111,42 +113,46 @@ public class NotificationService {
 
     public long getUnreadCount() {
         Long userId = authService.getCurrentUserId();
-        return notificationRepository.countByUser_IdAndIsReadFalse(userId);
+        long count = notificationRepository.countByUser_IdAndIsReadFalse(userId);
 
-//        messagingTemplate.convertAndSendToUser(
-//                String.valueOf(userId),
-//                "/queue/notifications/count-unread",
-//                n.getId()
-//        );
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(userId),
+                "/queue/notifications/count-unread",
+                count
+        );
+
+        return count;
     }
-
-    @Transactional
+    @Transactional  // 🚨 זה המפתח: פותח transaction ל-flush
     public void markAsRead(Long id) {
         Long userId = authService.getCurrentUserId();
 
-        Notification n = notificationRepository.findByIdAndUser_Id(id, userId)
+        Notification notification = notificationRepository.findByIdAndUser_Id(id, userId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
 
-        n.setRead(true);
-        notificationRepository.save(n);
+        notification.setRead(true);
+        notificationRepository.save(notification);
 
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(userId),
                 "/queue/notifications/read",
-                n.getId()
+                notification.getId()
         );
     }
-
 
     @Transactional
     public void markAllAsRead() {
         Long userId = authService.getCurrentUserId();
-        notificationRepository.markAllAsRead(userId);
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(userId),
-                "/queue/notifications/mark-all-read",
-                "OK"
-        );
+
+        int updatedCount = notificationRepository.markAllAsRead(userId);
+
+        if (updatedCount > 0) {
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(userId),
+                    "/queue/notifications/mark-all-read",
+                    "OK"
+            );
+        }
     }
 
     @Transactional
@@ -185,9 +191,8 @@ public class NotificationService {
         n.setTargetType(targetType);
         n.setTargetId(targetEntityId);
         n.setRead(false);
-        n.setCreatedAt(Instant.now());
+        n.setCreatedAt(OffsetDateTime.now());
 
-        // ברירת מחדל (תמיד קיים)
         n.setTitle(type.name());
         n.setMessage(null);
 
@@ -210,12 +215,11 @@ public class NotificationService {
             Long count = notificationRepository.countUnreadByUserIdAndType(userId, type);
             result.put(type.name(), count);
         }
-
         return result;
     }
 
 
-    //מטפל בהוספה ומחיקת לייקים - שולחהתראה לבעלים
+
     public void handleLikeNotification(
             ETargetType targetType,
             Long targetId,
@@ -223,11 +227,9 @@ public class NotificationService {
             int newCount
     ) {
 
-        //מקבלים את הסוג מסג שאמור להיות
         ENotificationType notifType =
                 getNotificationTypeByTargetTypeAndInteractionType(targetType, "LIKE");
 
-        //בודקים אם יש לו כבר התראה בנושא
         Optional<Notification> existing = notificationRepository
                 .findByTypeAndUserAndTargetTypeAndTargetId(
                         notifType,
@@ -236,24 +238,24 @@ public class NotificationService {
                         targetId
                 );
         Notification n;
-// אם הוא קיים נרצה לתפוס אותו
+
         if (existing.isPresent()) {
             n = existing.get();
-            //נסמן את ההתראה כלא נקראה
             n.setRead(false);
+            n.setCount(newCount);
         } else {
-            // אם הוא לא קיים ניצור אותו
             n = new Notification(
                     notifType,
                     contentOwner,
-                    null, //לא מעניין מי עשה את הלייק אין לנו עניין לשמור מי עשה
+                    null,
                     targetType,
                     targetId
             );
+            n.setCount(newCount);
         }
-        //מעברים לDTO החזרה מסוג ליק אנד פבורייט
+
+        n.setTitleAndMessageBasedOnType(n.getType(), n.getActor(), newCount);
         NotificationLikesAndFavoritesDTO dto = notificationMapper.NotificationToNotificationLikesAndFavoritesDTO(n);
-        //מעדכנים כאונט ותאריך ושעה
         dto.setCount(newCount);
         dto.setDateTime(LocalDateTime.now());
         notificationRepository.save(n);
@@ -266,20 +268,20 @@ public class NotificationService {
     }
 
 
+
+
     public void handleUnfollowNotification(Users follower, Users contentOwner) {
 
-        // יוצרים את ההתראה
         Notification n = new Notification(
                 ENotificationType.FOLLOWER_REMOVED,
                 contentOwner,
-                follower, // מי שהפסיק לעקוב
-                ETargetType.USER, // במקרה של משתמש
-                contentOwner.getId() // האיידי של היוזר
+                follower,
+                ETargetType.USER,
+                contentOwner.getId()
         );
 
         notificationRepository.save(n);
 
-        // לשלוח דרך WebSocket, ממירים ל-DTO
         NotificationFollowDTO dto = notificationMapper.NotificationToNotificationFollowDTO(n);
         messagingTemplate.convertAndSendToUser(
                 contentOwner.getName(),
@@ -313,17 +315,15 @@ public class NotificationService {
 
     public void handleFollowRequestDecisions(Users approvedUser, Users followedUser, ENotificationType notify) {
         if (approvedUser == null || followedUser == null) {
-            return; // לא עושים כלום אם אחד מהם null
+            return;
         }
 
-
-// יוצרים את ההתראה
         Notification n = new Notification(
-                notify, // סוג ההתראה
-                approvedUser,                        // המשתמש שקיבל את ההודעה
-                followedUser,                        // מי שאישר   או דחה את העקיבה
-                ETargetType.USER,                     // סוג המטרה
-                followedUser.getId()                  // מזהה המטרה
+                notify,
+                approvedUser,
+                followedUser,
+                ETargetType.USER,
+                followedUser.getId()
         );
 
 
@@ -352,37 +352,61 @@ public class NotificationService {
 
     }
 
-    public Page<NotificationResponseDTO> getAllNotificationsByCategory(
-            ENotificationCategory category,
-            Pageable pageable) {
-        return getNotifications(pageable, category, true);
-
-    }
-
 
     private Page<NotificationResponseDTO> getNotifications(
             Pageable pageable,
             ENotificationCategory category,
-            Boolean read
+            Boolean readStatus
     ) {
-
-
         Users currentUser = authService.getCurrentUser();
 
+        java.util.Collection<ENotificationType> categoryTypes = null;
 
-        Page<Notification> notifications;
         if (category != null) {
-            notifications = notificationRepository
-                    .findByUserAndCategory(currentUser, category, read, pageable);
-        } else {
-            notifications = notificationRepository
-                    .findByUser(currentUser, read, pageable);
+
+            categoryTypes = java.util.Arrays.stream(ENotificationType.values())
+                    .filter(type -> type.getCategory() == category)
+                    .collect(java.util.stream.Collectors.toList());
         }
 
-        // כאן את משתמשת במפה שלך
+
+        Page<Notification> notifications = notificationRepository.findFilteredNotifications(
+                currentUser,
+                categoryTypes, // שולח רשימת Types
+                readStatus,    // שולח את סטטוס הקריאה הנדרש (false במקרה שלך)
+                pageable
+        );
+
+        // 4. מיפוי והחזרה
         return notifications.map(notificationMapper::NotificationToNotificationResponseDTO);
-
-
     }
+//    public Page<NotificationResponseDTO> getAllNotificationsByCategory(
+//            ENotificationCategory category,
+//            Pageable pageable) {
+//        return getNotifications(pageable, category, true);
+//
+//    }
+// NotificationService.java - עדכון המתודה
 
+    public Page<NotificationResponseDTO> getAllNotificationsByCategory(ENotificationCategory category, Pageable pageable) {
+        Users currentUser = authService.getCurrentUser();
+
+        // 1. מיפוי הקטגוריה לסוגי ההתראות הרלוונטיים
+        java.util.Collection<ENotificationType> categoryTypes = null;
+        if (category != null) {
+            categoryTypes = java.util.Arrays.stream(ENotificationType.values())
+                    .filter(type -> type.getCategory() == category) // השתמש ב-getCategory()
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
+        // 2. קריאה ל-Repository עם רשימת ה-Types
+        Page<Notification> notifications = notificationRepository.findFilteredNotifications(
+                currentUser,
+                categoryTypes, // שולח רשימת Types
+                null,
+                pageable
+        );
+
+        return notifications.map(notificationMapper::NotificationToNotificationResponseDTO);
+    }
 }

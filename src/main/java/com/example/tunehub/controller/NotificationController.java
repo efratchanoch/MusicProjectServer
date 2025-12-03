@@ -2,6 +2,7 @@ package com.example.tunehub.controller;
 
 import com.example.tunehub.model.ENotificationCategory;
 import com.example.tunehub.model.Users;
+import com.example.tunehub.service.NotificationRepository;
 import com.example.tunehub.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,13 @@ import java.util.Map;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public NotificationController(NotificationService notificationService) {
+    public NotificationController(NotificationService notificationService, NotificationRepository notificationRepository) {
         this.notificationService = notificationService;
+        this.notificationRepository= notificationRepository;
+
     }
 
     @GetMapping
@@ -65,12 +69,13 @@ public class NotificationController {
         return ResponseEntity.ok(map);
     }
 
+
     @GetMapping("/allNotificationsByCategory")
     public Page<NotificationResponseDTO> getAllNotificationsByCategory(
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) ENotificationCategory category
     ) {
-        return notificationService.getAllNotificationsByCategory(category,pageable);
+        return notificationService.getAllNotificationsByCategory(category, pageable);
     }
 
     @GetMapping("/onlyUnreadNotificationsByCategory")
@@ -78,8 +83,11 @@ public class NotificationController {
             @PageableDefault(size = 20) Pageable pageable,
             @RequestParam(required = false) ENotificationCategory category
     ) {
-        return notificationService.getOnlyUnreadNotificationsByCategory(category,pageable);
+        return notificationService.getOnlyUnreadNotificationsByCategory(category, pageable);
     }
+
+
+
 
 
 

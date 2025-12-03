@@ -19,12 +19,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     Comment save(Comment comment);
 
-    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId ORDER BY c.dateUploaded DESC")
     Page<Comment> findByPostIdOrderByDateUploadedDesc(@Param("postId") Long postId, Pageable pageable);
-
-    List<Comment> findByPostIdOrderByDateUploadedAsc(Long postId);
-
-
 
     @Modifying
     @Query("UPDATE Comment c SET c.likes = :count WHERE c.id = :id")

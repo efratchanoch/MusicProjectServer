@@ -1,14 +1,16 @@
 package com.example.tunehub.dto;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 
 public record NotificationResponseDTO(
         Long id,
         String title,
         String message,
-        Instant createdAt,
+        OffsetDateTime createdAt,
         boolean isRead,
         Long targetId,
-        UsersProfileDTO actor
+        UsersProfileDTO actor,
+        Integer count
 ) {}

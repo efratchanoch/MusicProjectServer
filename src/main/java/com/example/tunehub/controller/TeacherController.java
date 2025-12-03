@@ -69,14 +69,12 @@ public class TeacherController {
     @GetMapping("/teachersByName/{name}")
     public ResponseEntity<List<Users>> getTeachersByName(@PathVariable String name) {
         try {
-            // 1. מחפשים משתמשים לפי שם
             List<Users> users = usersRepository.findAllByNameContainingIgnoreCase(name);
 
             if (users == null || users.isEmpty()) {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
 
-            // 2. מסננים רק משתמשים שיש להם UserType TEACHER
             List<Users> teachers = users.stream()
                     .filter(u -> u.getUserTypes() != null &&
                             u.getUserTypes().contains(EUserType.TEACHER))
@@ -86,7 +84,6 @@ public class TeacherController {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
 
-            // 3. מחזירים את רשימת המורים
             return new ResponseEntity<>(teachers, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -95,32 +92,7 @@ public class TeacherController {
         }
     }
 
-//
-//    @GetMapping("/teachersByCity/{city}")
-//    public ResponseEntity<List<Teacher>> getTeachersByCity(@PathVariable String city) {
-//        try {
-//            List<Teacher> t = teacherRepository.findAllByCity(city);
-//            if (t == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(t, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//
-//    @GetMapping("/teachersByCountry/{country}")
-//    public ResponseEntity<List<Teacher>> getTeachersByCountry(@PathVariable String country) {
-//        try {
-//            List<Teacher> t = teacherRepository.findAllByCountry(country);
-//            if (t == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(t, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+
 
     @GetMapping("/teachersByLessonDuration/{lessonDuration}")
     public ResponseEntity<List<Teacher>> getTeachersByLessonDuration(@PathVariable Double lessonDuration) {
@@ -134,8 +106,6 @@ public class TeacherController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
 
 
@@ -165,7 +135,6 @@ public class TeacherController {
         }
     }
 
-    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/teacherById/{id}")
     public ResponseEntity DeleteTeacherById(@PathVariable Long id){
         try{
@@ -180,117 +149,7 @@ public class TeacherController {
         }
     }
 
-//    @PostMapping("/signup/{userId}")
-//    public ResponseEntity<?> signUpAsTeacher(@PathVariable Long userId,
-//                                             @RequestBody TeacherSignUpDTO teacherDetails) {
-//        try {
-//            // הוספת לוגיקה לאימות והמרת המשתמש
-//            // ...
-//            // userService.upgradeToTeacher(userId, teacherDetails);
-//            // ...
-//            return ResponseEntity.ok("User upgraded to teacher successfully.");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
-//    }
-//
-//
-//    @PreAuthorize("isAuthenticated() and #id == authentication.principal.id")
-//    @PostMapping("/signup/{id}")
-//    @Transactional // ✅ חשוב מאוד! ודאי שטרנזקציה עוטפת את כל פעולות המחיקה/שמירה
-//    public ResponseEntity<?> signUpAsTeacher(@PathVariable Long id,
-//                                             @RequestBody TeacherSignUpDTO teacherDetails) {
-//        try {
-//            // 1. מצא את המשתמש הקיים
-//            Users user = usersRepository.findById(id)
-//                    .orElseThrow(() -> new UserValidationException("User not found"));
-//
-//            // 2. אימות זכאות (כפי שדרשת)
-//            if (user.getCity() == null || user.getCity().isEmpty() ||
-//                    user.getCountry() == null || user.getCountry().isEmpty() ||
-//                    user.getDescription() == null || user.getDescription().isEmpty()) {
-//                throw new UserValidationException("City, Country, and Description must be filled before signing up as a teacher.");
-//            }
-//
-//            // 3. יצירת אובייקט Teacher חדש
-//            Teacher teacher = new Teacher();
-//            // העתקת כל הנתונים משדות Users ל-Teacher
-//            BeanUtils.copyProperties(user, teacher, "id"); // העתקת שדות, לא כולל ID
-//
-//            // 4. הגדרת השדות הייחודיים למורה
-//            teacher.setPricePerLesson(teacherDetails.getPricePerLesson());
-//            teacher.setExperience(teacherDetails.getExperience());
-//            teacher.setLessonDuration(teacherDetails.getLessonDuration());
-//            teacher.setEUserType(EUserType.TEACHER); // עדכון הטיפוס
-//
-//            // 5. מציאת כלי הנגינה ושיוכם
-//            List<Instrument> instruments = instrumentRepository.findAllById(teacherDetails.getInstrumentsIds());
-//            teacher.setInstruments(instruments);
-//
-//            // 6. הוספת תפקיד 'מורה'
-//            Role teacherRole = roleRepository.findByName(ERole.ROLE_TEACHER)
-//                    .orElseThrow(() -> new RuntimeException("Teacher role not found."));
-//            teacher.getRoles().add(teacherRole);
-//
-//            // 7. מחיקת המשתמש הישן ושמירת המורה החדש
-//            // מכיוון שיש ירושה (JOINED) ו-Teacher יורש מ-Users, ייתכן שתצטרכי למחוק את ה-Users
-//            // ואז לשמור את ה-Teacher. פעולה זו תלויה באסטרטגיית ה-JPA המדויקת שלך.
-//            // אם ה-ID נשמר (כפי שקורה ב-JOINED), צריך לדאוג לשמור את המורה באותו ID.
-//
-//            // לשם פשטות והנחה על ירושה: מחיקת ישן ושמירת חדש
-//            usersRepository.delete(user);
-//            teacher.setId(id); // נשתמש באותו ID כדי לשמור על קשרים קיימים
-//            Teacher upgradedTeacher = teacherRepository.save(teacher);
-//
-//            // 8. החזרת DTO
-//            TeacherResponseDTO responseDTO = teacherMapper.teacherToTeacherResponseDTO(upgradedTeacher);
-//
-//            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
-//        } catch (UserValidationException e) {
-//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>("Failed to upgrade user to teacher: " + e.getMessage(),
-//                    HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//}
-    // נקודת קצה לרשימת המורים (לדף החיפוש)
-//    @GetMapping
-//    public ResponseEntity<List<UsersMusiciansDTO>> getAllTeachers() {
-//        // רשימה שמציגה רק מורים
-//        List<UsersMusiciansDTO> teachers = usersService.getTeachersList();
-//        return ResponseEntity.ok(teachers);
-//    }
 
-//    @GetMapping("/filter")
-//    // ✅ שינוי: החזרת List<TeacherListingDTO>
-//    public ResponseEntity<List<TeacherListingDTO>> filterTeachers(
-//            @RequestParam(required = false) String city,
-//            @RequestParam(required = false) String country,
-//            @RequestParam(required = false) String priceRange,
-//            @RequestParam(required = false) Integer duration,
-//            @RequestParam(required = false) String experience,
-//            @RequestParam(required = false) Long instrumentId,
-//            @RequestParam(required = false) String search
-//    ) {
-//        List<Teacher> teachers = teacherRepository.findTeachersByFilters(
-//                city, country, priceRange, duration, experience, instrumentId, search);
-//
-//        List<TeacherListingDTO> dtos = teacherMapper.toTeacherListingDTOList(teachers);
-//
-//        return ResponseEntity.ok(dtos);
-//    }
-
-    // ----------------------------------------------------------------------
-    // 2. נקודת קצה לשליפת רשימת הערים (דינמי)
-    // ----------------------------------------------------------------------
-    // GET: /api/teachers/cities
-
-
-    // ----------------------------------------------------------------------
-    // 3. נקודת קצה לשליפת רשימת המדינות (סטטי)
-    // ----------------------------------------------------------------------
-    // GET: /api/teachers/countries
 
 }
 

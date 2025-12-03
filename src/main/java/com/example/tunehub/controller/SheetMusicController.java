@@ -3,11 +3,11 @@ package com.example.tunehub.controller;
 import com.example.tunehub.dto.*;
 import com.example.tunehub.model.*;
 import com.example.tunehub.service.*;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import com.example.tunehub.service.UsersRatingUtils;
@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +40,6 @@ public class SheetMusicController {
     private final SheetMusicService sheetMusicService;
     private final LikeRepository likeRepository;
     private final FavoriteRepository favoriteRepository;
-    //private HebrewTransliterator transliterator;
 
 
     //Get
@@ -90,18 +92,6 @@ public class SheetMusicController {
         }
     }
 
-//    @GetMapping("/favoriteSheetsMusicByUserId/{id}")
-//    public ResponseEntity<List<SheetMusicResponseDTO>> getFavoriteSheetsMusicByUserId(@PathVariable Long id) {
-//        try {
-//            List<SheetMusic> s = sheetMusicRepository.findAllSheetMusicByUsersFavorite_Id(id);
-//            if (s == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(sheetMusicMapper.sheetMusicListToSheetMusicResponseDTOlist(s), HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
     @GetMapping("/sheetsMusicByTitle/{title}")
     public ResponseEntity<List<SheetMusicResponseDTO>> getSheetsMusicByTitle(String title) {
@@ -177,22 +167,6 @@ public class SheetMusicController {
         }
     }
 
-    //לאאא למחוקק!! שמתי בהערה כי עשה שגיאה ברפוזיטורי
-//    @DeleteMapping("/sheetsMusicByCategoryId/{id}")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN' ,'ROLE_SUPER_ADMIN')")
-//    public ResponseEntity deleteAllSheetsMusicByCategoryId(@PathVariable Long id) {
-//        try {
-//            List<SheetMusic> s = sheetMusicRepository.findAllByCategories_Id(id);
-//            if (s == null) {
-//                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//
-//            }
-//            sheetMusicRepository.deleteAllByCategoryId(id);
-//            return new ResponseEntity(HttpStatus.NO_CONTENT);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
     @PostMapping(value = "/uploadSheetMusic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
@@ -211,46 +185,13 @@ public class SheetMusicController {
 
 
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<SheetMusicResponseDTO> getSheetMusic(@PathVariable Long id) {
-//        SheetMusic sheetMusic = sheetMusicService.getSheetMusicById(id);
-//        return ResponseEntity.ok(convertToDto(sheetMusic));
-//    }
-//
-//    @GetMapping
-//    public ResponseEntity<List<SheetMusicResponseDTO>> getAllSheetMusic() {
-//        List<SheetMusic> list = sheetMusicService.getAllSheetMusic();
-//        return ResponseEntity.ok(convertListToDto(list));
-//    }
-//
-//    @GetMapping("/{id}/download")
-//    public ResponseEntity<Resource> downloadSheetMusic(@PathVariable Long id) {
-//        Resource resource = sheetMusicService.downloadSheetMusic(id);
-//
-//        return ResponseEntity.ok()
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-//                .body(resource);
-//    }
-//@GetMapping("/docs/{docPath}")
-//public ResponseEntity<Resource> getDocument(@PathVariable String docPath) throws IOException {
-//    InputStreamResource resource = new InputStreamResource(
-//            Files.newInputStream(Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, docPath))
-//    );
-//    return ResponseEntity.ok()
-//            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
-//            .contentType(MediaType.APPLICATION_PDF)
-//            .body(resource);
-//}
-
-    // ==================== הזרמת מסמכים / PDF ====================
     @GetMapping("/documents/{docPath}")
     public ResponseEntity<Resource> getDocument(@PathVariable String docPath) throws IOException {
         InputStreamResource resource = FileUtils.getDocument(docPath);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
-                .contentType(MediaType.APPLICATION_PDF) // או MediaType.APPLICATION_OCTET_STREAM אם לא PDF
+                .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
     }
 
@@ -385,5 +326,56 @@ public class SheetMusicController {
 //                "N/A"                            // lyricist
 //        );
 //    }
+
+    private final Path fileStorageLocation = Paths.get("./uploads/scores")
+            .toAbsolutePath().normalize();
+
+    /**
+     * מטפל בבקשת GET להורדת קובץ (למשל, תווי נגינה).
+     *
+     * @param fileName שם הקובץ המלא לבצע הורדה (למשל, "my_score.pdf")
+     * @param request  אובייקט בקשת ה-HTTP, משמש לזיהוי סוג ה-MIME
+     * @return תגובת HTTP עם הקובץ המצורף להורדה
+     */
+    @GetMapping("/download/{fileName:.+}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
+
+        // 1. איתור הקובץ במערכת הקבצים
+        Resource resource;
+        try {
+            // בונה את הנתיב המלא לקובץ
+            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            resource = new UrlResource(filePath.toUri());
+
+            // בדיקה אם הקובץ קיים וניתן לקרוא אותו
+            if (!resource.exists() || !resource.isReadable()) {
+                // מחזיר 404 Not Found אם הקובץ לא קיים
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+        } catch (MalformedURLException ex) {
+            // שגיאה בבניית ה-URL
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // 2. קביעת סוג התוכן (Content Type) של הקובץ
+        String contentType = null;
+        try {
+            // מנסה לזהות את סוג ה-MIME באמצעות הסיומת
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+        } catch (IOException ex) {
+            // אם הזיהוי נכשל, משתמשים ב-Content Type גנרי
+            contentType = "application/octet-stream";
+        }
+
+        // 3. החזרת הקובץ כ-ResponseEntity
+        return ResponseEntity.ok()
+                // הגדרת כותרת Content-Type
+                .contentType(MediaType.parseMediaType(contentType))
+                // הגדרת כותרת Content-Disposition, המורה לדפדפן להוריד את הקובץ
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                // גוף התגובה הוא הקובץ (Resource)
+                .body(resource);
+    }
 }
+
 

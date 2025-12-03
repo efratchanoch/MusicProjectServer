@@ -1,37 +1,47 @@
 package com.example.tunehub.model;
 
 public enum ENotificationType {
-    // Likes & Favorites
-    LIKE_POST,
-    LIKE_COMMENT,
-    LIKE_MUSIC,
-    FAVORITE_POST,
-    FAVORITE_MUSIC,
+    // Likes & Favorites (LIKES_FAVORITES)
+    LIKE_POST(ENotificationCategory.LIKES_FAVORITES),
+    LIKE_COMMENT(ENotificationCategory.LIKES_FAVORITES),
+    LIKE_MUSIC(ENotificationCategory.LIKES_FAVORITES),
+    FAVORITE_POST(ENotificationCategory.LIKES_FAVORITES),
+    FAVORITE_MUSIC(ENotificationCategory.LIKES_FAVORITES),
 
-    // Comments
-    COMMENT_ON_POST,
+    // Comments (COMMENTS)
+    COMMENT_ON_POST(ENotificationCategory.COMMENTS),
 
-    // Follow Updates (your followees perform actions)
-    FOLLOWEE_NEW_POST,
-    FOLLOWEE_NEW_MUSIC,
-    FOLLOWEE_NEW_PROFILE_PICTURE,
-    FOLLOWEE_NEW_VIDEO,
-    FOLLOWEE_PROFILE_UPDATED,
+    // Follow Updates (FOLLOW_UPDATES)
+    FOLLOWEE_NEW_POST(ENotificationCategory.FOLLOW_UPDATES),
+    FOLLOWEE_NEW_MUSIC(ENotificationCategory.FOLLOW_UPDATES),
+    FOLLOWEE_NEW_PROFILE_PICTURE(ENotificationCategory.FOLLOW_UPDATES),
+    FOLLOWEE_NEW_VIDEO(ENotificationCategory.FOLLOW_UPDATES),
+    FOLLOWEE_PROFILE_UPDATED(ENotificationCategory.FOLLOW_UPDATES),
 
-    // Approved follows
-    FOLLOW_REQUEST_ACCEPTED,
-    FOLLOW_REQUEST_DECLINED,
+    // Approved Follows (APPROVED_FOLLOWS)
+    FOLLOW_REQUEST_ACCEPTED(ENotificationCategory.APPROVED_FOLLOWS),
+    FOLLOW_REQUEST_DECLINED(ENotificationCategory.APPROVED_FOLLOWS),
 
-    // Follow requests
-    FOLLOW_REQUEST_RECEIVED,
-    FOLLOWER_REMOVED,
+    // Follow Requests & Follower Updates (FOLLOW_REQUESTS/FOLLOW_UPDATES)
+    FOLLOW_REQUEST_RECEIVED(ENotificationCategory.FOLLOW_REQUESTS), // זו בקשת עוקב שמגיעה אליך
+    FOLLOWER_REMOVED(ENotificationCategory.FOLLOW_UPDATES), // הסרת עוקב נכנסת כעדכון עוקב
 
-    // Admin
-    ADMIN_WARNING_POST,
-    ADMIN_WARNING_COMMENT,
-    ADMIN_DELETED_POST,
-    ADMIN_DELETED_COMMENT,
-    ADMIN_PROMOTION_MANAGER,
-    ADMIN_PROMOTION_SUPER_MANAGER
-//    SYSTEM_ANNOUNCEMENT,
+    // Admin (ADMIN)
+    ADMIN_WARNING_POST(ENotificationCategory.ADMIN),
+    ADMIN_WARNING_COMMENT(ENotificationCategory.ADMIN),
+    ADMIN_DELETED_POST(ENotificationCategory.ADMIN),
+    ADMIN_DELETED_COMMENT(ENotificationCategory.ADMIN),
+    ADMIN_PROMOTION_MANAGER(ENotificationCategory.ADMIN),
+    ADMIN_PROMOTION_SUPER_MANAGER(ENotificationCategory.ADMIN);
+    // SYSTEM_ANNOUNCEMENT, // אם תשתמש בזה בעתיד, שייך ל-ADMIN או צור קטגוריה חדשה
+
+    private final ENotificationCategory category;
+
+    ENotificationType(ENotificationCategory category) {
+        this.category = category;
+    }
+
+    public ENotificationCategory getCategory() {
+        return category;
+    }
 }

@@ -87,14 +87,14 @@ public class JwtUtils {
     public ResponseCookie generateJwtCookie(CustomUserDetails userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getUsername());
         ResponseCookie cookie = ResponseCookie.from("securitySample", jwt)
-                .path("/api").maxAge(24*60*60).httpOnly(true).build();
+                .path("/").maxAge(24*60*60).httpOnly(true).build();
         return cookie;
     }
     //********תפקיד הפונקציה:
     //מה הפונקציה מקבלת?
     //מה הפונקציה מחזירה?
     public ResponseCookie getCleanJwtCookie(){
-        ResponseCookie cookie= ResponseCookie.from("securitySample",null).path("/api").build();
+        ResponseCookie cookie= ResponseCookie.from("securitySample",null).path("/").build();
         return cookie;
     }
 
@@ -103,31 +103,31 @@ public class JwtUtils {
 
     //********תפקיד הפונקציה: יצירת קוקי עבור ה-Refresh Token (תוקף ארוך)
 // ההגדרה HttpOnly היא קריטית לאבטחה!
-    public ResponseCookie generateRefreshCookie(String refreshToken) {
-        // מוגדר לשנה, path מוגבל לנקודת הקצה של הריענון
-        return ResponseCookie.from("refreshToken", refreshToken)
-                .path("/api/auth/refreshtoken")
-                .maxAge(365 * 24 * 60 * 60) // שנה בשניות
-                .httpOnly(true)
-                .build();
-    }
-
-    //********תפקיד הפונקציה: חילוץ ה-Refresh Token מהקוקי
-    public String getRefreshJwtFromCookies(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
-        if (cookie != null) {
-            return cookie.getValue();
-        } else {
-            return null;
-        }
-    }
-
-    //********תפקיד הפונקציה: יצירת Access Token Cookie חדש (תוקף קצר)
-// משמש לרענון ה-Access Token בלבד
-    public ResponseCookie generateAccessCookie(String accessToken) {
-        // שם הקוקי הוא "securitySample" כפי שהיה לך
-        return ResponseCookie.from("securitySample", accessToken)
-                .path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
-    }
+//    public ResponseCookie generateRefreshCookie(String refreshToken) {
+//        // מוגדר לשנה, path מוגבל לנקודת הקצה של הריענון
+//        return ResponseCookie.from("refreshToken", refreshToken)
+//                .path("/api/auth/refreshtoken")
+//                .maxAge(365 * 24 * 60 * 60) // שנה בשניות
+//                .httpOnly(true)
+//                .build();
+//    }
+//
+//    //********תפקיד הפונקציה: חילוץ ה-Refresh Token מהקוקי
+//    public String getRefreshJwtFromCookies(HttpServletRequest request) {
+//        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
+//        if (cookie != null) {
+//            return cookie.getValue();
+//        } else {
+//            return null;
+//        }
+//    }
+//
+//    //********תפקיד הפונקציה: יצירת Access Token Cookie חדש (תוקף קצר)
+//// משמש לרענון ה-Access Token בלבד
+//    public ResponseCookie generateAccessCookie(String accessToken) {
+//        // שם הקוקי הוא "securitySample" כפי שהיה לך
+//        return ResponseCookie.from("securitySample", accessToken)
+//                .path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
+//    }
 
 }

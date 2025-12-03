@@ -25,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.reactive.config.ResourceHandlerRegistry;
+import org.springframework.web.servlet.View;
 
 import java.util.Arrays;
 import java.util.List;
@@ -77,7 +78,7 @@ public class WebSecurityConfig {
     //********תפקיד הפונקציה:
     //מגדירה את שרשרת מסנן האבטחה
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, View error) throws Exception {
         //משבית את הגנת CSRF על ידי הפעלת שיטת `csrf()` והשבתתה
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -89,14 +90,16 @@ public class WebSecurityConfig {
                     corsConfiguration.setAllowCredentials(true);//לאפשר עוגיות
                     return corsConfiguration;
                 }))
-
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler)
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                                 auth.requestMatchers("/h2-console/**").permitAll()
 //                                            .requestMatchers("/api/**/**").permitAll()
                                         .requestMatchers("/ws-notifications/**").authenticated()
-
                                         .requestMatchers("/api/users/**").permitAll()
+                                        .requestMatchers("/api/post/paged").permitAll() // 👈 פתח את הנתיב הספציפי
                                         .requestMatchers("/api/post/**").authenticated()
                                         .requestMatchers("/api/sheetMusic/**").authenticated()
                                         .requestMatchers("/api/sheetMusicCategory/**").authenticated()
@@ -112,6 +115,7 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/users/chat").permitAll()
                                         .requestMatchers("/api/search/**").authenticated()
                                         .requestMatchers("/api/post/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+
 //                                        .requestMatchers(HttpMethod.POST).permitAll()
 //                                        .requestMatchers(HttpMethod.GET).permitAll()
 

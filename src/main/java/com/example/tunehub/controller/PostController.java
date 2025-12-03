@@ -3,7 +3,6 @@ package com.example.tunehub.controller;
 import com.example.tunehub.dto.PostResponseDTO;
 import com.example.tunehub.dto.PostUploadDTO;
 import com.example.tunehub.model.*;
-import com.example.tunehub.security.CustomUserDetails;
 import com.example.tunehub.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.core.io.Resource;
@@ -14,9 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,25 +29,20 @@ public class PostController {
     private final FavoriteRepository favoriteRepository;
     private PostRepository postRepository;
     private PostMapper postMapper;
-    private UsersRepository usersRepository;
     private AuthService authService;
     private CommentRepository commentRepository;
     private NotificationService notificationService;
 
     @Autowired
-    public PostController(LikeRepository likeRepository, FavoriteRepository favoriteRepository, PostRepository postRepository, PostMapper postMapper, UsersRepository usersRepository, AuthService authService, NotificationService notificationService,CommentRepository commentRepository) {
+    public PostController(LikeRepository likeRepository, FavoriteRepository favoriteRepository, PostRepository postRepository, PostMapper postMapper, AuthService authService, NotificationService notificationService,CommentRepository commentRepository) {
         this.likeRepository = likeRepository;
         this.favoriteRepository = favoriteRepository;
         this.postRepository = postRepository;
         this.postMapper = postMapper;
-        this.usersRepository = usersRepository;
         this.authService = authService;
         this.notificationService = notificationService;
         this.commentRepository= commentRepository;
     }
-
-
-
 
 
     //Get
@@ -79,17 +70,9 @@ public class PostController {
                 return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
             }
 
-            // לולאה לחישוב דירוג עבור כל פוסט
             for (Post post : posts) {
-
-                // 1. שלוף את התגובות באמצעות ה-Repository
-                // משתמשים בשיטה findByPostId שהגדרנו למעלה.
                 List<Comment> comments = commentRepository.findByPostId(post.getId());
-
-                // 2. חשב את הדירוג המשוקלל
                 double starRating = UsersRatingUtils.calculatePostStarRating(post, comments);
-
-                // 3. עדכן את שדה הדירוג של הפוסט
                 post.setRating(starRating);
             }
 
@@ -118,18 +101,6 @@ public class PostController {
         }
     }
 
-//    @GetMapping("/favoritePostsByUserId/{id}")
-//    public ResponseEntity<List<PostResponseDTO>> getFavoritePostsByUserId(@PathVariable Long id) {
-//        try {
-//            List<Post> p = postRepository.findAllByUsersFavorite_Id(id);
-//            if (p == null) {
-//                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-//            }
-//            return new ResponseEntity<>(postMapper.postListToPostResponseDTOlist(p), HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 
 
     @GetMapping("/newPosts")
@@ -178,39 +149,8 @@ public class PostController {
     //Post
 
 
-//    @PostMapping("/audio")
-//    public ResponseEntity<String> uploadAudio(@RequestParam("file") MultipartFile file) {
-//        try {
-//            FileUtils.uploadAudio(file);
-//            return ResponseEntity.ok("Audio uploaded successfully!");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error uploading audio");
-//        }
-//    }
 
-//    @GetMapping("/audio/{audioPath}")
-//    public ResponseEntity<Resource> getReport(@PathVariable String audioPath) throws IOException {
-//        InputStreamResource resource=FileUtils.getAudio(audioPath);
-//
-//        return ResponseEntity.ok()
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + audioPath + "\"")
-//                .contentType(MediaType.parseMediaType("audio/mpeg"))
-//                .body((Resource) resource);
-//    }
-//
-//    @PostMapping("/video")
-//    public ResponseEntity<String> uploadVideo(@RequestParam("file") MultipartFile file) {
-//        try {
-//            FileUtils.uploadVideo(file);
-//            return ResponseEntity.ok("Video uploaded successfully!");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("Error uploading video");
-//        }
-//    }
+
 @PostMapping("/uploadPost")
 public ResponseEntity<PostResponseDTO> createPost(
         @RequestPart("data") PostUploadDTO dto,
@@ -219,17 +159,12 @@ public ResponseEntity<PostResponseDTO> createPost(
         @RequestPart(value = "video", required = false) MultipartFile video) {
 
     try {
-        // 🔑 קבלת המשתמש מה־JWT דרך SecurityContext
-//        CustomUserDetails currentUserDetails = (CustomUserDetails) SecurityContextHolder
-//                .getContext().getAuthentication().getPrincipal();
-//        Users user = usersRepository.findUsersByName(currentUserDetails.getUsername());
 
         Users user = authService.getCurrentUser();
-        // Convert DTO to Entity
         Post post = postMapper.postUploadDTOtoPost(dto);
-        post.setUser(user); // משתמש קיים מה־JWT
+        post.setUser(user);
 
-        // ==================== Images ====================
+        // Images
         if (images != null && !images.isEmpty()) {
             List<String> imageNames = new ArrayList<>();
             for (MultipartFile img : images) {
@@ -240,24 +175,22 @@ public ResponseEntity<PostResponseDTO> createPost(
             post.setImagesPath(imageNames);
         }
 
-        // ==================== Audio ====================
+        // Audio
         if (audio != null) {
             String uniqueAudioName = FileUtils.generateUniqueFileName(audio);
             FileUtils.uploadAudio(audio, uniqueAudioName);
             post.setAudioPath(uniqueAudioName);
         }
 
-        // ==================== Video ====================
+        //  Video
         if (video != null) {
             String uniqueVideoName = FileUtils.generateUniqueFileName(video);
             FileUtils.uploadVideo(video, uniqueVideoName);
             post.setVideoPath(uniqueVideoName);
         }
 
-        // Save to database
         postRepository.save(post);
 
-        // Build DTO
         PostResponseDTO responseDTO = postMapper.postToPostResponseDTO(post, user.getId(), likeRepository, favoriteRepository);
 
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
@@ -269,7 +202,7 @@ public ResponseEntity<PostResponseDTO> createPost(
 }
 
 
-    // ==================== הזרמת אודיו ====================
+    // Streaming
     @GetMapping("/audio/{audioPath}")
     public ResponseEntity<Resource> getAudio(@PathVariable String audioPath) throws IOException {
         InputStreamResource resource = FileUtils.getAudio(audioPath);
@@ -280,7 +213,7 @@ public ResponseEntity<PostResponseDTO> createPost(
                 .body(resource);
     }
 
-    // ==================== הזרמת וידאו ====================
+
     @GetMapping("/video/{videoPath}")
     public ResponseEntity<Resource> getVideo(@PathVariable String videoPath) throws IOException {
         InputStreamResource resource = FileUtils.getVideo(videoPath);
@@ -292,7 +225,7 @@ public ResponseEntity<PostResponseDTO> createPost(
     }
 
 
-    // ==================== הזרמת תמונה ====================
+
     @GetMapping("/image/{imagePath}")
     public ResponseEntity<Resource> getImage(@PathVariable String imagePath) throws IOException {
         InputStreamResource resource = new InputStreamResource(
@@ -306,10 +239,10 @@ public ResponseEntity<PostResponseDTO> createPost(
     }
 
 
-    //Delete
+    // Delete
     @DeleteMapping("/deletePostByPostId/{id}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN' ,'ROLE_SUPER_ADMIN')")
-    @Transactional // מבטיח שכל הפעולות מתבצעות כיחידה אחת
+    @Transactional
     public ResponseEntity<?> deletePostByPostId(@PathVariable Long id) {
         try {
             Post p = postRepository.findPostById(id);
@@ -317,15 +250,12 @@ public ResponseEntity<PostResponseDTO> createPost(
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            Users postOwner = p.getUser(); // מזהה את בעל הפוסט
-            Users adminUser = authService.getCurrentUser(); // **צריך פונקציה שמביאה את האדמין המחובר**
+            Users postOwner = p.getUser();
+            Users adminUser = authService.getCurrentUser();
 
-            // 1. מחיקת כל האינטראקציות (לייקים/מועדפים) הקשורות לפוסט
-            // יש להשתמש ב-InteractionRepository (או InteractionService)
             likeRepository.deleteAllByTargetTypeAndTargetId(ETargetType.POST, id);
             favoriteRepository.deleteAllByTargetTypeAndTargetId(ETargetType.POST, id);
 
-            // 2. יצירת ושליחת התראה לבעל הפוסט
 
             notificationService.createNotification(
                     ENotificationType.ADMIN_WARNING_POST,
@@ -334,11 +264,8 @@ public ResponseEntity<PostResponseDTO> createPost(
                     ETargetType.POST,
                     id
             );
-
-            // 3. מחיקת הפוסט
             postRepository.deleteById(id);
 
-            // **הוספנו הודעה להחזרה - אין צורך ב-NO_CONTENT אלא ב-OK עם הודעה**
             return new ResponseEntity<>("Post deleted and user notified.", HttpStatus.OK);
 
         } catch (Exception e) {
@@ -348,7 +275,6 @@ public ResponseEntity<PostResponseDTO> createPost(
 
 
 
-    // ... בתוך AdminController או PostController ...
 
     @PostMapping("/admin/sendPostOwnerWarningNotification/{postId}")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN' ,'ROLE_SUPER_ADMIN')")
@@ -360,7 +286,7 @@ public ResponseEntity<PostResponseDTO> createPost(
             }
 
             Users postOwner = p.getUser();
-            Users adminUser = authService.getCurrentUser(); // **האדמין ששולח**
+            Users adminUser = authService.getCurrentUser();
 
             Notification notification = new Notification(
                     ENotificationType.ADMIN_WARNING_POST,
@@ -370,15 +296,13 @@ public ResponseEntity<PostResponseDTO> createPost(
                     postId
             );
 
-            // הוספת הודעה מותאמת אישית אם נשלחה כפרמטר
             if (customMessage != null && !customMessage.trim().isEmpty()) {
                 notification.setMessage(customMessage);
             } else {
-                // יקבע את הודעת ברירת המחדל (כפי שהוגדר ב-Notification.java)
-                notification.setTitleAndMessageBasedOnType(ENotificationType.ADMIN_WARNING_POST, adminUser);
+                notification.setTitleAndMessageBasedOnType(ENotificationType.ADMIN_WARNING_POST, adminUser,1);
             }
 
-            notificationService.saveNotification(notification); // נניח שזו הפונקציה לשמירה ושליחה
+            notificationService.saveNotification(notification);
 
             return new ResponseEntity<>("Warning notification sent to post owner.", HttpStatus.OK);
 
@@ -387,4 +311,5 @@ public ResponseEntity<PostResponseDTO> createPost(
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

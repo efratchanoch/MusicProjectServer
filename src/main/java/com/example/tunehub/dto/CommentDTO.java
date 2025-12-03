@@ -1,14 +1,15 @@
 package com.example.tunehub.dto;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 public record CommentDTO(
         Long id,
         String content,
-        LocalDate dateUploaded,
+        OffsetDateTime dateUploaded,
         UsersProfileDTO profile,
         int likes,
-        int hearts,
         boolean isLiked
 ) {
 }

@@ -1,6 +1,9 @@
 package com.example.tunehub.service;
 
+import com.example.tunehub.dto.FavoriteItemDTO;
 import com.example.tunehub.dto.NotificationSimpleDTO;
+import com.example.tunehub.dto.PostResponseDTO;
+import com.example.tunehub.dto.SheetMusicResponseDTO;
 import com.example.tunehub.model.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class InteractionService {
@@ -24,13 +30,17 @@ public class InteractionService {
     private final AuthService authService;
     private final CommentRepository commentRepository;
     private final NotificationService notificationService;
+    private final SheetMusicMapper sheetMusicMapper;
+    private final PostMapper postMapper;
 
     @Autowired
     public InteractionService(PostRepository postRepository, SheetMusicRepository sheetMusicRepository,
                               UsersRepository usersRepository, LikeRepository likeRepository,
                               NotificationRepository notificationRepository, FavoriteRepository favoriteRepository,
                               FollowRepository followRepository, AuthService authService,
-                              CommentRepository commentRepository, NotificationService notificationService) {
+                              CommentRepository commentRepository, NotificationService notificationService,
+                              SheetMusicMapper sheetMusicMapper,
+                              PostMapper postMapper) {
 
         this.postRepository = postRepository;
         this.sheetMusicRepository = sheetMusicRepository;
@@ -42,6 +52,9 @@ public class InteractionService {
         this.authService = authService;
         this.commentRepository = commentRepository;
         this.notificationService = notificationService;
+        this.sheetMusicMapper = sheetMusicMapper;
+        this.postMapper = postMapper;
+
     }
 
 
@@ -79,10 +92,6 @@ public class InteractionService {
                 sheetMusicRepository.updateLikeCount(targetId, newCount);
                 break;
 
-            case USER:
-                usersRepository.updateFollowerCount(targetId, newCount);
-                break;
-
             case COMMENT:
                 commentRepository.updateLikeCount(targetId, newCount);
                 break;
@@ -92,34 +101,22 @@ public class InteractionService {
         }
     }
 
-    // LIKE *************************************************************
-// אני כותבת פה הערות כדי שנבין מהזה עושה אחכ למחוק הכל כמובן
+    // Likes
     public ResponseEntity<?> addLike(ETargetType targetType, Long targetId) {
-        // בודקים מי המשתמש הנוכחי
         Long currentUserId = authService.getCurrentUserId();
 
-
         try {
-            //אם הוא עשה כבר לייק --- אז לא תודה הרעיון הוא להוסיף לייק
             if (likeRepository.existsByUserIdAndTargetTypeAndTargetId(currentUserId, targetType, targetId)) {
                 return new ResponseEntity<>(null, HttpStatus.OK);
             }
-            // אם לא יוצרים לו לייק
-            //לתוכן הספציפי
+
             Like newLike = new Like(currentUserId, targetType, targetId);
             likeRepository.save(newLike);
 
-            //אחרי שהוספנו סופרים שוב כמה לייקים יש
-            //לתוכן הספציפי
             int newCount = likeRepository.countByTargetTypeAndTargetId(targetType, targetId);
-            // מעדכנים את הכאונט
-            //של התוכן הספציפי כמה לייקים יש לו
             updateContentCount(targetType, targetId, newCount);
 
-            //בדקים של מי התוכן
-            //כדי לשלוח לו התראה שעלה לו כאונט הלייקים
             Users contentOwner = getContentOwner(targetType, targetId);
-            //אם מצאו למי זה שייך אז שולחים לו התראה
             if (contentOwner != null) {
                 notificationService.handleLikeNotification(
                         targetType,
@@ -136,8 +133,8 @@ public class InteractionService {
         }
     }
 
+
     public ResponseEntity<?> removeLike(ETargetType targetType, Long targetId) {
-        //מקבליםפ את היוזר
         Long currentUserId = authService.getCurrentUserId();
 
         try {
@@ -149,11 +146,8 @@ public class InteractionService {
             int newCount = likeRepository.countByTargetTypeAndTargetId(targetType, targetId);
             updateContentCount(targetType, targetId, newCount);
 
-
-            //בדקים של מי התוכן
-            //כדי לשלוח לו התראה שעלה לו כאונט הלייקים
             Users contentOwner = getContentOwner(targetType, targetId);
-            //אם מצאו למי זה שייך אז שולחים לו התראה
+
             if (contentOwner != null) {
                 notificationService.handleLikeNotification(
                         targetType,
@@ -170,25 +164,24 @@ public class InteractionService {
         }
     }
 
-    // FOLLOW *************************************************************
 
+    // Follow
     @Transactional
     public ResponseEntity<EFollowStatus> toggleFollowRequest(Long targetUserId) {
         Users follower = authService.getCurrentUser();
 
-        //רוצה לעקוב אחרי עצמו
         if (follower.getId().equals(targetUserId))
             return new ResponseEntity<>(EFollowStatus.NONE, HttpStatus.BAD_REQUEST);
 
-        //בודקים אם כבר קיים מעקב
         Follow existingFollow = followRepository.findByFollowerIdAndFollowingIdForUpdate(
                 follower.getId(), targetUserId);
 
         Users contentOwner = usersRepository.findUsersById(targetUserId);
+
         if (contentOwner == null) {
             return new ResponseEntity<>(EFollowStatus.NONE, HttpStatus.BAD_REQUEST);
         }
-        //אם קיים מסירים מעקב
+
         if (existingFollow != null) {
             followRepository.delete(existingFollow);
             followRepository.flush();
@@ -205,16 +198,13 @@ public class InteractionService {
     }
 
 
-
     public ResponseEntity<EFollowStatus> getFollowStatus(Long targetUserId) {
         Users currentUser = authService.getCurrentUser();
-//        if (currentUser == null)
-//            return new ResponseEntity<>(EFollowStatus.NONE, HttpStatus.UNAUTHORIZED);
+        if (currentUser == null)
+            return new ResponseEntity<>(EFollowStatus.NONE, HttpStatus.UNAUTHORIZED);
 
-        // לבדוק אם תקיןןןן
-        // עוקב אחרי עצמך
         if (currentUser.getId() == targetUserId)
-            return new ResponseEntity<>(EFollowStatus.APPROVED, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
 
         Follow follow = followRepository.findByFollowerIdAndFollowingId(
                 currentUser.getId(), targetUserId);
@@ -228,6 +218,7 @@ public class InteractionService {
     public ResponseEntity<?> approveFollow(Long followerId){
         return approveOrRejectFollow(followerId, ENotificationType.FOLLOW_REQUEST_ACCEPTED);
     }
+
     public ResponseEntity<?> RejectFollow(Long followerId){
         return approveOrRejectFollow(followerId, ENotificationType.FOLLOW_REQUEST_RECEIVED);
     }
@@ -240,47 +231,38 @@ public class InteractionService {
                     .findByFollowerIdAndFollowingIdAndStatus(
                             followerId, followingUser.getId(), EFollowStatus.PENDING);
 
-            Follow follow = existingFollow.orElseThrow(() ->
-                    new NoSuchElementException("לא נמצאה בקשת מעקב ממתינה."));
+            if (existingFollow.isEmpty()) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("No pending follow request found.");
+            }
 
+            Follow follow = existingFollow.get();
             follow.setStatus(EFollowStatus.APPROVED);
             followRepository.save(follow);
 
             Users follower = usersRepository.findById(followerId).orElse(null);
-            if (follower == null){
-                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-
+            if (follower == null) {
+                return ResponseEntity
+                        .status(HttpStatus.NOT_FOUND)
+                        .body("Follower user not found.");
             }
 
             notificationService.handleFollowRequestDecisions(follower, followingUser, notify);
 
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Follow request processed successfully.");
 
-
-            return new ResponseEntity<>(null, HttpStatus.OK);
-
-        } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred.");
         }
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // FAVORITES *************************************************************
-
+    // Favorites
     @Transactional
     public ResponseEntity<NotificationSimpleDTO> addFavorite(ETargetType targetType, Long targetId) {
         Long currentUserId = authService.getCurrentUserId();
@@ -328,5 +310,81 @@ public class InteractionService {
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public List<FavoriteItemDTO> getFavoritesForUserByType(Long userId, ETargetType type, String search) {
+        List<Favorite> favoriteRecords = favoriteRepository.findByUserIdAndTargetType(userId, type);
+        String lowerCaseSearch = search.toLowerCase();
+
+        return favoriteRecords.stream()
+                .map(record -> fetchDetailsAndFilter(record, lowerCaseSearch))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+
+    private FavoriteItemDTO fetchDetailsAndFilter(Favorite record, String search) {
+
+        Object details = null;
+        boolean matchesSearch = true;
+
+        FavoriteItemDTO dto = new FavoriteItemDTO();
+        dto.setId(record.getId());
+        dto.setTargetId(record.getTargetId());
+        dto.setTargetType(record.getTargetType());
+        dto.setCreatedAt(record.getCreatedAt());
+
+        switch (record.getTargetType()) {
+
+            case POST:
+                Optional<Post> postOptional = postRepository.findById(record.getTargetId());
+                if (postOptional.isPresent()) {
+                    PostResponseDTO postDto = postMapper.postToPostResponseDTO(
+                            postOptional.get(),
+                            record.getUserId(),
+                            this.likeRepository,
+                            this.favoriteRepository
+                    );
+                    details = postDto;
+                    if (!search.isEmpty()) {
+                        String title = postDto.getTitle() != null ? postDto.getTitle().toLowerCase() : "";
+                        if (!title.contains(search)) {
+                            matchesSearch = false;
+                        }
+                    }
+                }
+                break;
+
+
+            case SHEET_MUSIC:
+                Optional<SheetMusic> sheetMusicOptional = sheetMusicRepository.findById(record.getTargetId());
+                if (sheetMusicOptional.isPresent()) {
+                    SheetMusicResponseDTO sheetMusicDto = sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(
+                            sheetMusicOptional.get(),
+                            record.getUserId(),
+                            this.likeRepository,
+                            this.favoriteRepository
+                    );
+
+                    details = sheetMusicDto;
+                    if (!search.isEmpty()) {
+                        String title = sheetMusicDto.title() != null ? sheetMusicDto.title().toLowerCase() : "";
+                        if (!title.contains(search)) {
+                            matchesSearch = false;
+                        }
+                    }
+                }
+                break;
+
+            default:
+                return null;
+        }
+
+        if (details == null || !matchesSearch) {
+            return null;
+        }
+
+        dto.setDetails(details);
+        return dto;
     }
 }

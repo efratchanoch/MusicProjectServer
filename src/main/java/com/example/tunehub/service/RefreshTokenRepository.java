@@ -10,10 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    // מציאת טוקן רענון לפי המחרוזת שלו
-    Optional<RefreshToken> findByToken(String token);
-
-    // מחיקת טוקן רענון של משתמש ספציפי (למשל, בלוג-אאוט)
-    @Modifying
-    int deleteByUser(Users user);
+//    // מציאת טוקן רענון לפי המחרוזת שלו
+//    Optional<RefreshToken> findByToken(String token);
+//
+//    // מחיקת טוקן רענון של משתמש ספציפי (למשל, בלוג-אאוט)
+//    @Modifying
+//    int deleteByUser(Users user);
 }

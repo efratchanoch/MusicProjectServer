@@ -34,20 +34,11 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
     List<Users> findByTeacherId(Long teacherId);
 
 
-    // List<Users> findByLikes(List<Users> users);
-
-    // List<Users> findTop10ByLikesOrderByLikesDesc();
-
     boolean existsById(Long id);
 
     void deleteById(Long id);
 
-
-//    UsersMusiciansDTO findMusicianDtoById(Long id);
-
     List<Users> findAllByLastActivityTimestampBeforeAndIsActiveIsTrue(Date threshold);
-
-    //Optional<Users> findByUsername(String username);
 
     Users findByName(String name);
 
@@ -67,12 +58,9 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
 
     List<Users> findAllByCity(String city);
 
-    //List<Users> findAllByDateUploaded(String dateUploaded);
 
-    //List<Users> findAllByCreatedAt(LocalDate createdAt, Pageable pageable);
-
-    @Transactional // 1. חובה: כדי שהשינוי יתבצע כראוי ב-DB.
-    @Modifying   // 2. חובה: מציין שזהו Query שמשנה נתונים (INSERT, UPDATE, DELETE).
+    @Transactional
+    @Modifying
     @Query("UPDATE Users u SET u.teacher.id = :teacherId WHERE u.id = :studentId")
     void assignTeacherToStudent(
             @Param("studentId") Long studentId,

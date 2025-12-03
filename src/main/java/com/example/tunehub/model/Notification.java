@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
 
 
 @Entity
@@ -37,8 +38,10 @@ public class Notification {
 
     private boolean isRead = false;
 
+    private Integer count = 1;
+
     @CreationTimestamp
-    private Instant createdAt;
+    private OffsetDateTime createdAt;
 
     public Notification() {
     }
@@ -53,10 +56,10 @@ public class Notification {
 
         this.category = getCategoryByType(type);
         // יצירת Title ו-Message (ראה הסבר בסעיף 2)
-        setTitleAndMessageBasedOnType(type, actor);
+        setTitleAndMessageBasedOnType(type, actor ,count);
     }
 
-    public Notification(Long id, Users user, Users actor, ENotificationType type, String title, String message, ETargetType targetType, Long targetId, boolean isRead, Instant createdAt) {
+    public Notification(Long id, Users user, Users actor, ENotificationType type, String title, String message, ETargetType targetType, ENotificationCategory category, Long targetId, boolean isRead, Integer count, OffsetDateTime createdAt) {
         this.id = id;
         this.user = user;
         this.actor = actor;
@@ -64,8 +67,10 @@ public class Notification {
         this.title = title;
         this.message = message;
         this.targetType = targetType;
+        this.category = category;
         this.targetId = targetId;
         this.isRead = isRead;
+        this.count = 1;
         this.createdAt = createdAt;
     }
 
@@ -141,11 +146,11 @@ public class Notification {
         isRead = read;
     }
 
-    public Instant getCreatedAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -158,10 +163,18 @@ public class Notification {
     }
 
 
+    public Integer getCount() {
+        return count;
+    }
 
-    public void setTitleAndMessageBasedOnType(ENotificationType type, Users actor) {
+    public void setCount(Integer count) {
+        this.count = count;
+    }
+
+    public void setTitleAndMessageBasedOnType(ENotificationType type, Users actor ,Integer count) {
 
         String actorName = (actor != null) ? actor.getName() : "Someone";
+        String countString = (count != null && count > 1) ? count.toString() + " " : "";
 
         switch (type) {
 
@@ -170,27 +183,47 @@ public class Notification {
             // -------------------------
             case LIKE_POST -> {
                 this.title = "New Engagement";
-                this.message = "people liked your post.";
+                if (count != null && count > 1) {
+                    this.message = count + " people liked your post.";
+                } else {
+                    this.message = actorName + " liked your post.";
+                }
             }
             case LIKE_COMMENT -> {
                 this.title = "New Engagement";
-                this.message = "people liked your comment.";
+                if (count != null && count > 1) {
+                    this.message = count + " people liked your comment.";
+                } else {
+                    this.message = actorName + " liked your comment.";
+                }
             }
             case LIKE_MUSIC -> {
                 this.title = "New Engagement";
-                this.message = "people liked your music track.";
+                if (count != null && count > 1) {
+                    this.message = count + " people liked your music track.";
+                } else {
+                    this.message = actorName + " liked your music track.";
+                }
             }
             case FAVORITE_POST -> {
                 this.title = "New Engagement";
-                this.message = "people added your post to favorites.";
+                if (count != null && count > 1) {
+                    this.message = count + " people added your post to favorites.";
+                } else {
+                    this.message = actorName + " added your post to favorites.";
+                }
             }
             case FAVORITE_MUSIC -> {
                 this.title = "New Engagement";
-                this.message = "people added your music track to favorites.";
+                if (count != null && count > 1) {
+                    this.message = count + " people added your music track to favorites.";
+                } else {
+                    this.message = actorName + " added your music track to favorites.";
+                }
             }
 
             // -------------------------
-            // Comments on post
+            // Comments on post (אינה מאוגדת - משתמשת ב-actorName)
             // -------------------------
             case COMMENT_ON_POST -> {
                 this.title = "New Comment on Your Post";

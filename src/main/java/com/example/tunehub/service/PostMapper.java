@@ -19,6 +19,7 @@ public interface PostMapper {
     @Mapping(target = "comments", ignore = true)
     Post postUploadDTOtoPost(PostUploadDTO dto);
 
+
     @Mapping(target = "user", source = "user")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "imagesBase64", expression = "java(com.example.tunehub.service.FileUtils.imagesToBase64(p.getImagesPath()))")

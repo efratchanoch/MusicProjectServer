@@ -4,8 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 
 @Entity
 public class Comment {
@@ -23,7 +26,8 @@ public class Comment {
 
     private String content;
 
-    private LocalDate dateUploaded;
+    @CreationTimestamp
+    private OffsetDateTime dateUploaded;
 
 //    private String imageUrl;
 //
@@ -31,7 +35,8 @@ public class Comment {
 
     public Comment() {
     }
-    public Comment(Long id, int likes, Users user, Post post, String content, LocalDate dateUploaded) {
+
+    public Comment(Long id, int likes, Users user, Post post, String content, OffsetDateTime dateUploaded) {
         this.id = id;
         this.likes = likes;
         this.user = user;
@@ -80,13 +85,11 @@ public class Comment {
         this.content = content;
     }
 
-    public LocalDate getDateUploaded() {
+    public OffsetDateTime getDateUploaded() {
         return dateUploaded;
     }
 
-    public void setDateUploaded(LocalDate dateUploaded) {
+    public void setDateUploaded(OffsetDateTime dateUploaded) {
         this.dateUploaded = dateUploaded;
     }
-
-
 }
