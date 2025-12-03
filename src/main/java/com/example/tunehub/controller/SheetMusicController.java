@@ -3,11 +3,11 @@ package com.example.tunehub.controller;
 import com.example.tunehub.dto.*;
 import com.example.tunehub.model.*;
 import com.example.tunehub.service.*;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import com.example.tunehub.service.UsersRatingUtils;
@@ -18,9 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -191,107 +188,88 @@ public class SheetMusicController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + docPath + "\"")
-                .contentType(MediaType.APPLICATION_PDF)
+                .contentType(MediaType.APPLICATION_PDF) // או MediaType.APPLICATION_OCTET_STREAM אם לא PDF
                 .body(resource);
     }
 
+
     @PostMapping(value = "/analyzePDF", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SheetMusicFinalResponseAIDTO> analyzeSheetMusicPDF(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<SheetMusicFinalResponseAIDTO> analyzeSheetMusicPDF(
+            @RequestPart("file") MultipartFile file) {
+
         try {
-            if (file.isEmpty() || file.getBytes().length == 0) {
+            if (file.isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
 
             byte[] pdfBytes = file.getBytes();
 
-            // 1️⃣ שלב AI – ניתוח PDF
+            // AI
             SheetMusicResponseAI aiResponse = agentService.analyzePdfBytes(pdfBytes);
 
-            // 2️⃣ טיפול בכלי נגינה: הוספה ל-DB ובניית DTO עם ID
+            // Instruments
             List<InstrumentResponseDTO> finalInstrumentsDTO = new ArrayList<>();
             List<Instrument> instrumentsForSheet = new ArrayList<>();
-            // aiResponse.instruments() מחזיר List<String>
+
             for (String instrumentName : aiResponse.instruments()) {
-                // 2.1. חיפוש קיים לפי שם (פונקציית findByName ב-Repository)
-                Instrument existing = instrumentRepository.findByName(instrumentName);
-                if (existing == null) {
-                    // 2.2. יצירת חדש אם לא קיים
-                    existing = new Instrument();
-                    existing.setName(instrumentName);
-                    existing = instrumentRepository.save(existing); // שמירה ב-DB לקבלת ID
+                Instrument inst = instrumentRepository.findByName(instrumentName);
+                if (inst == null) {
+                    inst = new Instrument();
+                    inst.setName(instrumentName);
+                    inst = instrumentRepository.save(inst);
                 }
-                // 2.3. בניית ה-DTO הסופי עם ה-ID
-                finalInstrumentsDTO.add(new InstrumentResponseDTO(existing.getId(), existing.getName()));
-                instrumentsForSheet.add(existing);
+
+                instrumentsForSheet.add(inst);
+                finalInstrumentsDTO.add(new InstrumentResponseDTO(inst.getId(), inst.getName()));
             }
 
-            // 3️⃣ בדיקה עבור קטגוריות – תמיכה במספר קטגוריות
-            // 3️⃣ טיפול בקטגוריות: הוספה ל-DB ובניית DTO עם ID
+            // Categories
             List<SheetMusicCategoryResponseDTO> finalCategoriesDTO = new ArrayList<>();
             List<SheetMusicCategory> categoriesForSheet = new ArrayList<>();
-// aiResponse.suggestedCategory() מחזיר List<String>
+
             if (aiResponse.suggestedCategories() != null) {
                 for (String categoryName : aiResponse.suggestedCategories()) {
-                    // 3.1. חיפוש קיים לפי שם
-                    SheetMusicCategory existingCat = categoryRepository.findByName(categoryName);
-                    if (existingCat == null) {
-                        // 3.2. יצירת חדש אם לא קיים
-                        existingCat = new SheetMusicCategory();
-                        existingCat.setName(categoryName);
-                        existingCat = categoryRepository.save(existingCat); // שמירה ב-DB לקבלת ID
+
+                    SheetMusicCategory cat = categoryRepository.findByName(categoryName);
+                    if (cat == null) {
+                        cat = new SheetMusicCategory();
+                        cat.setName(categoryName);
+                        cat = categoryRepository.save(cat);
                     }
-                    // 3.3. בניית ה-DTO הסופי עם ה-ID
-                    finalCategoriesDTO.add(new SheetMusicCategoryResponseDTO(existingCat.getId(), existingCat.getName()));
-                    categoriesForSheet.add(existingCat);
+
+                    categoriesForSheet.add(cat);
+                    finalCategoriesDTO.add(new SheetMusicCategoryResponseDTO(cat.getId(), cat.getName()));
                 }
             }
 
-            // 4️⃣ מיפוי הסולם ורמת הקושי לאינאומים שלך
+            // Scale
             EScale scaleEnum = null;
             if (aiResponse.scale() != null) {
-                for (EScale scale : EScale.values()) {
-                    if (scale.name().equalsIgnoreCase(aiResponse.scale())) {
-                        scaleEnum = scale;
+                for (EScale s : EScale.values()) {
+                    if (s.name().equalsIgnoreCase(aiResponse.scale())) {
+                        scaleEnum = s;
                         break;
                     }
                 }
             }
 
+            // Level
             EDifficultyLevel levelEnum = null;
             if (aiResponse.difficulty() != null) {
-                for (EDifficultyLevel level : EDifficultyLevel.values()) {
-                    if (level.name().equalsIgnoreCase(aiResponse.difficulty())) {
-                        levelEnum = level;
+                for (EDifficultyLevel lvl : EDifficultyLevel.values()) {
+                    if (lvl.name().equalsIgnoreCase(aiResponse.difficulty())) {
+                        levelEnum = lvl;
                         break;
                     }
                 }
             }
 
-//            // 5️⃣ שמירה בDB כ-SheetMusic (הקוד שבוטל חוזר לחיים)
-//            SheetMusic sheet = new SheetMusic();
-//            sheet.setTitle(aiResponse.title());
-//            sheet.setScale(scaleEnum);
-//            sheet.setLevel(levelEnum);
-//            // sheet.setPages(pages); // שימוש במספר העמודים אם קיימת פונקציה
-//            sheet.setInstruments(instrumentsForSheet);
-//            sheet.setCategories(categoriesForSheet);
-//            sheet.setFileName(file.getOriginalFilename());
-//
-//            // **תיקון: שימוש בשדות החדשים מה-DTO**
-//            sheet.setComposer(aiResponse.composer());
-//            sheet.setLyricist(aiResponse.lyricist());
-//
-////            sheet.setDateUploaded(LocalDate.now());
-//
-//            sheetMusicRepository.save(sheet); // שמירת ה-Entity המלא
-
-            // 6️⃣ החזרת DTO מעודכן עם IDs
             SheetMusicFinalResponseAIDTO response = new SheetMusicFinalResponseAIDTO(
                     aiResponse.title(),
                     aiResponse.scale(),
                     finalInstrumentsDTO,
                     aiResponse.difficulty(),
-                    finalCategoriesDTO, // כבר מכיל IDs
+                    finalCategoriesDTO,
                     aiResponse.composer(),
                     aiResponse.lyricist()
             );
@@ -300,82 +278,7 @@ public class SheetMusicController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // ניתן להוסיף הודעת שגיאה ספציפית יותר כאן
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    /**
-     * פונקציה שמדמה ניתוח PDF עם AI.
-     * כאן אפשר לשים את קריאה ל-Gemini או OpenAI.
-     * חובה להחזיר את הנתונים באנגלית בלבד
-     */
-//    private SheetMusicResponseAI analyzePDFWithAI(byte[] pdfBytes) {
-//        // 🔹 כרגע מחזיר דוגמה סטטית
-//        return new SheetMusicResponseAI(
-//                "Ode to Joy",                   // title
-//                "C_MAJOR",                       // scale
-//                List.of(new InstrumentResponseDTO(null, "Piano"), new InstrumentResponseDTO(null, "Violin")), // instruments
-//                "BEGINNER",                      // difficulty
-//                List.of(
-//                        new SheetMusicCategoryResponseDTO(null, "Classical"),
-//                        new SheetMusicCategoryResponseDTO(null, "Orchestral"),
-//                        new SheetMusicCategoryResponseDTO(null, "Choir")
-//                ), // suggestedCategory
-//                "Ludwig van Beethoven",          // composer
-//                "N/A"                            // lyricist
-//        );
-//    }
-
-    private final Path fileStorageLocation = Paths.get("./uploads/scores")
-            .toAbsolutePath().normalize();
-
-    /**
-     * מטפל בבקשת GET להורדת קובץ (למשל, תווי נגינה).
-     *
-     * @param fileName שם הקובץ המלא לבצע הורדה (למשל, "my_score.pdf")
-     * @param request  אובייקט בקשת ה-HTTP, משמש לזיהוי סוג ה-MIME
-     * @return תגובת HTTP עם הקובץ המצורף להורדה
-     */
-    @GetMapping("/download/{fileName:.+}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName, HttpServletRequest request) {
-
-        // 1. איתור הקובץ במערכת הקבצים
-        Resource resource;
-        try {
-            // בונה את הנתיב המלא לקובץ
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
-            resource = new UrlResource(filePath.toUri());
-
-            // בדיקה אם הקובץ קיים וניתן לקרוא אותו
-            if (!resource.exists() || !resource.isReadable()) {
-                // מחזיר 404 Not Found אם הקובץ לא קיים
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (MalformedURLException ex) {
-            // שגיאה בבניית ה-URL
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        // 2. קביעת סוג התוכן (Content Type) של הקובץ
-        String contentType = null;
-        try {
-            // מנסה לזהות את סוג ה-MIME באמצעות הסיומת
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-        } catch (IOException ex) {
-            // אם הזיהוי נכשל, משתמשים ב-Content Type גנרי
-            contentType = "application/octet-stream";
-        }
-
-        // 3. החזרת הקובץ כ-ResponseEntity
-        return ResponseEntity.ok()
-                // הגדרת כותרת Content-Type
-                .contentType(MediaType.parseMediaType(contentType))
-                // הגדרת כותרת Content-Disposition, המורה לדפדפן להוריד את הקובץ
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                // גוף התגובה הוא הקובץ (Resource)
-                .body(resource);
-    }
 }
-
-

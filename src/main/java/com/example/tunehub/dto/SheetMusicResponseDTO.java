@@ -24,7 +24,9 @@ public record SheetMusicResponseDTO (
         boolean isFavorite,
 
         int hearts,
-        int likes
+        int likes,
+        String composer,
+        String lyricist
 
 ){}
 
