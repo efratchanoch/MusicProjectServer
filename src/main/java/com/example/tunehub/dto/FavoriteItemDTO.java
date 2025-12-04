@@ -6,16 +6,13 @@ import java.time.Instant;
 
 public class FavoriteItemDTO {
 
-    // נתונים מרשומת ה-Favorite המקורית
-    private Long id; // ID של רשומת ה-Favorite
+    private Long id;
     private ETargetType targetType;
     private Long targetId;
     private Instant createdAt;
 
-    // 🚨 שדה קריטי: מחזיק את ה-DTO המלא של הישות (PostResponseDTO, TeacherDTO וכו')
     private Object details;
 
-    // Constructor ריק
     public FavoriteItemDTO() {}
 
     public FavoriteItemDTO(Long id, ETargetType targetType, Long targetId, Instant createdAt, Object details) {

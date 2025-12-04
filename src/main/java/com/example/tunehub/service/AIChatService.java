@@ -302,44 +302,22 @@ public class AIChatService {
        this.chatMemory=chatMemory;
     }
 
-//    public String getResponse(String prompt,String conversationId){
-//        List<Message> messageList= new ArrayList<>();
-//        //ההנחיה הראשונה
-//        messageList.add(new SystemMessage(SYSYEM_INSTRUCTION));
-//        SystemMessage systemMessage=new SystemMessage(SYSYEM_INSTRUCTION);
-//        UserMessage userMessage=new UserMessage(prompt);
-//
-//        List<Message> messageList= List.of(systemMessage,userMessage);
-//
-//        return chatClient.prompt().messages(messageList).call().content();
-//    }
 
     public String getResponse(String prompt,String conversationId){
         List<Message> messageList= new ArrayList<>();
-        //ההנחיה הראשונה
         messageList.add(new SystemMessage(SYSYEM_INSTRUCTION));
-        //מוסיף את כל ההודעות ששיכות לשיחה
         messageList.addAll(chatMemory.get(conversationId));
-        //השאלה הנוכחית
         UserMessage userMessage=new UserMessage(prompt);
         messageList.add(userMessage);
 
         String aiResponse=chatClient.prompt().messages(messageList).call().content();
 
-        //שמירת התגובה בזיכרון
-        //התגובה של AI
+
         AssistantMessage aiMessage=new AssistantMessage(aiResponse);
         List<Message> messageList1=List.of(userMessage,aiMessage);
-        //מוסיפים לזיכרון את השאלה והתשובה
         chatMemory.add(conversationId,messageList1);
 
         return  aiResponse;
-//        SystemMessage systemMessage=new SystemMessage(SYSYEM_INSTRUCTION);
-//        UserMessage userMessage=new UserMessage(prompt);
-//
-//        List<Message> messageList= List.of(systemMessage,userMessage);
-//
-//        return chatClient.prompt().messages(messageList).call().content();
     }
 }
 

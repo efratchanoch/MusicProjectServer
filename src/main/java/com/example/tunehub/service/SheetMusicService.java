@@ -27,13 +27,10 @@ public class SheetMusicService {
 
     public SheetMusicResponseDTO upload(SheetMusicUploadDTO dto, MultipartFile file, MultipartFile image) throws Exception {
 
-        // 1. מיפוי בסיסי מה-DTO (ללא instruments ו-categories)
         SheetMusic s = sheetMusicMapper.SheetMusicUploadDTOtoSheetMusic(dto);
 
-        // 2. הגדרת user
         s.setUser(authService.getCurrentUser());
 
-        // 3. יצירת שמות ייחודיים
         String uniqueFileName = null;
         if (file != null) {
             uniqueFileName = FileUtils.generateUniqueFileName(file);
@@ -46,10 +43,8 @@ public class SheetMusicService {
             s.setImageCoverName(uniqueImageCoverName);
         }
 
-        // 4. ספירת עמודים
         s.setPages(FileUtils.getPDFPageCount(file.getBytes()));
 
-        // 5. טעינת Instrument לפי ID
         List<Instrument> instruments =
                 dto.instruments().stream()
                         .map(i -> instrumentRepository.findById(i.id())
@@ -57,7 +52,6 @@ public class SheetMusicService {
                         .toList();
         s.setInstruments(instruments);
 
-        // 6. טעינת Categories לפי ID
         List<SheetMusicCategory> categories =
                 dto.categories().stream()
                         .map(c -> categoryRepository.findById(c.id())
@@ -65,14 +59,11 @@ public class SheetMusicService {
                         .toList();
         s.setCategories(categories);
 
-        // 7. שמירה ב-DB
         sheetMusicRepository.save(s);
 
-        // 8. שמירת קבצים פיזית
         FileUtils.uploadDocument(file, uniqueFileName);
         FileUtils.uploadImage(image, uniqueImageCoverName);
 
-        // 9. מיפוי ל-ResponseDTO
         return sheetMusicMapper.sheetMusicToSheetMusicResponseDTO(s,authService.getCurrentUserId(),likeRepository,favoriteRepository);
     }
 }

@@ -35,11 +35,11 @@ public class PostDTO {
   this.createdAt = createdAt;
  }
 
- public UsersProfileDTO getUser() {
+ public UsersProfileDTO getProfile() {
   return profile;
  }
 
- public void setUser(UsersProfileDTO user) {
+ public void setProfile(UsersProfileDTO profile) {
   this.profile = profile;
  }
 

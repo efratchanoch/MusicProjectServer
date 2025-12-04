@@ -9,13 +9,13 @@ import java.util.List;
 public record SheetMusicResponseDTO (
         Long id,
         String title,
-        List<InstrumentResponseDTO> instruments, // אם יש DTO תגובה נפרד
-        List<SheetMusicCategoryResponseDTO> categories, // אם יש DTO תגובה נפרד
+        List<InstrumentResponseDTO> instruments,
+        List<SheetMusicCategoryResponseDTO> categories,
         EDifficultyLevel level,
         EScale scale,
         String filePath,
-        UsersProfileDTO user, // רק מזהה המשתמש המעלה
-        LocalDate dateUploaded, // תאריך העלאה
+        UsersProfileDTO user,
+        LocalDate dateUploaded,
         int downloads,
         int pages,
         String imageCoverName,

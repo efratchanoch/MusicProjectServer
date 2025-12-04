@@ -65,23 +65,12 @@ public  interface  UsersMapper {
         return usersUploadProfileImageDTO;
     }
 
-//    default UsersUploadProfileImageDTO userToUploadProfileImageDTO(Users u) throws IOException {
-//        UsersUploadProfileImageDTO dto = new UsersUploadProfileImageDTO();
-//        dto.setId(u.getId());
-//        dto.setImagePath(u.getImageProfilePath());
-//        return dto;
-//    }
+
     @Mapping(target = "profile", source = "u")
     UsersSearchDTO usersToUsersSearchDTO(Users u);
 
     List<UsersSearchDTO> usersListToUsersSearchDTOList(List<Users> u);
 
-//    default UsersProfileDTO usersToDTO(Users u) throws IOException {
-//        UsersProfileDTO usersProfileDTO = new UsersProfileDTO();
-//        usersProfileDTO.setId(u.getId());
-//        usersProfileDTO.setImageProfilePath(u.getImageProfilePath());
-//        return usersProfileDTO;
-//    }
 
 
 }

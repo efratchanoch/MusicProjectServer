@@ -9,12 +9,12 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = UsersMapper.class)
 public interface NotificationMapper {
-    @Mapping(source = "read", target = "isRead")  // 🚨 explicit mapping
+    @Mapping(source = "read", target = "isRead")
     NotificationResponseDTO NotificationToNotificationResponseDTO(Notification n);
 
-    @Mapping(source = "read", target = "read")  // 🚨 explicit mapping
+    @Mapping(source = "read", target = "read")
     NotificationLikesAndFavoritesDTO NotificationToNotificationLikesAndFavoritesDTO(Notification n);
 
-    @Mapping(source = "read", target = "isRead")  // 🚨 explicit mapping
+    @Mapping(source = "read", target = "isRead")
     NotificationFollowDTO NotificationToNotificationFollowDTO(Notification n);
 }

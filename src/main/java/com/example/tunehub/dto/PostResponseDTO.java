@@ -4,16 +4,16 @@ import java.util.List;
 
 public class PostResponseDTO {
     private Long id;
-    private UsersProfileDTO  user;         // מזהה היוזר שפרסם את הפוסט
-    private String title;        // כותרת הפוסט
+    private UsersProfileDTO  user;
+    private String title;
     private String content;
-    private int hearts;          // לבבות
+    private int hearts;
     private int likes;
     private Double rating;
-    private String audioPath;    // שם הקובץ של האודיו (אם קיים)
-    private String videoPath;    // שם הקובץ של הווידאו (אם קיים)
-    private List<String> imagesBase64; // תמונות בפורמט Base64
-    private String dateUploaded; // תאריך העלאה (לדוגמה כמחרוזת)
+    private String audioPath;
+    private String videoPath;
+    private List<String> imagesBase64;
+    private String dateUploaded;
 
     boolean isLiked;
     boolean isFavorite;

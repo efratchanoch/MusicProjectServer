@@ -15,11 +15,10 @@ public class Notification {
     private Long id;
 
     @ManyToOne
-    private Users user; // מי מקבל
+    private Users user;
 
     @ManyToOne
-    private Users actor;    // מי יזם את ההודעה (יכול להיות null)
-
+    private Users actor;
     @Enumerated(EnumType.STRING)
     private ENotificationType type;
 
@@ -52,10 +51,9 @@ public class Notification {
         this.actor = actor;
         this.targetType = targetType;
         this.targetId = targetId;
-        this.isRead = false; // ברירת מחדל: לא נקרא
+        this.isRead = false;
 
         this.category = getCategoryByType(type);
-        // יצירת Title ו-Message (ראה הסבר בסעיף 2)
         setTitleAndMessageBasedOnType(type, actor ,count);
     }
 
@@ -178,9 +176,7 @@ public class Notification {
 
         switch (type) {
 
-            // -------------------------
-            // Likes & Favorites
-            // -------------------------
+
             case LIKE_POST -> {
                 this.title = "New Engagement";
                 if (count != null && count > 1) {
@@ -222,17 +218,13 @@ public class Notification {
                 }
             }
 
-            // -------------------------
-            // Comments on post (אינה מאוגדת - משתמשת ב-actorName)
-            // -------------------------
+
             case COMMENT_ON_POST -> {
                 this.title = "New Comment on Your Post";
                 this.message = actorName + " commented on your post.";
             }
 
-            // -------------------------
-            // Follow Updates
-            // -------------------------
+
             case FOLLOWEE_NEW_POST -> {
                 this.title = "New Activity from Someone You Follow";
                 this.message = actorName + " posted new content.";
@@ -254,9 +246,7 @@ public class Notification {
                 this.message = actorName + " updated their profile.";
             }
 
-            // -------------------------
-            // Follow Requests
-            // -------------------------
+
             case FOLLOW_REQUEST_RECEIVED -> {
                 this.title = "New Follow Request";
                 this.message = actorName + " wants to follow you.";
@@ -266,9 +256,7 @@ public class Notification {
                 this.message = actorName + " removed you from their followers.";
             }
 
-            // -------------------------
-            // Approved Follows
-            // -------------------------
+
             case FOLLOW_REQUEST_ACCEPTED -> {
                 this.title = "Follow Request Accepted";
                 this.message = actorName + " approved your follow request.";
@@ -278,9 +266,7 @@ public class Notification {
                 this.message = actorName + " declined your follow request.";
             }
 
-            // -------------------------
-            // Admin
-            // -------------------------
+
             case ADMIN_WARNING_POST -> {
                 this.title = "Content Warning";
                 this.message = "Your post violates our content guidelines. Continued issues may result in account removal.";
@@ -306,9 +292,7 @@ public class Notification {
                 this.message = "You can now assign moderator roles to others.";
             }
 
-            // -------------------------
-            // Default
-            // -------------------------
+
             default -> {
                 this.title = "New Notification";
                 this.message = "You have a new notification.";

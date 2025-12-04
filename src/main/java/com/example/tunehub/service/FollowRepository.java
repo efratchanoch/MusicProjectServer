@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
-    // ---- בסיסי ----
     Follow findByFollowerIdAndFollowingId(Long followerId, Long followingId);
 
     Optional<Follow> findByFollowerIdAndFollowingIdAndStatus(
@@ -23,7 +22,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
             Long followerId, Long followingId, EFollowStatus status
     );
 
-    // ---- חיפוש עם נעילה למניעת race condition ----
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT f FROM Follow f WHERE f.followerId = :followerId AND f.followingId = :followingId")
     Follow findByFollowerIdAndFollowingIdForUpdate(
@@ -31,7 +29,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
             @Param("followingId") Long followingId
     );
 
-    // ---- אפשרות להוספה עתידית: מספר עוקבים / עוקבים פעילים ----
     @Query("SELECT COUNT(f) FROM Follow f WHERE f.followingId = :userId AND f.status = :status")
     int countFollowersByUserIdAndStatus(
             @Param("userId") Long userId,

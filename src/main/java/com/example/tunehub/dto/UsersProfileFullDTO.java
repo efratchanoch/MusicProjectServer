@@ -42,9 +42,6 @@ public class UsersProfileFullDTO {
     private List<PostResponseDTO> posts;
 
 
-    //  private List<Comment> comments;
-
-
     public String getName() {
         return name;
     }

@@ -12,10 +12,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
- /// /////////////////////
     @Autowired
     private AuthChannelInterceptor authChannelInterceptor;
-    /// /////////////////
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/queue");
@@ -29,13 +27,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
     }
-/// /////////////////////////
-    // *** הוסף את המתודה הזו ***
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        // רישום ה-Interceptor שיטפל באימות JWT עבור כל הודעה נכנסת (כולל CONNECT)
         registration.interceptors(authChannelInterceptor);
     }
-    /// //////////////////////
 
 }

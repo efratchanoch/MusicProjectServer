@@ -11,7 +11,7 @@ public class TeacherListingDTO {
     private int lessonDuration;
     private int experience;
 
-    private List<InstrumentDTO> instruments; // נשתמש ב-DTO נוסף לכלי נגינה
+    private List<InstrumentDTO> instruments;
 
 
 

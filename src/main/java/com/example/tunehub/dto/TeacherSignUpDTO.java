@@ -7,7 +7,7 @@ public class TeacherSignUpDTO {
     private double pricePerLesson;
     private int experience;
     private double lessonDuration;
-    private List<Long> instrumentsIds; // נשתמש ברשימת ID של כלי נגינה
+    private List<Long> instrumentsIds;
 
 
     public double getPricePerLesson() {

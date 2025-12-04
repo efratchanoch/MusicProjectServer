@@ -27,30 +27,6 @@ public class SearchService {
                 .map(u -> new UsersDTO(u.getId(), u.getName()))
                 .toList();
     }
-//
-//    public List<PostResponseDTO> searchPosts(String q) {
-//        if (q == null || q.isBlank()) return List.of();
-//        return postRepo.searchByTitleOrContent(q)
-//                .stream()
-//                .map(PostDTO::fromEntity)
-//                .toList();
-//    }
-//
-//    public List<SheetDTO> searchSheets(String q) {
-//        if (q == null || q.isBlank()) return List.of();
-//        return sheetRepo.findByNameContaining(q)
-//                .stream()
-//                .map(SheetDTO::fromEntity)
-//                .toList();
-//    }
-//
-//    public SearchResult searchAll(String q) {
-//        return new SearchResult(
-//                searchUsers(q),
-//                searchPosts(q),
-//                searchSheets(q)
-//        );
-//    }
-//
+
 
 }

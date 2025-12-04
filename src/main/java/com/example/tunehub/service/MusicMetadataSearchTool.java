@@ -15,20 +15,15 @@ public class MusicMetadataSearchTool {
     private static final Logger logger = Logger.getLogger(MusicMetadataSearchTool.class.getName());
     private final RestTemplate restTemplate = new RestTemplate();
 
-    // הזרקת הערכים מקובץ ה-properties
     @Value("${google.search.api-key}")
     private String apiKey;
 
     @Value("${google.search.cx}")
     private String cxId;
 
-    /**
-     * פונקציה זו מחפשת מידע על המלחין וכותב המילים באמצעות Google Custom Search.
-     * * @param title כותרת היצירה (Transliterated) מה-PDF.
-     * @return מחרוזת JSON עם השדות foundComposer ו-foundLyricist.
-     */
 
-    @Tool // ✅ המיקום הנכון!
+
+    @Tool
     public String searchForMetadata(String title) {
 
 

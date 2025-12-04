@@ -26,10 +26,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. 🔑 הוספת לוגיקת הדילוג (התיקון העיקרי ל-403)
         String path = httpServletRequest.getRequestURI();
 
-        // אם הנתיב הוא Login, Sign Up או Sign Out, דלג על בדיקת ה-JWT
         if (path.startsWith("/api/users/signin") || path.startsWith("/api/users/signup")) {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
             return;

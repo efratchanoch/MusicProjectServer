@@ -18,7 +18,6 @@ public class Follow {
     @Column(name = "follower_id", nullable = false)
     private Long followerId;
 
-    // המשתמש שאחריו עוקבים
     @Column(name = "following_id", nullable = false)
     private Long followingId;
 

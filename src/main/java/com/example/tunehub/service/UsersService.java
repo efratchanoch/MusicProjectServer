@@ -237,7 +237,6 @@ public class UsersService {
         Long userId = Long.parseLong(principal.getName());
         usersRepository.findById(userId).ifPresent(user -> {
             user.setIsActive(true);
-            user.setLastActivityTimestamp(new Date());
             usersRepository.save(user);
         });
         return ResponseEntity.ok().build();

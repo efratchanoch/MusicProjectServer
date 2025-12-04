@@ -21,7 +21,6 @@ public class FileUtils {
     private static String VIDEO_FOLDER = "video";
     private static String DOCUMENTS_FOLDER = "docs";
 
-    // ------------------ Generic ------------------
 
     /**
      * Generate a unique file name using UUID and preserve the original extension.
@@ -36,7 +35,6 @@ public class FileUtils {
         return UUID.randomUUID().toString() + fileExtension;
     }
 
-    // ------------------ Images ------------------
 
     /**
      * Save an image file on disk.
@@ -53,7 +51,7 @@ public class FileUtils {
     public static String imageToBase64(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             System.out.println("fileName is null or empty, returning null");
-            return null; // או להחזיר תמונה ברירת מחדל
+            return null;
         }
 
         try {
@@ -79,7 +77,6 @@ public class FileUtils {
 
 
 
-    // ==================== Audio ====================
     /**
      * Saves the uploaded audio file with a unique name.
      * @param file MultipartFile received from the request
@@ -104,7 +101,6 @@ public class FileUtils {
         return new InputStreamResource(stream);
     }
 
-// ==================== Video ====================
     /**
      * Saves the uploaded video file with a unique name.
      * @param file MultipartFile received from the request
@@ -151,14 +147,7 @@ public class FileUtils {
         }
     }
 
-    /**
-     * Convert document to Base64 string (optional, small PDFs only).
-     */
-//    public static String docsToBase64(String fileName) throws IOException {
-//        Path path = Paths.get(UPLOAD_DIRECTORY, DOCUMENTS_FOLDER, fileName);
-//        byte[] fileBytes = Files.readAllBytes(path);
-//        return Base64.getEncoder().encodeToString(fileBytes);
-//    }
+
 
     /**
      * Stream document file to client (recommended for multiple or large PDFs).

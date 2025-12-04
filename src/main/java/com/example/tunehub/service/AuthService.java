@@ -20,7 +20,7 @@ public class AuthService {
     public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("משתמש אינו מאומת.");
+            throw new IllegalStateException("no valid user.");
         }
 
         Object principal = authentication.getPrincipal();
@@ -29,17 +29,17 @@ public class AuthService {
         if (principal instanceof CustomUserDetails) {
             Long userId = ((CustomUserDetails) principal).getId();
             if (userId == null || userId <= 0) {
-                throw new IllegalStateException("ID משתמש לא תקין ב-Security Context.");
+                throw new IllegalStateException(" id not correct-Security Context.");
             }
             return userId;
         }
-        throw new IllegalStateException("Principal אינו מהסוג הצפוי.");
+        throw new IllegalStateException("no principal.");
     }
 
     public Users getCurrentUser() {
         Long userId = getCurrentUserId();
         return usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("לא נמצא משתמש"));
+                .orElseThrow(() -> new IllegalStateException("not found user"));
     }
 }
 

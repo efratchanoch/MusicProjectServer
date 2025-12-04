@@ -14,11 +14,9 @@ public class Teacher {
     private Long id;
 
     @OneToOne
-    @MapsId                 // ⬅️ קריטי! אומר ל-JPA להשתמש באותו ה-ID של המשתמש
+    @MapsId
     @JoinColumn(name = "id")
     private Users user;
-
-
 
     private double pricePerLesson;
 
@@ -112,9 +110,6 @@ public class Teacher {
     public List<Users> getStudents() {
         return students;
     }
-
-
-
 
 
     public void setStudents(List<Users> students) {

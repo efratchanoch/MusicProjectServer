@@ -17,13 +17,5 @@ public interface TeacherRepository extends JpaRepository<Teacher, Long> {
 
     List<Teacher> findAllByInstrumentsId(Long instrument_id);
 
-   // List<Teacher> findAllByNameContainingIgnoreCase(String name);
 
-   //List<Teacher> findAllTop5ByNameContainingIgnoreCase(String name);
-
-   // List<Teacher> findAllByCountry(String country);
-
-   // List<Teacher> findAllByCity(String city);
-
-//    List<Teacher> findTeachersByFilters(String city, String country, String priceRange, Integer duration, String experience, Long instrumentId, String search);
 }

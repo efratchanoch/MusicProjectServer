@@ -37,9 +37,7 @@ public interface UsersRepository  extends JpaRepository<Users, Long> {
     boolean existsById(Long id);
 
     void deleteById(Long id);
-
-    List<Users> findAllByLastActivityTimestampBeforeAndIsActiveIsTrue(Date threshold);
-
+    
     Users findByName(String name);
 
 

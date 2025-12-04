@@ -8,7 +8,7 @@ import java.util.List;
 @Entity
 public class SheetMusic {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
@@ -24,7 +24,7 @@ public class SheetMusic {
 
     private int downloads = 0;
 
-    @Transient // ⬅️ חשוב! השדה הזה לא יישמר בבסיס הנתונים (MongoDB/SQL)
+    @Transient
     private Double rating;
     private LocalDate dateUploaded;
 

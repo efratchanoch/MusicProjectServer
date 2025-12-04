@@ -38,16 +38,11 @@ public class Post {
 
     private List<String> imagesPath;
 
-    @ManyToMany
-    private List<Users> usersFavorite;
-
-    @ManyToMany
-    private Set<Users> mentionedUsers = new HashSet<>();
 
     public Post() {
     }
 
-    public Post(Long id, Users user, String title, String content, int hearts, int likes, Double rating, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath, List<Users> usersFavorite, Set<Users> mentionedUsers) {
+    public Post(Long id, Users user, String title, String content, int hearts, int likes, Double rating, String audioPath, String videoPath, LocalDate dateUploaded, List<Comment> comments, List<String> imagesPath) {
         this.id = id;
         this.user = user;
         this.title = title;
@@ -60,17 +55,10 @@ public class Post {
         this.dateUploaded = dateUploaded;
         this.comments = comments;
         this.imagesPath = imagesPath;
-        this.usersFavorite = usersFavorite;
-        this.mentionedUsers = mentionedUsers;
     }
 
-    public Set<Users> getMentionedUsers() {
-        return mentionedUsers;
-    }
 
-    public void setMentionedUsers(Set<Users> mentionedUsers) {
-        this.mentionedUsers = mentionedUsers;
-    }
+
 
     public Long getId() {
         return id;
@@ -168,12 +156,6 @@ public class Post {
         this.rating = rating;
     }
 
-    public List<Users> getUsersFavorite() {
-        return usersFavorite;
-    }
 
-    public void setUsersFavorite(List<Users> usersFavorite) {
-        this.usersFavorite = usersFavorite;
-    }
 }
 

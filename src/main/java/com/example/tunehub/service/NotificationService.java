@@ -35,8 +35,7 @@ public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
     private final AuthService authService;
     private final NotificationMapper notificationMapper;
-    private final EntityManager entityManager;  // 🚨 הוסף inject ל-EntityManager
-
+    private final EntityManager entityManager;
     @Autowired
     public NotificationService(NotificationRepository notificationRepository, UsersRepository usersRepository, SimpMessagingTemplate messagingTemplate, AuthService authService, NotificationMapper notificationMapper, EntityManager entityManager) {
         this.notificationRepository = notificationRepository;
@@ -123,7 +122,7 @@ public class NotificationService {
 
         return count;
     }
-    @Transactional  // 🚨 זה המפתח: פותח transaction ל-flush
+    @Transactional
     public void markAsRead(Long id) {
         Long userId = authService.getCurrentUserId();
 
@@ -372,37 +371,28 @@ public class NotificationService {
 
         Page<Notification> notifications = notificationRepository.findFilteredNotifications(
                 currentUser,
-                categoryTypes, // שולח רשימת Types
-                readStatus,    // שולח את סטטוס הקריאה הנדרש (false במקרה שלך)
+                categoryTypes,
+                readStatus,
                 pageable
         );
 
-        // 4. מיפוי והחזרה
         return notifications.map(notificationMapper::NotificationToNotificationResponseDTO);
     }
-//    public Page<NotificationResponseDTO> getAllNotificationsByCategory(
-//            ENotificationCategory category,
-//            Pageable pageable) {
-//        return getNotifications(pageable, category, true);
-//
-//    }
-// NotificationService.java - עדכון המתודה
+
 
     public Page<NotificationResponseDTO> getAllNotificationsByCategory(ENotificationCategory category, Pageable pageable) {
         Users currentUser = authService.getCurrentUser();
 
-        // 1. מיפוי הקטגוריה לסוגי ההתראות הרלוונטיים
         java.util.Collection<ENotificationType> categoryTypes = null;
         if (category != null) {
             categoryTypes = java.util.Arrays.stream(ENotificationType.values())
-                    .filter(type -> type.getCategory() == category) // השתמש ב-getCategory()
+                    .filter(type -> type.getCategory() == category)
                     .collect(java.util.stream.Collectors.toList());
         }
 
-        // 2. קריאה ל-Repository עם רשימת ה-Types
         Page<Notification> notifications = notificationRepository.findFilteredNotifications(
                 currentUser,
-                categoryTypes, // שולח רשימת Types
+                categoryTypes,
                 null,
                 pageable
         );

@@ -63,17 +63,6 @@ public interface PostMapper {
     List<PostSearchDTO> postListToPostSearchDTOList(List<Post> posts);
 
 
-//    default PostMediaDTO PostToDTO(Post p) throws IOException {
-//        PostMediaDTO postMediaDTO = new PostMediaDTO();
-//        postMediaDTO.setId(p.getId());
-//        return postMediaDTO;
-//    }
 
-//    default PostDTO PostToDTO(Post p) throws IOException {
-//        PostDTO postDTO =new PostDTO();
-//        postDTO.setMedia(postMediaDTO.setImagePath);
-//        PostDTO.setImagePath(p.getImageProfilePath());
-//        return postDTO;
-//    }
 
 }

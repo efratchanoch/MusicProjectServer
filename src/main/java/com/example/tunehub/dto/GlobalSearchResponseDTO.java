@@ -10,7 +10,6 @@ public class GlobalSearchResponseDTO {
     private List<SheetMusicSearchDTO> sheetMusic = new ArrayList<>();
     private List<UsersSearchDTO> musicians = new ArrayList<>();
     private List<UsersSearchDTO> teachers = new ArrayList<>();
-   // private boolean hasResults;
 
 
     public List<PostSearchDTO> getPosts() {

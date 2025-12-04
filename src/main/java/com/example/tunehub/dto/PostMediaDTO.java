@@ -1,6 +1,5 @@
 package com.example.tunehub.dto;
 
-import org.springframework.web.multipart.MultipartFile;
 
 public class PostMediaDTO {
 

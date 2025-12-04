@@ -29,9 +29,6 @@ public class Comment {
     @CreationTimestamp
     private OffsetDateTime dateUploaded;
 
-//    private String imageUrl;
-//
-//    private String audioUrl;
 
     public Comment() {
     }

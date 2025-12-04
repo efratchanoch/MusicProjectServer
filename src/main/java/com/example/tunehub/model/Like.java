@@ -31,7 +31,7 @@ public class Like {
 
     public Like() {}
     public Like(Long userId, ETargetType targetType, Long targetId) {
-        this.userId = userId;   // חשוב! לא id
+        this.userId = userId;
         this.targetType = targetType;
         this.targetId = targetId;
     }

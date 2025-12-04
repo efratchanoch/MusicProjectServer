@@ -19,7 +19,7 @@ public class RoleController {
     private final RoleRepository roleRepository;
     private final RoleMapper roleMapper;
     private final UsersRepository usersRepository;
-    private final NotificationRepository notificationRepository; // 💡 נניח שזה מספיק, אך שירות ייעודי עדיף
+    private final NotificationRepository notificationRepository;
 
     @Autowired
     public RoleController(RoleRepository roleRepository,RoleMapper roleMapper,UsersRepository usersRepository ,NotificationRepository notificationRepository)
@@ -68,12 +68,13 @@ public class RoleController {
             notification.setRead(false); // התראה חדשה היא תמיד לא נקראה
 
             notificationRepository.save(notification);
-            return ResponseEntity.ok().body("הרול עודכן בהצלחה ל: " + newRoleString);
+            return ResponseEntity.ok().body("Role status " + newRoleString);
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("שגיאה בעדכון הרול: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Role error " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("שגיאה פנימית בשרת: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("error in the network " + e.getMessage());
         }
     }
 

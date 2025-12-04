@@ -34,13 +34,10 @@ public class Users {
 
     private LocalDate editedIn;
 
-    @Transient // ⬅️ חשוב! השדה הזה לא יישמר בבסיס הנתונים (MongoDB/SQL)
+    @Transient
     private Double rating;
 
     private boolean isActive = false;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastActivityTimestamp;
 
     private String city;
 
@@ -52,7 +49,7 @@ public class Users {
     @ManyToOne(fetch = FetchType.EAGER)
     private Teacher teacher;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, optional = true, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Teacher teacherDetails;
 
     private String imageProfilePath;
@@ -66,9 +63,6 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private List<Comment> comments;
 
-    @ManyToMany(mappedBy = "mentionedUsers")
-    private Set<Post> mentionedInPosts = new HashSet<>();
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Notification> receivedNotifications;
 
@@ -78,13 +72,13 @@ public class Users {
     @Column(nullable = false)
     private int followerCount = 0;
 
-    //Security
+    // Security
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
     public Users() {
     }
 
-    public Users(Long id, String name, String password, String email, String description, Set<EUserType> userTypes, LocalDate createdAt, LocalDate editedIn, Double rating, boolean isActive, Date lastActivityTimestamp, String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, Teacher teacherDetails, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, Set<Post> mentionedInPosts, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles) {
+    public Users(Long id, String name, String password, String email, String description, Set<EUserType> userTypes, LocalDate createdAt, LocalDate editedIn, Double rating, boolean isActive,  String city, String country, List<Instrument> instrumentsUsers, Teacher teacher, Teacher teacherDetails, String imageProfilePath, List<SheetMusic> sheetsMusic, List<Post> posts, List<Comment> comments, List<Notification> receivedNotifications, List<Notification> sentNotifications, int followerCount, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -95,7 +89,6 @@ public class Users {
         this.editedIn = editedIn;
         this.rating = rating;
         this.isActive = isActive;
-        this.lastActivityTimestamp = lastActivityTimestamp;
         this.city = city;
         this.country = country;
         this.instrumentsUsers = instrumentsUsers;
@@ -105,7 +98,6 @@ public class Users {
         this.sheetsMusic = sheetsMusic;
         this.posts = posts;
         this.comments = comments;
-        this.mentionedInPosts = mentionedInPosts;
         this.receivedNotifications = receivedNotifications;
         this.sentNotifications = sentNotifications;
         this.followerCount = followerCount;
@@ -145,13 +137,7 @@ public class Users {
         this.teacherDetails = teacherDetails;
     }
 
-    public Set<Post> getMentionedInPosts() {
-        return mentionedInPosts;
-    }
 
-    public void setMentionedInPosts(Set<Post> mentionedInPosts) {
-        this.mentionedInPosts = mentionedInPosts;
-    }
 
     public String getCity() {
         return city;
@@ -177,22 +163,6 @@ public class Users {
     public void setCountry(String country) {
         this.country = country;
     }
-
-//    public List<Users> getFollowers() {
-//        return followers;
-//    }
-//
-//    public void setFollowers(List<Users> followers) {
-//        this.followers = followers;
-//    }
-//
-//    public List<Users> getFollowing() {
-//        return following;
-//    }
-//
-//    public void setFollowing(List<Users> followOn) {
-//        this.following = followOn;
-//    }
 
     public Long getId() {
         return id;
@@ -282,14 +252,6 @@ public class Users {
         isActive = active;
     }
 
-    public Date getLastActivityTimestamp() {
-        return lastActivityTimestamp;
-    }
-
-    public void setLastActivityTimestamp(Date lastActivityTimestamp) {
-        this.lastActivityTimestamp = lastActivityTimestamp;
-    }
-
     public Teacher getTeacher() {
         return teacher;
     }
@@ -325,8 +287,6 @@ public class Users {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
-
-
 
     public Set<Role> getRoles() {
         return roles;
