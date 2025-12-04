@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +168,7 @@ public class SheetMusicController {
 
     @PostMapping(value = "/uploadSheetMusic", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SheetMusicResponseDTO> uploadSheetMusic(
-            @RequestPart("file") MultipartFile file,
+            @Valid @RequestPart("file") MultipartFile file,
             @RequestPart(name = "image", required = false) MultipartFile image,
             @RequestPart("data") SheetMusicUploadDTO dto) {
 

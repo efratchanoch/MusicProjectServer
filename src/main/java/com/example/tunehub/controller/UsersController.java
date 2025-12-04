@@ -18,6 +18,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Date;
@@ -132,13 +133,13 @@ public class UsersController {
 
     // ---------- POST ----------
     @PostMapping("/signIn")
-    public ResponseEntity<?> signIn(@RequestBody UsersLogInDTO u) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody UsersLogInDTO u) {
         return usersService.signIn(u, authenticationManager, jwtUtils);
     }
 
     @PostMapping("/signUp")
     public ResponseEntity<?> signUp(
-            @RequestPart(value = "image", required = false) MultipartFile file,
+            @Valid @RequestPart(value = "image", required = false) MultipartFile file,
             @RequestPart("profile") UsersSignUpDTO user) throws IOException {
         return usersService.signUp(user, file);
     }
@@ -149,7 +150,7 @@ public class UsersController {
     }
 
     @PostMapping("/uploadImageProfile")
-    public ResponseEntity<Users> uploadImageProfile(@RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) throws IOException {
+    public ResponseEntity<Users> uploadImageProfile(@Valid @RequestPart("image") MultipartFile file, @RequestPart("profile") Users p) throws IOException {
         return usersService.uploadImageProfile(file, p);
     }
 
@@ -165,8 +166,8 @@ public class UsersController {
 
     @PostMapping("/signupTeacher/{id}")
     @Transactional
-    public ResponseEntity<?> signUpAsTeacher(@PathVariable Long id,
-                                             @RequestBody TeacherSignUpDTO teacherDetails) {
+    public ResponseEntity<?> signUpAsTeacher(@Valid @PathVariable Long id,
+                                             @Valid @RequestBody TeacherSignUpDTO teacherDetails) {
         return usersService.signUpAsTeacher(id, teacherDetails);
     }
 

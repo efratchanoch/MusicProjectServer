@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/comment")
 public class CommentController {
@@ -53,7 +55,7 @@ public class CommentController {
 
     // Post
     @PostMapping("/upload")
-    public ResponseEntity<CommentDTO> uploadComment(@RequestBody CommentUploadDTO dto) {
+    public ResponseEntity<CommentDTO> uploadComment(@Valid @RequestBody CommentUploadDTO dto) {
         try {
             CommentDTO created = commentService.uploadComment(dto);
             return new ResponseEntity<>(created, HttpStatus.CREATED);
